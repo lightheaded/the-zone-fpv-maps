@@ -1,0 +1,10 @@
+.git
+.venv
+data
+dist
+tmp
+docs
+tests
+.github
+custom_map_blender_template
+**/__pycache__
