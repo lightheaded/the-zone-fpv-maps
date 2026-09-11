@@ -84,8 +84,12 @@ and publishes the GitHub release with the map files, previews and build reports.
 - Every commit body is one section of "What changed". An empty body prints
   "No description was written for this change." Do not let that happen.
 - `Co-Authored-By` and `Signed-off-by` trailers are removed.
-- Each map gets a section with its preview from `docs/screenshots/`, then the
-  install steps and the attribution.
+- Each map that the release **adds** gets a section with its preview from
+  `docs/screenshots/`, then the install steps and the attribution. A release page is
+  a change list, so it does not repeat the maps of earlier releases. The assets hold
+  every map in every release, and `docs/maps.md` is the inventory of them all.
+- A new map needs a row in `docs/maps.md` and a preview in `docs/screenshots/` before
+  the tag. The workflow refuses a map without a preview.
 
 So every commit on `main` needs a subject that stands alone as a change list line,
 and a body that explains the change to a reader who was not there. Reword `fix bug`

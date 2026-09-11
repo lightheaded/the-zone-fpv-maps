@@ -182,3 +182,14 @@ landmarks of Ülejõe span 802 x 675 m, and no sheet aligned box holds them all:
 2 x 1 km box puts the Kroonuaia sild 5 m from its edge, and a 2 x 2 km box costs the
 same four sheets but drops the texture to 24 cm. Four downloads of 30 MB are cheaper
 than the lost detail.
+
+## 2026-09-11: The release page names new maps only, docs/maps.md is the inventory
+
+Decision: `scripts/release-notes.sh` writes a section for each map that the release
+adds, and names no other map. `docs/maps.md` lists every map with its area, its size
+and its source data. The release assets stay complete: every map is in every release.
+
+Why: a release page is a change list. A reader who opens v0.3.0 wants to know what is
+new. A reader who wants the full list reads the repository, which is always current,
+and a release page from four months ago is not. The assets stay complete because a
+reader must never need to walk back through old releases to find one map file.

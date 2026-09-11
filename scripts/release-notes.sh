@@ -9,6 +9,10 @@
 # no separate release-notes step: the commit message is the release note. See
 # AGENTS.md, Releases.
 #
+# The maps section names the maps that the release adds, because a release page is
+# a change list. The inventory of every map is docs/maps.md. The release assets
+# hold every map, new or not.
+#
 # The `Release X.Y.Z` commit is not a change. Its body is the headline of the
 # release, and it stays out of the two lists.
 #
@@ -97,11 +101,29 @@ if [ -n "$headline" ]; then
   echo "$headline"
 fi
 
-# One section per map file in maps/, with its preview image at this tag.
+# One section per map that this release adds, with its preview image at this tag.
+# A release page is a change list, so it names the new maps only. `docs/maps.md`
+# is the inventory of every map. The assets below hold every map in either case,
+# because a reader who wants one map must not need to find an older release.
+if [ -n "$prev" ]; then
+  new_maps=$(git diff --name-only --diff-filter=A "$prev" "$ref" -- 'maps/*.toml' || true)
+else
+  new_maps=$(git ls-tree --name-only "$ref" maps/ | grep '\.toml$' || true)
+fi
+
 echo
-echo "## Maps in this release"
+if [ -n "$new_maps" ]; then
+  echo "## New maps in this release"
+else
+  echo "## Maps"
+  echo
+  echo "This release adds no map. It rebuilds every map of the repository from the"
+  echo "open data, so the assets below are current."
+fi
 echo
-for cfg in maps/*.toml; do
+for cfg in $new_maps; do
+  # A map that the release adds and a later commit deletes is not in the tree.
+  [ -f "$cfg" ] || continue
   name=$(grep -m1 '^name = ' "$cfg" | sed -E 's/name = "(.*)"/\1/')
   description=$(grep -m1 '^description = ' "$cfg" | sed -E 's/description = "(.*)"/\1/')
   echo "### $name"
@@ -120,6 +142,10 @@ for cfg in maps/*.toml; do
     echo
   done
 done
+
+echo "The assets below hold every map of the repository, not only the new ones."
+echo "\`docs/maps.md\` lists them all with their size, their area and their source data."
+echo
 
 if [ -n "$tldr" ]; then
   echo "## TL;DR"
