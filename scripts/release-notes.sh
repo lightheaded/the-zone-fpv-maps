@@ -106,7 +106,9 @@ fi
 # is the inventory of every map. The assets below hold every map in either case,
 # because a reader who wants one map must not need to find an older release.
 if [ -n "$prev" ]; then
-  new_maps=$(git diff --name-only --diff-filter=A "$prev" "$ref" -- 'maps/*.toml' || true)
+  # --no-renames on purpose. A renamed map is a new file to download and a new folder
+  # in the game, so the reader needs its section as much as for a map that is new.
+  new_maps=$(git diff --name-only --no-renames --diff-filter=A "$prev" "$ref" -- 'maps/*.toml' || true)
 else
   new_maps=$(git ls-tree --name-only "$ref" maps/ | grep '\.toml$' || true)
 fi
