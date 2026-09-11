@@ -85,6 +85,9 @@ for key in user.name user.email user.signingkey gpg.format commit.gpgsign; do
   fi
 done
 
+# Every page is generated, so the wiki holds what the generator writes and nothing
+# else. Without this, a renamed map keeps its old page in the wiki forever.
+find "$work/wiki" -maxdepth 1 -name '*.md' -delete
 cp dist/wiki/*.md "$work/wiki/"
 git -C "$work/wiki" add -A
 if git -C "$work/wiki" diff --cached --quiet; then
