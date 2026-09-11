@@ -2,6 +2,78 @@
 
 Status: proposal. The maintainer decides before the first public push.
 
+## License TL;DR
+
+### Maa-amet geodata (buildings, lidar, elevation, orthophotos, ETAK, trees)
+
+- Can: use, change, combine, sell, and redistribute. Publish the maps, the textures cut from orthophotos, and the raw tiles.
+- Cannot: drop the attribution. Cannot present the data as official or endorsed.
+- Implications: every map upload, the README and `NOTICE` carry one attribution line per data set with the data year. The license link ships with the data. Nothing else is required. The license is compatible with CC BY and with Apache-2.0 outputs.
+- Alternatives: none needed. This is the best source. OpenStreetMap is the fallback for missing features, with its own rules below.
+
+### Maa-amet oblique aerial photos (Fotoladu)
+
+- Can: use the photos as textures with the line "Foto: Maa- ja Ruumiamet".
+- Cannot: bulk download today. The viewer has no export. Scraping the tiles is not forbidden by the license, but it is not an offered service, and the Chancellor of Justice review of 2025 makes the future uncertain.
+- Implications: ask for bulk access in writing before any script touches the viewer. Plan the first release without these photos.
+- Alternatives: own drone and ground photos of hero buildings, procedural facades.
+
+### OpenStreetMap (ODbL)
+
+- Can: use names, positions and features. Publish the map as a "produced work" with the line "© OpenStreetMap contributors".
+- Cannot: mix OSM into a database and publish that database under another license. A derived database must be ODbL.
+- Implications: the `.glb` map is a produced work and stays CC BY. Any intermediate GeoPackage that merges OSM with ETAK is ODbL if we publish it. Keep OSM out of the published data files, or publish them under ODbL.
+- Alternatives: ETAK has the same features under the Maa-amet license. Use ETAK, and OSM only for a name lookup that does not enter the data files.
+
+### The Zone Blender template and texture library
+
+- Can: use the material names so that the game applies its own textures. Use the template on each contributor's own machine.
+- Cannot: commit the template, the textures, or any file from the game folder to the repository. Cannot redistribute them in a map file, except as names.
+- Implications: the repository holds no game assets. The `.gitignore` blocks the template folder. A contributor needs the game.
+- Alternatives: our own texture set under CC BY 4.0 for anything that must live in the repository.
+
+### Google Street View and Google 3D
+
+- Can: look at it as a human for reference.
+- Cannot: download, cache, trace, or derive textures or geometry from it. The terms forbid scraping, caching and creating content from Google Maps content.
+- Implications: never in the pipeline. A texture "inspired by" a Street View frame that a human paints by hand is fine.
+- Alternatives: own photos, Fotoladu, Mapillary with its share-alike cost.
+
+### Mapillary (CC BY-SA 4.0)
+
+- Can: use photos and derive textures with attribution.
+- Cannot: license the derived textures under CC BY. Share-alike forces CC BY-SA on the adaptation.
+- Implications: a CC BY-SA texture inside a CC BY map makes the map a mixed work and confuses every downstream user.
+- Alternatives: skip Mapillary. If a facade needs it, keep those textures in a separate folder with their own CC BY-SA license file.
+
+### Our code: Apache-2.0 (proposed)
+
+- Can: anyone uses, changes, sells, and closes the code. Contributors grant a patent license with their contribution.
+- Cannot: remove the license and notices. Cannot sue users over patents in the code without losing the license.
+- Implications: the pipeline can be reused by other cities and other simulators, also in closed products. The contribution clause means no separate agreement is needed.
+- Alternatives: MIT is shorter and equal in practice, but has no patent clause and no contribution clause. GPL-3.0 forces derived tools to stay open, but blocks use inside closed simulators and adds friction for a small hobby project.
+
+### Our assets: CC BY 4.0 (proposed)
+
+- Can: anyone remixes and reuses the maps, textures and hero models, also commercially, with attribution.
+- Cannot: drop the attribution to us and to Maa-amet.
+- Implications: the same attribution rule as the input data, so one `NOTICE` covers both. A commercial simulator can ship our map with attribution.
+- Alternatives: CC BY-SA keeps remixes open but blocks use in closed simulators, and it would be the only way to include Mapillary content. CC BY-NC blocks commercial use, but is not an open license and blocks the game developer from adopting a map as official if the game is sold. CC0 drops even our attribution, but cannot drop the Maa-amet one.
+
+### Uploading to The Zone servers
+
+- Can: upload the maps. Players download them by name.
+- Cannot: verify the rights the game developer takes on uploaded maps. The store page and wiki state no terms for uploads.
+- Implications: ask in Discord or by mail what rights an upload grants. A CC BY license on our side already permits the developer to host and adopt the map with attribution, so the risk is small.
+- Alternatives: distribute the `.glb` only through GitHub releases until the terms are clear.
+
+### Drone photos and privacy
+
+- Can: photograph buildings from public airspace within the drone rules, and publish the textures.
+- Cannot: publish faces, license plates, or interiors. Cannot fly the Mavic 2 Pro over the city.
+- Implications: a blur step before commit, and a rented C2 drone for the city.
+- Alternatives: photogrammetry from ground photos for single buildings, or a rented drone operator.
+
 ## Inputs
 
 | Source | License | What we must do |
