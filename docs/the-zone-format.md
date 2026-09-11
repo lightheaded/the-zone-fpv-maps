@@ -97,7 +97,7 @@ so fly it and record the answers here.
 
 | # | Question | How to test | Answer |
 |---|----------|-------------|--------|
-| 11 | Does the game load a 126 MB file, and how long does it take? | start the map with a stop watch | open |
+| 11 | Does the game load a 126 MB file, and how long does it take? | start the map with a stop watch | the map loads on the Mac, first test 2026-09-11. The load time is not measured yet |
 | 12 | Does the frame rate hold with 108 meshes over 81 km²? | fly a straight line across the map | open |
 | 13 | Does the game keep position accuracy 4.5 km from the origin? | fly to a corner and hover | open |
 | 14 | Do the terrain chunks show a seam or a crack? | fly low over a chunk border, 1500 m grid from the spawn | open |

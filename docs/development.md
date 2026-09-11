@@ -77,6 +77,24 @@ uv run fpv-maps install maps/<name>.toml     # copy into the game
 uv run fpv-maps inspect dist/<name>/<name>.glb
 ```
 
+## How reproducible a build is
+
+Measured on 2026-09-11 for both maps, with the same source files and the same lock file.
+
+- The geometry is the same everywhere. Triangles, vertices, meshes, bounds, the origin
+  height and the building count agree on macOS arm64, in the Docker container and on
+  the Linux runner in CI.
+- The file is not the same everywhere. The embedded JPEG differs between processor
+  architectures, because the JPEG encoder in the Pillow wheel is built for the
+  architecture. `tartu-base` is 20 bytes larger on the amd64 runner than on an arm64
+  Mac, and every one of those bytes is in the image.
+- macOS arm64 and the Docker container on the same Mac write a file that is equal byte
+  for byte.
+
+So a checksum of a `.glb` only proves that two builds ran on the same architecture. To
+compare a build with a release, read `<name>-build-report.json` and compare the
+geometry numbers and the source file names.
+
 ## Code quality
 
 ```
