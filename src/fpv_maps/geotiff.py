@@ -57,11 +57,16 @@ def read_rgb(paths: list[Path], bbox: BBox, size_px: int) -> np.ndarray:
     if not paths:
         raise ValueError("no orthophoto sheets given")
     res = (bbox.width / size_px, bbox.height / size_px)
+    # Merge one pixel wider on each side, then cut the margin away. The merge rounds
+    # the window of each source sheet to whole pixels, and the rounding can leave the
+    # last row or column of the output untouched. An untouched pixel keeps the fill
+    # value, so a black line of one pixel appears at the edge of the map.
+    grown = BBox(bbox.xmin - res[0], bbox.ymin - res[1], bbox.xmax + res[0], bbox.ymax + res[1])
     sources = [rasterio.open(p) for p in paths]
     try:
         data, _ = merge(
             sources,
-            bounds=bbox.as_tuple(),
+            bounds=grown.as_tuple(),
             res=res,
             indexes=[1, 2, 3],
             resampling=Resampling.average,
@@ -70,6 +75,12 @@ def read_rgb(paths: list[Path], bbox: BBox, size_px: int) -> np.ndarray:
         for src in sources:
             src.close()
     rgb = np.moveaxis(data, 0, -1)
+    if rgb.shape[0] < size_px + 2 or rgb.shape[1] < size_px + 2:
+        raise ValueError(
+            f"the merged orthophoto is {rgb.shape[1]} x {rgb.shape[0]} px, "
+            f"which is smaller than the {size_px + 2} px that the margin needs"
+        )
+    rgb = rgb[1 : 1 + size_px, 1 : 1 + size_px]
     if rgb.dtype != np.uint8:
         rgb = np.clip(rgb, 0, 255).astype(np.uint8)
     return rgb
