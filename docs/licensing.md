@@ -1,196 +1,231 @@
 # Licenses, contributions and legality
 
-Status: proposal. The maintainer decides before the first public push.
+Status: proposal. The maintainer decides the items in section 1 before the first public push.
 
-## License TL;DR
+The document has four parts. Section 1 lists the decisions that we must make, with a recommendation for each. Section 2 lists the licenses that come with the inputs, where we have no choice. Section 3 is a reference with one entry per license, and each entry says what it pertains to in this project. Sections 4 to 7 cover attribution, contributions, content legality and drone rules.
 
-### Maa-amet geodata (buildings, lidar, elevation, orthophotos, ETAK, trees)
+## 1. Decisions to make
 
-- Can: use, change, combine, sell, and redistribute. Publish the maps, the textures cut from orthophotos, and the raw tiles.
-- Cannot: drop the attribution. Cannot present the data as official or endorsed.
-- Implications: every map upload, the README and `NOTICE` carry one attribution line per data set with the data year. The license link ships with the data. Nothing else is required. The license is compatible with CC BY and with Apache-2.0 outputs.
-- Alternatives: none needed. This is the best source. OpenStreetMap is the fallback for missing features, with its own rules below.
+### D1. License for our code
 
-### Maa-amet oblique aerial photos (Fotoladu)
+Pertains to: `pipeline/`, `docker/`, scripts, configuration.
 
-- Can: use the photos as textures with the line "Foto: Maa- ja Ruumiamet".
-- Cannot: bulk download today. The viewer has no export. Scraping the tiles is not forbidden by the license, but it is not an offered service, and the Chancellor of Justice review of 2025 makes the future uncertain.
-- Implications: ask for bulk access in writing before any script touches the viewer. Plan the first release without these photos.
-- Alternatives: own drone and ground photos of hero buildings, procedural facades.
+- Recommendation: Apache-2.0.
+- Rationale: the pipeline is useful to other cities and other simulators, and some of those are closed products. Apache-2.0 allows that. It adds a patent grant from every contributor and a built in contribution clause, so no separate agreement is needed. It is compatible with the CC BY assets and with the Maa-amet inputs.
+- Alternatives: MIT is equal in practice but has no patent or contribution clause. GPL-3.0 keeps derived tools open but blocks embedding in closed simulators and adds friction for a hobby project.
 
-### OpenStreetMap (ODbL)
+### D2. License for our assets
 
-- Can: use names, positions and features. Publish the map as a "produced work" with the line "© OpenStreetMap contributors".
-- Cannot: mix OSM into a database and publish that database under another license. A derived database must be ODbL.
-- Implications: the `.glb` map is a produced work and stays CC BY. Any intermediate GeoPackage that merges OSM with ETAK is ODbL if we publish it. Keep OSM out of the published data files, or publish them under ODbL.
-- Alternatives: ETAK has the same features under the Maa-amet license. Use ETAK, and OSM only for a name lookup that does not enter the data files.
+Pertains to: published `.glb` maps, textures we make, hero models in `assets/hero/`.
 
-### The Zone Blender template and texture library
+- Recommendation: CC BY 4.0.
+- Rationale: the Maa-amet inputs need attribution and nothing else, so CC BY passes the same single rule downstream. One `NOTICE` covers both. The game developer can adopt a map as official in a sold game. Other pilots can remix.
+- Alternatives: CC BY-SA keeps remixes open, but blocks closed simulators and is the only option if Mapillary content enters the map. CC BY-NC blocks commercial use, is not an open license, and would block adoption in a paid game. CC0 drops our attribution but cannot drop the Maa-amet attribution, so the map can never be fully CC0.
+
+### D3. Contribution model
+
+Pertains to: pull requests from collaborators.
+
+- Recommendation: Developer Certificate of Origin, `git commit -s`, plus a pull request template that asks for the data sources of the change.
+- Rationale: no paperwork, and the sign off is a statement that the contributor may license the work under D1 and D2. Apache-2.0 section 5 already covers the code side.
+- Alternatives: a contributor license agreement allows relicensing later, but scares hobby contributors away. No sign off at all leaves the asset rights unclear.
+
+### D4. Mapillary photos as texture source
+
+Pertains to: facade textures.
+
+- Recommendation: no.
+- Rationale: Mapillary is CC BY-SA. One derived texture forces the map to CC BY-SA and conflicts with D2.
+- Alternatives: own photos, Fotoladu after access is granted, procedural facades. If a single facade truly needs it, keep those textures in a separate folder with a CC BY-SA license file, and mark the map as mixed.
+
+### D5. Distribution channel for the maps
+
+Pertains to: where players get the `.glb` files.
+
+- Recommendation: GitHub Releases as the primary channel, with the attribution in the release notes. Upload to The Zone server as well, after the developer confirms what rights an upload grants.
+- Rationale: the game states no terms for uploads. CC BY already permits hosting and adoption with attribution, so the risk is small, but the question must be asked once.
+- Alternatives: GitHub Releases only, until the terms are clear.
+
+### D6. Oblique aerial photos from Fotoladu
+
+Pertains to: facade textures in the second release.
+
+- Recommendation: write to fotoladu@maaruum.ee and ask for bulk access with orientation data for a named photo list. Do not scrape the viewer.
+- Rationale: the photos are open data with attribution, but the viewer offers no export, and the Chancellor of Justice review of 2025 makes access uncertain. A written yes protects the project.
+- Alternatives: own drone photos, procedural facades.
+
+## 2. Licenses that come with the inputs
+
+No choice here. Each entry says what we can do, what we cannot do, and what it means for the project.
+
+### Maa-amet geodata: Maa- ja Ruumiamet open data license
+
+Buildings, lidar, elevation, orthophotos, ETAK vectors, trees.
+
+- Can: use, change, combine, sell, redistribute. Publish the maps, the textures cut from orthophotos, the raw tiles.
+- Cannot: drop the attribution. Cannot claim endorsement.
+- Means: one attribution line per data set with the data year in every map description, in `NOTICE` and in the README, plus the license link.
+
+### Fotoladu oblique photos: Maa-amet open data, attribution "Foto: Maa- ja Ruumiamet"
+
+- Can: use as textures with the attribution line.
+- Cannot: bulk download today. See D6.
+- Means: second release material, after written access.
+
+### OpenStreetMap: ODbL
+
+- Can: use names and features. Publish the map as a produced work with "© OpenStreetMap contributors".
+- Cannot: publish a database that mixes OSM with other data under a non ODbL license.
+- Means: prefer ETAK. Use OSM only for lookups that do not enter the published data files. The `.glb` is a produced work and stays CC BY.
+
+### The Zone Blender template and texture library: proprietary, part of the game
 
 - Can: use the material names so that the game applies its own textures. Use the template on each contributor's own machine.
-- Cannot: commit the template, the textures, or any file from the game folder to the repository. Cannot redistribute them in a map file, except as names.
-- Implications: the repository holds no game assets. The `.gitignore` blocks the template folder. A contributor needs the game.
-- Alternatives: our own texture set under CC BY 4.0 for anything that must live in the repository.
+- Cannot: commit any file from the game folder. Cannot redistribute textures in a map file.
+- Means: `.gitignore` blocks the template folder. A contributor needs the game.
 
-### Google Street View and Google 3D
+### Google Street View and Google 3D: Google Maps Platform terms
 
 - Can: look at it as a human for reference.
-- Cannot: download, cache, trace, or derive textures or geometry from it. The terms forbid scraping, caching and creating content from Google Maps content.
-- Implications: never in the pipeline. A texture "inspired by" a Street View frame that a human paints by hand is fine.
-- Alternatives: own photos, Fotoladu, Mapillary with its share-alike cost.
+- Cannot: download, cache, trace or derive textures or geometry. The terms forbid scraping, caching and creating content from Google content.
+- Means: never in the pipeline.
 
-### Mapillary (CC BY-SA 4.0)
+### Mapillary: CC BY-SA 4.0
 
-- Can: use photos and derive textures with attribution.
-- Cannot: license the derived textures under CC BY. Share-alike forces CC BY-SA on the adaptation.
-- Implications: a CC BY-SA texture inside a CC BY map makes the map a mixed work and confuses every downstream user.
-- Alternatives: skip Mapillary. If a facade needs it, keep those textures in a separate folder with their own CC BY-SA license file.
+- Can: use with attribution.
+- Cannot: license derived textures under CC BY.
+- Means: see D4, recommendation no.
 
-### Our code: Apache-2.0 (proposed)
+### Own drone and ground photos: ours
 
-- Can: anyone uses, changes, sells, and closes the code. Contributors grant a patent license with their contribution.
-- Cannot: remove the license and notices. Cannot sue users over patents in the code without losing the license.
-- Implications: the pipeline can be reused by other cities and other simulators, also in closed products. The contribution clause means no separate agreement is needed.
-- Alternatives: MIT is shorter and equal in practice, but has no patent clause and no contribution clause. GPL-3.0 forces derived tools to stay open, but blocks use inside closed simulators and adds friction for a small hobby project.
+- Can: publish as textures under D2.
+- Cannot: publish faces, license plates, interiors.
+- Means: a blur step before commit. Drone rules in section 7.
 
-### Our assets: CC BY 4.0 (proposed)
+## 3. License reference
 
-- Can: anyone remixes and reuses the maps, textures and hero models, also commercially, with attribution.
-- Cannot: drop the attribution to us and to Maa-amet.
-- Implications: the same attribution rule as the input data, so one `NOTICE` covers both. A commercial simulator can ship our map with attribution.
-- Alternatives: CC BY-SA keeps remixes open but blocks use in closed simulators, and it would be the only way to include Mapillary content. CC BY-NC blocks commercial use, but is not an open license and blocks the game developer from adopting a map as official if the game is sold. CC0 drops even our attribution, but cannot drop the Maa-amet one.
+One entry per license. The first line says what the license pertains to in this project.
 
-### Uploading to The Zone servers
+### Maa- ja Ruumiamet open data license, 2025-01-01
 
-- Can: upload the maps. Players download them by name.
-- Cannot: verify the rights the game developer takes on uploaded maps. The store page and wiki state no terms for uploads.
-- Implications: ask in Discord or by mail what rights an upload grants. A CC BY license on our side already permits the developer to host and adopt the map with attribution, so the risk is small.
-- Alternatives: distribute the `.glb` only through GitHub releases until the terms are clear.
+In this project: comes with all Maa-amet geodata and the Fotoladu photos. Not a choice.
 
-### Drone photos and privacy
-
-- Can: photograph buildings from public airspace within the drone rules, and publish the textures.
-- Cannot: publish faces, license plates, or interiors. Cannot fly the Mavic 2 Pro over the city.
-- Implications: a blur step before commit, and a rented C2 drone for the city.
-- Alternatives: photogrammetry from ground photos for single buildings, or a rented drone operator.
-
-## License reference TL;DR
-
-One entry per license that this project touches. "Must" lists the conditions, "cannot" the limits.
-
-### Maa- ja Ruumiamet open data license (2025-01-01)
-
-- Can: copy, change, combine, distribute, and sell the data and works made from it.
+- Can: copy, change, combine, distribute, sell the data and works made from it.
 - Must: name the licensor, the data set and the data date. Ship the license text or link with redistributed data.
-- Cannot: claim endorsement by the licensor. Cannot hold the licensor liable for errors.
-- Alternatives: none. It is the only license for this data. It is in effect CC BY 4.0 with an extra rule on the data date.
+- Cannot: claim endorsement. Cannot hold the licensor liable.
+- Note: in effect CC BY 4.0 with an extra rule on the data date.
 
 ### Apache-2.0
 
-- Can: use, change, distribute, sublicense, and sell. Closed derivatives are allowed.
-- Must: keep the license text, the copyright and `NOTICE` lines. Mark changed files.
-- Cannot: use the project trademarks. A patent suit against the project ends your patent license.
-- Implication: contributors grant a patent license by contributing, without a separate agreement. Incompatible with GPL-2.0 code, compatible with GPL-3.0 code.
-- Alternatives: MIT, GPL-3.0.
+In this project: recommended for our code, D1.
+
+- Can: use, change, distribute, sublicense, sell. Closed derivatives allowed.
+- Must: keep the license text, copyright and `NOTICE` lines. Mark changed files.
+- Cannot: use project trademarks. A patent suit against the project ends the patent license.
+- Note: contributors grant a patent license by contributing. Compatible with GPL-3.0, not with GPL-2.0.
 
 ### MIT
 
+In this project: alternative for our code, D1.
+
 - Can: everything Apache-2.0 allows.
 - Must: keep the license text and copyright line.
-- Cannot: nothing more. There is no patent clause and no trademark clause.
-- Implication: the shortest option. No protection if a contributor later claims a patent.
-- Alternatives: Apache-2.0 when patents or a contribution clause matter.
+- Cannot: nothing more. No patent clause, no trademark clause.
+- Note: shortest option, no protection if a contributor later claims a patent.
 
 ### GPL-3.0
 
-- Can: use, change, and sell.
-- Must: publish the full source of any distributed derivative under GPL-3.0. Keep notices and install information.
-- Cannot: link the code into a closed product and distribute it. Cannot add rules that GPL-3.0 does not allow.
-- Implication: a simulator vendor could not embed the pipeline in a closed tool. For a small pipeline this cost brings little.
-- Alternatives: Apache-2.0 or MIT for a hobby tool that others must be free to adopt.
+In this project: alternative for our code, D1, not recommended.
+
+- Can: use, change, sell.
+- Must: publish the full source of any distributed derivative under GPL-3.0.
+- Cannot: link into a closed product and distribute.
+- Note: blocks a simulator vendor from embedding the pipeline.
 
 ### CC BY 4.0
 
-- Can: copy, remix, distribute, and sell, in any medium.
-- Must: credit the author, link the license, note changes. Attribution can be a line in a credits screen or a file.
+In this project: recommended for our assets, D2.
+
+- Can: copy, remix, distribute, sell, in any medium.
+- Must: credit the author, link the license, note changes.
 - Cannot: apply technical measures that block the rights. Cannot imply endorsement.
-- Implication: the right match for the Maa-amet inputs, because both need attribution only. Not meant for software, use it for maps, textures and models.
-- Alternatives: CC BY-SA, CC0, CC BY-NC.
+- Note: not meant for software. Matches the Maa-amet inputs.
 
 ### CC BY-SA 4.0
 
+In this project: comes with Mapillary photos, D4. Alternative for our assets, D2.
+
 - Can: as CC BY.
-- Must: as CC BY, and license every adaptation under CC BY-SA or a compatible license.
-- Cannot: license a remix under CC BY, or bundle the work into a closed asset pack.
-- Implication: a single CC BY-SA texture forces the whole map that adapts it to CC BY-SA. This is the Mapillary problem.
-- Alternatives: CC BY if the sources allow it.
+- Must: as CC BY, and license every adaptation under CC BY-SA.
+- Cannot: license a remix under CC BY. Cannot bundle into a closed asset pack.
+- Note: one CC BY-SA texture forces the whole map to CC BY-SA.
 
 ### CC BY-NC 4.0
 
+In this project: alternative for our assets, D2, not recommended.
+
 - Can: copy, remix, distribute for non commercial purposes.
 - Must: as CC BY.
-- Cannot: use commercially. "Commercial" is undefined in detail and creates doubt for a paid simulator or a sponsored channel.
-- Implication: not an open license by the Open Definition. The game developer could not adopt the map as official in a paid game without a separate permission.
-- Alternatives: CC BY with a request, not a rule, to ask before commercial use.
+- Cannot: use commercially. "Commercial" is vague for a paid simulator or a sponsored channel.
+- Note: not an open license by the Open Definition.
 
 ### CC0 1.0
 
-- Can: everything, with no conditions. A public domain dedication.
+In this project: alternative for our assets, D2, not recommended.
+
+- Can: everything, no conditions.
 - Must: nothing.
-- Cannot: waive moral rights in some countries. Cannot remove the attribution that upstream licenses demand.
-- Implication: our own attribution would be gone, the Maa-amet attribution would still be required, so the map could not truly be CC0.
-- Alternatives: CC BY.
+- Cannot: remove the attribution that upstream licenses demand.
+- Note: the Maa-amet attribution stays required, so the map can never be fully CC0.
 
-### ODbL 1.0 (OpenStreetMap)
+### ODbL 1.0
 
-- Can: use, change, and distribute the database. Make "produced works" such as maps, images and game levels under any license.
-- Must: attribute. Publish any derived database under ODbL. Offer the derived database when you publish a produced work that used it.
-- Cannot: use technical measures that block the rights. Cannot publish the database itself under another license.
-- Implication: a `.glb` map is a produced work and can be CC BY. The GeoPackage that produced it is a derived database if it contains OSM data.
-- Alternatives: ETAK under the Maa-amet license, which has no share-alike rule.
+In this project: comes with OpenStreetMap data. Not a choice.
 
-### Developer Certificate of Origin (DCO)
+- Can: use, change, distribute the database. Make produced works such as maps and game levels under any license.
+- Must: attribute. Publish any derived database under ODbL and offer it when a produced work is published.
+- Cannot: publish the database under another license. Cannot use technical measures that block the rights.
+- Note: the `.glb` map is a produced work. A GeoPackage with OSM data inside is a derived database.
 
-- Can: accept contributions with a `Signed-off-by` line in each commit.
-- Must: the contributor states that they have the right to submit the work under the project license.
-- Cannot: transfer copyright, and cannot change the license later without every contributor.
-- Implication: light process, no paperwork. A license change later needs consent from all contributors.
-- Alternatives: a contributor license agreement, which allows relicensing but scares away hobby contributors.
+### Google Maps Platform terms
 
-## Inputs
+In this project: comes with Google Street View and Google 3D. Not a choice.
 
-| Source | License | What we must do |
-|--------|---------|-----------------|
-| Maa- ja Ruumiamet geodata (buildings, lidar, elevation, orthophotos, ETAK, trees) | Maa- ja Ruumiamet open data license, 2025-01-01. Commercial use, derivatives and redistribution allowed. | Name the licensor, the data set and the data date in the map description, in `NOTICE` and in the README. Ship the license link with every distributed map. Example: "Elevation data 2024: Republic of Estonia Land and Spatial Development Board". |
-| Maa-amet oblique aerial photos (Fotoladu) | Open data, attribution "Foto: Maa- ja Ruumiamet". Bulk access to verify. | Same attribution. Do not scrape the viewer without a written yes. |
-| OpenStreetMap | ODbL. | Prefer ETAK. If OSM names or features are used, add "© OpenStreetMap contributors" and keep the produced map, which ODbL allows, but publish any derived database under ODbL. |
-| The Zone Blender template and texture library | Proprietary, part of the game. | Never commit. Reference material names only. Collaborators copy the template from their own Steam install. |
-| Google Street View, Google Maps 3D | Google terms forbid extraction and use as textures. | Reference viewing only by a human. Never in the pipeline. |
-| Mapillary | CC BY-SA 4.0. | Textures derived from it must stay CC BY-SA. Keep them in a separate folder with their own license, or do not use them. |
-| Own drone photos | Ours. | Blur faces and license plates before commit. |
+- Can: view.
+- Must: nothing, because no use is allowed.
+- Cannot: scrape, cache, create content from Google content.
 
-## Outputs
+### Developer Certificate of Origin, DCO 1.1
 
-Proposal, two licenses in one repository:
+In this project: recommended for contributions, D3.
 
-- Code (`pipeline/`, `docker/`, scripts): Apache-2.0. It has an explicit patent grant and a contribution clause.
-- Assets (`assets/hero/`, textures, published `.glb` maps): CC BY 4.0, plus the Maa-amet attribution line. CC BY matches the Maa-amet license, which needs attribution only.
-- `NOTICE` lists all third party attributions. The map description that the upload form in the game asks for repeats the Maa-amet line.
+- Can: accept contributions with a `Signed-off-by` line per commit.
+- Must: the contributor states the right to submit under the project licenses.
+- Cannot: transfer copyright. A later license change needs every contributor.
+- Note: light process. A contributor license agreement is the heavier alternative.
 
-## Contributions
+## 4. Attribution and NOTICE
 
-- Contributors sign off commits with the Developer Certificate of Origin (`git commit -s`). No contributor license agreement.
-- A pull request template asks: which data sources did you use, and are you allowed to license the result under CC BY 4.0.
+- `NOTICE` at the repository root lists every third party attribution: one line per Maa-amet data set with the data year, the Fotoladu line if used, the OpenStreetMap line if used.
+- The README repeats the Maa-amet lines and links the license.
+- Every map upload and every GitHub release repeats the Maa-amet lines in its description.
+- Example line: "Elevation data 2024: Republic of Estonia Land and Spatial Development Board".
+
+## 5. Contributions
+
+- Contributors sign off commits with the Developer Certificate of Origin, `git commit -s`.
+- The pull request template asks: which data sources did you use, and can you license the result under Apache-2.0 for code and CC BY 4.0 for assets.
 - Hero assets need a source note: modeled from lidar, from own photos, or from Fotoladu photos.
+- Nothing from the game folder enters a pull request.
 
-## Legality of the content
+## 6. Legality of the content
 
 - Buildings: the Estonian Copyright Act allows reproduction of architectural works that stand permanently in public places, with the limit that the work is not the main subject of a commercial use. A free fan map is fine. A paid version needs a check for signature buildings such as ERM.
 - Logos and signs: reproduce them as they appear in photos, at low resolution. Do not invent brand usage. Replace a logo if the owner asks.
 - Personal data: faces and license plates never reach the repository. Orthophotos at 10 cm show no faces. Facades of private homes at low resolution are not personal data in practice, but a resident can ask for a blurred wall.
 - Security sites: the prison, the military area at Raadi and the airport are in the public geodata and in the orthophoto. Build them from the same data. Do not add drone photos of them.
 
-## Drone flights
+## 7. Drone flights
 
 Rules of the Estonian Transport Administration (Transpordiamet) for the EU open category, checked in September 2026.
 
