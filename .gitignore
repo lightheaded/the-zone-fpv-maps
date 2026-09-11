@@ -1,0 +1,10 @@
+# Downloaded geodata, gigabytes
+data/
+# Built maps
+dist/
+# The Zone Blender template and its texture library are proprietary. Never commit them.
+custom_map_blender_template/
+*.blend1
+__pycache__/
+.venv/
+.DS_Store
