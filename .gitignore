@@ -1,13 +1,22 @@
-# Downloaded geodata, gigabytes
+# Downloaded geodata, gigabytes. The pipeline caches it here.
 data/
-# Built maps
+# Built maps and build reports
 dist/
 # The Zone Blender template and its texture library are proprietary. Never commit them.
 custom_map_blender_template/
 *.blend1
+# Python
 __pycache__/
 .venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+# Editors and OS
 .DS_Store
-
+.idea/
+.vscode/
 # Local drafts and scratch, never committed
 tmp/
+# Local overrides for Docker Compose
+compose.override.yaml
+.env

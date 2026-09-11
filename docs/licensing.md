@@ -10,23 +10,23 @@ The document has four parts. Section 1 lists the decisions that we must make, wi
 
 Pertains to: `pipeline/`, `docker/`, scripts, configuration.
 
-- Recommendation: Apache-2.0.
-- Rationale: the pipeline is useful to other cities and other simulators, and some of those are closed products. Apache-2.0 allows that. It adds a patent grant from every contributor and a built in contribution clause, so no separate agreement is needed. It is compatible with the CC BY assets and with the Maa-amet inputs.
-- Alternatives: MIT is equal in practice but has no patent or contribution clause. GPL-3.0 keeps derived tools open but blocks embedding in closed simulators and adds friction for a hobby project.
+- Recommendation: [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
+- Rationale: the pipeline is useful to other cities and other simulators, and some of those are closed products. Apache-2.0 allows that. It adds a patent grant from every contributor and a built in contribution clause, so no separate agreement is needed. It is compatible with the CC BY assets and with the [Maa-amet](https://geoportaal.maaruum.ee/) inputs.
+- Alternatives: [MIT](https://opensource.org/license/mit) is equal in practice but has no patent or contribution clause. [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) keeps derived tools open but blocks embedding in closed simulators and adds friction for a hobby project.
 
 ### D2. License for our assets
 
 Pertains to: published `.glb` maps, textures we make, hero models in `assets/hero/`.
 
-- Recommendation: CC BY 4.0.
+- Recommendation: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 - Rationale: the Maa-amet inputs need attribution and nothing else, so CC BY passes the same single rule downstream. One `NOTICE` covers both. The game developer can adopt a map as official in a sold game. Other pilots can remix.
-- Alternatives: CC BY-SA keeps remixes open, but blocks closed simulators and is the only option if Mapillary content enters the map. CC BY-NC blocks commercial use, is not an open license, and would block adoption in a paid game. CC0 drops our attribution but cannot drop the Maa-amet attribution, so the map can never be fully CC0.
+- Alternatives: CC BY-SA keeps remixes open, but blocks closed simulators and is the only option if [Mapillary](https://www.mapillary.com/) content enters the map. CC BY-NC blocks commercial use, is not an open license, and would block adoption in a paid game. [CC0](https://creativecommons.org/publicdomain/zero/1.0/) drops our attribution but cannot drop the Maa-amet attribution, so the map can never be fully CC0.
 
 ### D3. Contribution model
 
 Pertains to: pull requests from collaborators.
 
-- Recommendation: Developer Certificate of Origin, `git commit -s`, plus a pull request template that asks for the data sources of the change.
+- Recommendation: [Developer Certificate of Origin](https://developercertificate.org/), `git commit -s`, plus a pull request template that asks for the data sources of the change.
 - Rationale: no paperwork, and the sign off is a statement that the contributor may license the work under D1 and D2. Apache-2.0 section 5 already covers the code side.
 - Alternatives: a contributor license agreement allows relicensing later, but scares hobby contributors away. No sign off at all leaves the asset rights unclear.
 
@@ -36,13 +36,13 @@ Pertains to: facade textures.
 
 - Recommendation: no.
 - Rationale: Mapillary is CC BY-SA. One derived texture forces the map to CC BY-SA and conflicts with D2.
-- Alternatives: own photos, Fotoladu after access is granted, procedural facades. If a single facade truly needs it, keep those textures in a separate folder with a CC BY-SA license file, and mark the map as mixed.
+- Alternatives: own photos, [Fotoladu](https://fotoladu.maaamet.ee/) after access is granted, procedural facades. If a single facade truly needs it, keep those textures in a separate folder with a CC BY-SA license file, and mark the map as mixed.
 
 ### D5. Distribution channel for the maps
 
 Pertains to: where players get the `.glb` files.
 
-- Recommendation: GitHub Releases as the primary channel, with the attribution in the release notes. Upload to The Zone server as well, after the developer confirms what rights an upload grants.
+- Recommendation: GitHub Releases as the primary channel, with the attribution in the release notes. Upload to [The Zone](https://store.steampowered.com/app/3491280/) server as well, after the developer confirms what rights an upload grants.
 - Rationale: the game states no terms for uploads. CC BY already permits hosting and adoption with attribution, so the risk is small, but the question must be asked once.
 - Alternatives: GitHub Releases only, until the terms are clear.
 
@@ -51,7 +51,7 @@ Pertains to: where players get the `.glb` files.
 Pertains to: facade textures in the second release.
 
 - Recommendation: write to fotoladu@maaruum.ee and ask for bulk access with orientation data for a named photo list. Do not scrape the viewer.
-- Rationale: the photos are open data with attribution, but the viewer offers no export, and the Chancellor of Justice review of 2025 makes access uncertain. A written yes protects the project.
+- Rationale: the photos are open data with attribution, but the viewer offers no export, and the [Chancellor of Justice](https://www.oiguskantsler.ee/sites/default/files/2025-11/Orto-%20ja%20kaldaerofotode%20avalikustamine.pdf) review of 2025 makes access uncertain. A written yes protects the project.
 - Alternatives: own drone photos, procedural facades.
 
 ## 2. Licenses that come with the inputs
@@ -60,7 +60,7 @@ No choice here. Each entry says what we can do, what we cannot do, and what it m
 
 ### Maa-amet geodata: Maa- ja Ruumiamet open data license
 
-Buildings, lidar, elevation, orthophotos, ETAK vectors, trees.
+Buildings, lidar, elevation, orthophotos, [ETAK](https://geoportaal.maaamet.ee/est/ruumiandmed/eesti-topograafia-andmekogu-p79.html) vectors, trees.
 
 - Can: use, change, combine, sell, redistribute. Publish the maps, the textures cut from orthophotos, the raw tiles.
 - Cannot: drop the attribution. Cannot claim endorsement.
@@ -74,8 +74,8 @@ Buildings, lidar, elevation, orthophotos, ETAK vectors, trees.
 
 ### OpenStreetMap: ODbL
 
-- Can: use names and features. Publish the map as a produced work with "© OpenStreetMap contributors".
-- Cannot: publish a database that mixes OSM with other data under a non ODbL license.
+- Can: use names and features. Publish the map as a produced work with "© [OpenStreetMap](https://www.openstreetmap.org/) contributors".
+- Cannot: publish a database that mixes OSM with other data under a non [ODbL](https://opendatacommons.org/licenses/odbl/1-0/) license.
 - Means: prefer ETAK. Use OSM only for lookups that do not enter the published data files. The `.glb` is a produced work and stays CC BY.
 
 ### The Zone Blender template and texture library: proprietary, part of the game
@@ -167,7 +167,7 @@ In this project: alternative for our assets, D2, not recommended.
 - Can: copy, remix, distribute for non commercial purposes.
 - Must: as CC BY.
 - Cannot: use commercially. "Commercial" is vague for a paid simulator or a sponsored channel.
-- Note: not an open license by the Open Definition.
+- Note: not an open license by the [Open Definition](https://opendefinition.org/od/2.1/en/).
 
 ### CC0 1.0
 
@@ -189,7 +189,7 @@ In this project: comes with OpenStreetMap data. Not a choice.
 
 ### Google Maps Platform terms
 
-In this project: comes with Google Street View and Google 3D. Not a choice.
+In this project: comes with [Google Street View](https://www.google.com/streetview/) and Google 3D. Not a choice.
 
 - Can: view.
 - Must: nothing, because no use is allowed.
@@ -223,13 +223,13 @@ In this project: recommended for contributions, D3.
 - Buildings: the Estonian Copyright Act allows reproduction of architectural works that stand permanently in public places, with the limit that the work is not the main subject of a commercial use. A free fan map is fine. A paid version needs a check for signature buildings such as ERM.
 - Logos and signs: reproduce them as they appear in photos, at low resolution. Do not invent brand usage. Replace a logo if the owner asks.
 - Personal data: faces and license plates never reach the repository. Orthophotos at 10 cm show no faces. Facades of private homes at low resolution are not personal data in practice, but a resident can ask for a blurred wall.
-- Security sites: the prison, the military area at Raadi and the airport are in the public geodata and in the orthophoto. Build them from the same data. Do not add drone photos of them.
+- Security sites: the prison, the military area at [Raadi](https://et.wikipedia.org/wiki/Raadi_lennuv%C3%A4li) and the airport are in the public geodata and in the orthophoto. Build them from the same data. Do not add drone photos of them.
 
 ## 7. Drone flights
 
-Rules of the Estonian Transport Administration (Transpordiamet) for the EU open category, checked in September 2026.
+Rules of the [Estonian Transport Administration](https://www.transpordiamet.ee/en/open-category-flights) ([Transpordiamet](https://www.transpordiamet.ee/en/open-category-flights)) for the EU open category, checked in September 2026.
 
-- The Mavic 2 Pro has no class label and weighs 907 g. Since 2024-01-01 such a drone flies only in A3: 150 m from residential, commercial, industrial and recreational areas. It cannot do photogrammetry over the city. It can fly the Aardlapalu quarry, the river meanders and parts of the Raadi field.
+- The Mavic 2 Pro has no class label and weighs 907 g. Since 2024-01-01 such a drone flies only in A3: 150 m from residential, commercial, industrial and recreational areas. It cannot do photogrammetry over the city. It can fly the [Aardlapalu](https://et.wikipedia.org/wiki/Aardlapalu) quarry, the river meanders and parts of the Raadi field.
 - For the city, rent a C2 drone and fly in A2: 30 m from uninvolved people, 5 m in low speed mode. C2 drones with RTK: DJI Mavic 3 Enterprise EU. Other C2: Mavic 3 Pro, Mavic 4 Pro, Matrice 4E. C3: Matrice 350 RTK, which allows lidar payloads but flies only in A3.
 - STS-01 needs a C5 drone. C5 kits exist for the Mavic 3 and Matrice 4. STS-01 permits flight over a controlled ground area in a populated environment, which fits a closed off site such as the laululava on a quiet morning.
 
@@ -237,22 +237,22 @@ Geographical zones near the clusters, from the open GeoJSON at https://utm.eans.
 
 | Zone | Where | Effect | Contact |
 |------|-------|--------|---------|
-| EEGZ7, EEGZ8, EEGZ9 | Tartu airport FIZ, south of about 58.34 N | No open category flight over the airport. Below 30 m in EEGZ8, below 50 m in EEGZ9. Aardlapalu and the Ihaste bridge are inside EEGZ8 or EEGZ9. | Transpordiamet, LOIS |
+| EEGZ7, EEGZ8, EEGZ9 | [Tartu airport](https://www.tartu-airport.ee/) FIZ, south of about 58.34 N | No open category flight over the airport. Below 30 m in EEGZ8, below 50 m in EEGZ9. Aardlapalu and the [Ihaste](https://et.wikipedia.org/wiki/Ihaste) bridge are inside EEGZ8 or EEGZ9. | Transpordiamet, [LOIS](https://lois.transpordiamet.ee/) |
 | ZONE8 | The whole city, 58.37 to 58.46 N | Manned training area. Fly with caution. No permit. | |
 | EER31 | Raatuse 110, Raadi | Defence Forces permit | lennuluba@mil.ee |
-| EERZ107 | Turu 56 | Tartu prison, no flight | tartuv.info@just.ee |
+| EERZ107 | Turu 56 | [Tartu prison](https://www.vangla.ee/et/asutused-kontaktid/tartu-vangla), no flight | tartuv.info@just.ee |
 | EERZ69 | Jaani tn | Internal Security Service, no flight. This is inside the old town, next to Jaani kirik. | kapo@kapo.ee |
 | EERZ84 | Riia 132 | Police | ppa@politsei.ee |
-| EER25, EER2610 | Sirgu, Luunja, east of Lohkva | Defence Forces, temporary until 2026-11-25 | lennuluba@mil.ee |
+| EER25, EER2610 | Sirgu, Luunja, east of [Lohkva](https://et.wikipedia.org/wiki/Lohkva) | Defence Forces, temporary until 2026-11-25 | lennuluba@mil.ee |
 
-The Tartu Kliinikum heliport has no UAS zone in the current list. The general rule to stay away from helicopter operations still applies.
+The [Tartu](https://en.wikipedia.org/wiki/Tartu) Kliinikum heliport has no UAS zone in the current list. The general rule to stay away from helicopter operations still applies.
 
 Permits: written application to the zone owner with the eleven data points that the general order lists. Decision within five working days. Airport zone flights above the limits need a special category authorization from Transpordiamet, which takes months. Operator registration costs 10 euros.
 
 Effect on the plan:
 
-- Annelinn and Lohkva: A2 with a rented C2 drone, no zone conflicts west of Sirgu. Good first scan site.
-- Tähtvere and the laululava: A2, or STS-01 for the shell. The 330 kV substation is not a zone, but keep the distance that the operator Elering asks.
-- Kesklinn: A2 is possible in most of the old town, but the Jaani tn zone cuts out the Jaani kirik block. Photogrammetry of the center is a summer morning job with many battery swaps and crowd management.
+- [Annelinn](https://et.wikipedia.org/wiki/Annelinn) and Lohkva: A2 with a rented C2 drone, no zone conflicts west of Sirgu. Good first scan site.
+- [Tähtvere](https://et.wikipedia.org/wiki/T%C3%A4htvere) and the laululava: A2, or STS-01 for the shell. The 330 kV substation is not a zone, but keep the distance that the operator [Elering](https://elering.ee/) asks.
+- [Kesklinn](https://et.wikipedia.org/wiki/Kesklinn_%28Tartu%29): A2 is possible in most of the old town, but the Jaani tn zone cuts out the Jaani kirik block. Photogrammetry of the center is a summer morning job with many battery swaps and crowd management.
 - Raadi: the ERM side is free, the Raatuse 110 side needs the Defence Forces permit.
 - Aardlapalu and Ihaste: A3 with the Mavic 2 Pro is allowed, but only below 30 or 50 m.
