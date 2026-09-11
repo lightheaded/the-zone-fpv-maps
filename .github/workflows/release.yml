@@ -1,0 +1,86 @@
+name: release
+
+# A tag `vX.Y.Z` builds every map in maps/ from the open data and publishes a GitHub
+# release with the map files, the previews and the build reports. The tag must match
+# the version in pyproject.toml. The release notes come from git history, see
+# scripts/release-notes.sh and AGENTS.md, Releases.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # The whole history and every tag. The notes are built from the commits since
+      # the previous release tag, and a shallow clone has neither.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check that the tag matches the package version
+        run: |
+          version=$(grep -m1 '^version = ' pyproject.toml | sed -E 's/version = "(.*)"/\1/')
+          if [ "v$version" != "${{ github.ref_name }}" ]; then
+            echo "tag ${{ github.ref_name }} does not match pyproject.toml version $version"
+            exit 1
+          fi
+
+      - name: Check that every map has a preview image
+        run: |
+          for cfg in maps/*.toml; do
+            name=$(grep -m1 '^name = ' "$cfg" | sed -E 's/name = "(.*)"/\1/')
+            test -s "docs/screenshots/$name-preview.jpg" || { echo "docs/screenshots/$name-preview.jpg is missing. Build the map and copy the preview."; exit 1; }
+          done
+
+      - name: Refuse tracked text that points at one machine or one person
+        run: scripts/check-privacy.sh
+
+      - name: Write the release notes
+        run: |
+          scripts/release-notes.sh "${{ github.ref_name }}" > release-notes.md
+          echo "release notes: $(wc -c < release-notes.md) bytes"
+
+      - name: Refuse notes that point at one machine or one person
+        run: scripts/check-privacy.sh release-notes.md
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install
+        run: uv sync --frozen
+
+      # The source data is public and does not change for a given file name, so a
+      # cache hit is always valid. The key changes when a map config changes.
+      - name: Cache the Maa-amet downloads
+        uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: maa-amet-${{ hashFiles('maps/*.toml') }}
+          restore-keys: maa-amet-
+
+      - name: Build every map
+        run: |
+          mkdir -p release-assets
+          for cfg in maps/*.toml; do
+            name=$(grep -m1 '^name = ' "$cfg" | sed -E 's/name = "(.*)"/\1/')
+            uv run fpv-maps build "$cfg"
+            uv run fpv-maps inspect "dist/$name/$name.glb"
+            cp "dist/$name/$name.glb" "dist/$name/$name-preview.jpg" "dist/$name/$name-build-report.json" release-assets/
+          done
+          ls -la release-assets
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "The Zone FPV maps ${{ github.ref_name }}" \
+            --notes-file release-notes.md \
+            --verify-tag \
+            release-assets/*

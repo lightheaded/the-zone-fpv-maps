@@ -1,0 +1,62 @@
+#!/bin/bash
+# Refuse text that points at one machine or one person.
+#
+# The text must hold no absolute home path, no personal email address, no private
+# network address and no internal host name. CI runs this script over the tracked
+# files, and the release workflow runs it over the generated release notes.
+#
+# Usage: scripts/check-privacy.sh              # every tracked file
+#        scripts/check-privacy.sh FILE...      # only these files
+#
+# The check is a net, not a proof. It cannot find a machine name that only its
+# owner knows. The control that works is not writing such text at all.
+set -uo pipefail
+
+args=()
+for f in "$@"; do
+  case "$f" in
+    /*) args+=("$f") ;;
+    *) args+=("$PWD/$f") ;;
+  esac
+done
+
+cd "$(dirname "$0")/.."
+
+if [ "${#args[@]}" -gt 0 ]; then
+  files=$(printf '%s\n' "${args[@]}")
+else
+  # Binary and generated files carry no prose.
+  files=$(git ls-files | grep -vE '\.(png|jpg|jpeg|glb|tif|zip|lock)$')
+fi
+
+hits=0
+check() { # $1 = rule, $2 = regex, $3 = regex of allowed matches (may be empty)
+  local rule=$1 re=$2 allow=${3:-}
+  local out
+  out=$(printf '%s\n' "$files" | xargs grep -nHE -- "$re" 2>/dev/null || true)
+  if [ -n "$allow" ] && [ -n "$out" ]; then
+    out=$(printf '%s\n' "$out" | grep -vE -- "$allow" || true)
+  fi
+  if [ -n "$out" ]; then
+    echo "$rule:"
+    printf '%s\n' "$out" | cut -c1-160 | sed 's/^/  /'
+    hits=1
+  fi
+}
+
+# A home path names the local user. Documentation uses $HOME, ~ or a placeholder.
+check "absolute home path" '/(Users|home)/[A-Za-z0-9._-]+/' '/(Users|home)/(you|dev|USER|username|<[a-z-]+>|\$[A-Za-z_{}]+)/'
+# An email address. The no-reply addresses of the forge, of the AI tool and public
+# agency addresses are fine.
+check "email address" '[A-Za-z0-9._%+-]+@[A-Za-z][A-Za-z0-9-]*(\.[A-Za-z0-9-]+)*\.[a-z]{2,}\b' 'noreply@anthropic\.com|users\.noreply\.github\.com|@example\.(com|org)|@(maaruum|maaamet|tartu|mil|just|kapo|politsei|transpordiamet)\.ee'
+# A private network address.
+check "private network address" '\b(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3}|100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.[0-9]{1,3}\.[0-9]{1,3})\b' ''
+# An internal host name.
+check "internal host name" '\b[a-z0-9-]+\.(local|lan|internal|home|corp|intranet)\b' ''
+
+if [ "$hits" = 1 ]; then
+  echo
+  echo "check-privacy: the lines above point at one machine or one person. Replace them with a placeholder."
+  exit 1
+fi
+echo "check-privacy: clean"
