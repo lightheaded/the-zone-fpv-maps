@@ -90,8 +90,9 @@ and publishes the GitHub release with the map files, previews and build reports.
 - Every commit body is one section of "What changed". An empty body prints
   "No description was written for this change." Do not let that happen.
 - `Co-Authored-By` and `Signed-off-by` trailers are removed.
-- Each map that the release **adds** gets a section with its preview from
-  `docs/screenshots/`, then the install steps and the attribution. A release page is
+- Each map that the release **adds** gets a section with its preview and its first
+  tour picture from `docs/screenshots/`, a link to its tour video in the assets, then
+  the install steps and the attribution. A release page is
   a change list, so it does not repeat the maps of earlier releases. The assets hold
   every map in every release, and `docs/maps.md` is the inventory of them all.
 - A new map needs a row in `docs/maps.md`, a preview and at least one tour picture in

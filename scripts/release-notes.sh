@@ -136,6 +136,15 @@ for cfg in $new_maps; do
     echo "![$name from above]($repo_url/raw/$tag/docs/screenshots/$name-preview.jpg)"
     echo
   fi
+  # The tour of the map: the first rendered shot, and the video asset of this release.
+  tour_shot=$(ls docs/screenshots/"$name"-tour-*.jpg 2>/dev/null | head -1 || true)
+  if [ -n "$tour_shot" ]; then
+    echo "![$name, from the rendered tour]($repo_url/raw/$tag/$tour_shot)"
+    echo
+    echo "The tour video is \`$name-tour.mp4\` in the assets below. Every shot of it is on"
+    echo "the [wiki gallery]($repo_url/wiki/Map-tours)."
+    echo
+  fi
   for shot in docs/screenshots/"$name"-ingame-*.jpg; do
     [ -f "$shot" ] || continue
     echo "![$name in the game]($repo_url/raw/$tag/$shot)"
