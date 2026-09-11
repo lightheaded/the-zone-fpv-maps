@@ -13,8 +13,12 @@ Status: planning. See `docs/analysis.md` for the feasibility study and `docs/loc
 
 ## Data and attribution
 
-Geodata: Maa- ja Ruumiamet open data license, see `docs/licensing.md`. Every published map carries the attribution line that the license requires.
+Geodata: Republic of Estonia Land and Spatial Development Board (Maa- ja Ruumiamet), open data license 2025-01-01, https://geoportaal.maaruum.ee/opendata-licence. Full attribution lines are in `NOTICE`. Every published map carries them.
+
+## Licenses
+
+Code: Apache-2.0 (`LICENSE`). Assets: CC BY 4.0 (`LICENSE-ASSETS`). Reasoning in `docs/licensing.md`.
 
 ## Contributing
 
-Not open yet. The contribution rules and the licenses are proposals in `docs/licensing.md` until the first release.
+See `CONTRIBUTING.md`. Commits need a Developer Certificate of Origin sign off.

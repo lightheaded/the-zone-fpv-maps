@@ -1,6 +1,6 @@
 # Licenses, contributions and legality
 
-Status: proposal. The maintainer decides the items in section 1 before the first public push.
+Status: decided on 2026-09-11. The maintainer accepted all recommendations in section 1. `LICENSE`, `LICENSE-ASSETS`, `NOTICE`, `CONTRIBUTING.md` and the pull request template implement them.
 
 The document has four parts. Section 1 lists the decisions that we must make, with a recommendation for each. Section 2 lists the licenses that come with the inputs, where we have no choice. Section 3 is a reference with one entry per license, and each entry says what it pertains to in this project. Sections 4 to 7 cover attribution, contributions, content legality and drone rules.
 

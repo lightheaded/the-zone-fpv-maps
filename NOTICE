@@ -1,0 +1,20 @@
+The Zone FPV Maps
+Copyright 2026 The Zone FPV Maps contributors
+
+Code in this repository is licensed under the Apache License, Version 2.0 (LICENSE).
+Assets (maps, textures, hero models under assets/) are licensed under
+Creative Commons Attribution 4.0 International (LICENSE-ASSETS).
+
+Third party data
+----------------
+Geodata: Republic of Estonia Land and Spatial Development Board
+(Maa- ja Ruumiamet), open data license 2025-01-01,
+https://geoportaal.maaruum.ee/opendata-licence
+
+- 3D buildings LOD2 2026: Republic of Estonia Land and Spatial Development Board
+- Elevation data 2021-2024: Republic of Estonia Land and Spatial Development Board
+- Orthophoto 2024: Republic of Estonia Land and Spatial Development Board
+- Estonian Topographic Database (ETAK) 2026: Republic of Estonia Land and Spatial Development Board
+- Tree points 2026: Republic of Estonia Land and Spatial Development Board
+
+Update the years above when the pipeline fetches newer data.
