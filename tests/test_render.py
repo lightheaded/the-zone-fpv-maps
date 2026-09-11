@@ -30,10 +30,16 @@ ORIGIN = (662500.0, 6473500.0, 40.0)
 
 @pytest.fixture(scope="session")
 def opengl():
-    """Skip the test when this machine has no offscreen OpenGL 3.3 context."""
-    moderngl = pytest.importorskip("moderngl")
+    """Skip the test when this machine has no offscreen OpenGL 3.3 context.
+
+    It asks for the context the same way as the renderer, so that a machine with EGL
+    and no display runs these tests instead of skipping them.
+    """
+    pytest.importorskip("moderngl")
+    from fpv_maps.render import _context
+
     try:
-        ctx = moderngl.create_context(standalone=True, require=330)
+        ctx = _context()
     except Exception as exc:  # pragma: no cover - depends on the machine
         pytest.skip(f"no offscreen OpenGL 3.3 context: {exc}")
     ctx.release()

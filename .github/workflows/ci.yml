@@ -54,7 +54,14 @@ jobs:
         env:
           LIBGL_ALWAYS_SOFTWARE: 1
           EGL_PLATFORM: surfaceless
-        run: uv run pytest tests/test_render.py -v
+        run: |
+          uv run pytest tests/test_render.py -v -rs | tee result.txt
+          # This job exists to draw. A skipped test means that the runner gave no
+          # OpenGL context, and then the renderer is not tested anywhere.
+          if grep -q skipped result.txt; then
+            echo "The renderer tests skipped. This runner has no OpenGL context."
+            exit 1
+          fi
 
   privacy:
     name: No text points at one machine or one person
