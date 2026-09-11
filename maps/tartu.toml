@@ -4,7 +4,7 @@
 # orthophoto sheets cover it. See docs/analysis.md section 3 for the size budget.
 
 [map]
-name = "tartu-base"
+name = "tartu"
 description = "The whole city of Tartu, 9 x 9 km. Terrain, orthophoto and every LOD2 building."
 
 [area]

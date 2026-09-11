@@ -30,7 +30,7 @@ jobs:
       - name: Test
         run: uv run pytest
       - name: Smoke test the CLI
-        run: uv run fpv-maps area maps/annelinn-test.toml
+        run: uv run fpv-maps area maps/tartu-annelinn-test.toml
 
   # The renderer is an optional extra, because glcontext needs a C++ compiler outside
   # macOS. Mesa draws in software here, so the tests render small pictures only.

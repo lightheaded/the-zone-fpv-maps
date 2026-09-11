@@ -117,7 +117,7 @@ does not pull the terrain down.
 
 ## 2026-09-11: The base map is a 9 x 9 km square, not the whole city municipality
 
-Decision: `maps/tartu-base.toml` covers L-EST97 656000 to 665000 east and 6468500 to
+Decision: `maps/tartu.toml` covers L-EST97 656000 to 665000 east and 6468500 to
 6477500 north. That is 81 km². It holds every cluster in `docs/locations.md` except
 [Tartu lennujaam](https://www.tartu-airport.ee/), which is 6 km further south.
 
@@ -132,7 +132,7 @@ touches the corner but has no building inside, so it is not in the list.
 
 ## 2026-09-11: The base map spawns on the Emajõgi, not at the center of the box
 
-Decision: the origin of `tartu-base` is 58.37990 north, 26.72743 east. That is mid
+Decision: the origin of `tartu` is 58.37990 north, 26.72743 east. That is mid
 river, 134 m south east of the [Kaarsild](https://et.wikipedia.org/wiki/Kaarsild) and 188 m north west of the Võidu sild,
 12 m from each bank, 31.4 m above sea level in EH2000.
 
@@ -143,10 +143,10 @@ bridge with [Toomemägi](https://et.wikipedia.org/wiki/Toomem%C3%A4gi) and the o
 elevation model and the orthophoto, not by eye: water is the flattest and darkest
 part of the box.
 
-## 2026-09-11: The first two detailed tiles are vaksali and ulejoe
+## 2026-09-11: The first two detailed tiles are tartu-vaksali and tartu-ulejoe
 
-Decision: the first two detailed maps are `vaksali`, the 1:2000 sheet 473658 in
-the industry belt, and `ulejoe`, a 1 km² box over the [Emajõgi](https://et.wikipedia.org/wiki/Emaj%C3%B5gi) and
+Decision: the first two detailed maps are `tartu-vaksali`, the 1:2000 sheet 473658 in
+the industry belt, and `tartu-ulejoe`, a 1 km² box over the [Emajõgi](https://et.wikipedia.org/wiki/Emaj%C3%B5gi) and
 [Ülejõe](https://et.wikipedia.org/wiki/%C3%9Clej%C3%B5e). They come before
 [Annelinn](https://et.wikipedia.org/wiki/Annelinn), which `docs/analysis.md` names first.
 
@@ -160,21 +160,21 @@ Puiestee stand on public streets. A drone cannot replace the walk: a 907 g aircr
 without a class label flies A3 only, 150 m from a built up area.
 
 The two tiles also carry the height that freestyle needs. Measured in the LOD2 data of
-2026-09-05: `vaksali` holds 774 buildings with a median height of 6.2 m, 17 of
+2026-09-05: `tartu-vaksali` holds 774 buildings with a median height of 6.2 m, 17 of
 them over 20 m, a 49.0 m tower at the [Tartu Mill](https://tartumill.ee/) block and a
-35.4 m water tower. `ulejoe` holds 882 buildings with a median height of 5.4 m, 10 of
+35.4 m water tower. `tartu-ulejoe` holds 882 buildings with a median height of 5.4 m, 10 of
 them over 20 m, the 59.4 m spires of Peetri kirik, and two factory blocks of
 107 x 80 m and 66 x 76 m.
 
-Cost: neither tile is a whole cluster of `docs/locations.md`. `vaksali` is the
-north half of cluster 4 and `ulejoe` is the south half of cluster 2. The rest of each
+Cost: neither tile is a whole cluster of `docs/locations.md`. `tartu-vaksali` is the
+north half of cluster 4 and `tartu-ulejoe` is the south half of cluster 2. The rest of each
 cluster waits for a later map.
 
 ## 2026-09-11: A detailed tile is 1 km² at 12 cm, even over four orthophoto sheets
 
 Decision: a detailed tile is 1 x 1 km with an 8192 px ground texture. That is 12 cm per
-pixel. `vaksali` aligns to the Maa-amet 1:2000 grid and needs one orthophoto
-sheet. `ulejoe` does not align, and needs four.
+pixel. `tartu-vaksali` aligns to the Maa-amet 1:2000 grid and needs one orthophoto
+sheet. `tartu-ulejoe` does not align, and needs four.
 
 Why: 12 cm is the finest ground texture that the memory budget in `docs/analysis.md`
 allows. A 16384 px texture needs 1.4 GB of video memory instead of 0.36 GB. The
@@ -254,3 +254,21 @@ pictures are linked, not copied, so the wiki never holds a second copy that ages
 Cost: the wiki pages are generated, so nobody must edit them by hand. A map that changes
 needs `scripts/publish-tours.sh` again. GitHub does not play an MP4 asset in the page,
 so the link starts a download.
+
+## 2026-09-11: Every map name starts with its city
+
+Decision: a map name is `<city>` for the map of a whole city, and `<city>-<place>` for
+a tile in it. The four maps of Tartu are `tartu`, `tartu-vaksali`, `tartu-ulejoe` and
+`tartu-annelinn-test`. The name stays letters, digits, `-` and `_`, because the game
+uses it as a folder name and a file name.
+
+Why: the project starts with one city and does not end there. A name like `vaksali`
+says nothing to a person who does not know Tartu, and a second city with a district of
+the same name breaks the namespace. The custom map browser of the game is one flat
+list for everybody, so a name must carry its place. `tartu` is short for the map of the
+whole city, because the city name alone is the clearest name for it.
+
+Cost: every file name changed. `docs/screenshots/` and the map files in the release of
+version 0.4.0 carry the new names. The releases v0.1.0 to v0.3.0 keep the old names,
+because a published asset must never change under a reader. A person who installed
+`vaksali` must install `tartu-vaksali` and delete the old folder.

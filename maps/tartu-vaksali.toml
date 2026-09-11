@@ -6,7 +6,7 @@
 # public ground. See docs/locations.md and docs/analysis.md section 4.
 
 [map]
-name = "vaksali"
+name = "tartu-vaksali"
 description = "1 km2 of the Tartu industry belt: the Tartu Mill elevator, the railway yard, Aparaaditehas, the water tower and Pauluse kirik."
 
 [area]

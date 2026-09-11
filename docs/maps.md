@@ -4,17 +4,22 @@ Every map that this repository builds. This file is the inventory. A release pag
 only the maps that the release adds, so read this file for the full list. Every release
 attaches every map, so the newest release always holds them all.
 
-The numbers come from the build reports of version 0.3.0, built on 2026-09-11 on macOS
+Every map name starts with its city since version 0.4.0. The releases v0.1.0 to v0.3.0
+hold the same maps under the names `vaksali`, `ulejoe`, `tartu-base` and
+`annelinn-test`. The folder in the game must carry the new name, so an installed map
+from an older release needs a new folder. See `docs/decisions.md`.
+
+The numbers come from the build reports of version 0.4.0, built on 2026-09-11 on macOS
 arm64. A build on another processor architecture writes a file of a slightly different
 size, because the JPEG encoder differs. The geometry is the same everywhere. See
 `docs/development.md`, "How reproducible a build is".
 
 | Map | Area | Ground pixel | Buildings | Triangles | File | First release |
 |-----|------|--------------|-----------|-----------|------|---------------|
-| [`vaksali`](#vaksali) | 1 x 1 km | 12.2 cm | 776 | 0.55 M | 26.5 MB | v0.3.0 |
-| [`ulejoe`](#ulejoe) | 1 x 1 km | 12.2 cm | 883 | 0.54 M | 25.8 MB | v0.3.0 |
-| [`tartu-base`](#tartu-base) | 9 x 9 km | 1.10 m | 23,745 | 2.87 M | 126 MB | v0.2.0 |
-| [`annelinn-test`](#annelinn-test) | 1 x 1 km | 12.2 cm | 145 | 0.51 M | 23.1 MB | v0.1.0 |
+| [`tartu-vaksali`](#tartu-vaksali) | 1 x 1 km | 12.2 cm | 776 | 0.55 M | 26.5 MB | v0.3.0 |
+| [`tartu-ulejoe`](#tartu-ulejoe) | 1 x 1 km | 12.2 cm | 883 | 0.54 M | 25.8 MB | v0.3.0 |
+| [`tartu`](#tartu) | 9 x 9 km | 1.10 m | 23,745 | 2.87 M | 126 MB | v0.2.0 |
+| [`tartu-annelinn-test`](#tartu-annelinn-test) | 1 x 1 km | 12.2 cm | 145 | 0.51 M | 23.1 MB | v0.1.0 |
 
 ## The pictures of a map
 
@@ -40,7 +45,7 @@ them.
 What no map holds yet: trees, power lines, lattice towers, bridges, a water surface,
 hand made hero assets and photo facades. `README.md` lists them under planned products.
 
-## vaksali
+## tartu-vaksali
 
 1 km² of the Tartu industry belt, over Ropka, Karlova and Vaksali. The box is the
 Maa-amet 1:2000 sheet 473658, so one orthophoto sheet and one elevation sheet cover it.
@@ -58,23 +63,23 @@ Maa-amet 1:2000 sheet 473658, so one orthophoto sheet and one elevation sheet co
   12.2 MB, 26.5 MB in total.
 - Status: built, and it loads in the game on 2026-09-11. Nothing else is checked.
 
-### The tour of `vaksali`
+### The tour of `tartu-vaksali`
 
-[![The Tartu Mill elevator, 48.6 m above the terrain](screenshots/vaksali-tour-2-tartu-mill.jpg)](screenshots/vaksali-tour-2-tartu-mill.jpg)
+[![The Tartu Mill elevator, 48.6 m above the terrain](screenshots/tartu-vaksali-tour-2-tartu-mill.jpg)](screenshots/tartu-vaksali-tour-2-tartu-mill.jpg)
 
 *The Tartu Mill elevator, 48.6 m above the terrain.*
 
-[![The spawn point in the open freight yard](screenshots/vaksali-tour-5-spawn.jpg)](screenshots/vaksali-tour-5-spawn.jpg)
+[![The spawn point in the open freight yard](screenshots/tartu-vaksali-tour-5-spawn.jpg)](screenshots/tartu-vaksali-tour-5-spawn.jpg)
 
 *The spawn point in the open freight yard.*
 
-Every shot of the tour, and the video, are on the [`vaksali` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/vaksali).
+Every shot of the tour, and the video, are on the [`tartu-vaksali` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/tartu-vaksali).
 
 Every landmark of this tile stands on public ground, so a person can photograph the
 walls without a permit. That is why it is the first candidate for photo facades. See
 `docs/decisions.md`.
 
-## ulejoe
+## tartu-ulejoe
 
 1 km² of [Ülejõe](https://et.wikipedia.org/wiki/%C3%9Clej%C3%B5e) with the
 [Emajõgi](https://et.wikipedia.org/wiki/Emaj%C3%B5gi) and the north edge of the old
@@ -96,23 +101,23 @@ elevation sheets feed one texture. All four sheets are from the same flight of
   11.6 MB, 25.8 MB in total.
 - Status: built, and it loads in the game on 2026-09-11. Nothing else is checked.
 
-### The tour of `ulejoe`
+### The tour of `tartu-ulejoe`
 
-[![Peetri kirik, the tallest structure of the tile at 59.1 m](screenshots/ulejoe-tour-2-peetri-kirik.jpg)](screenshots/ulejoe-tour-2-peetri-kirik.jpg)
+[![Peetri kirik, the tallest structure of the tile at 59.1 m](screenshots/tartu-ulejoe-tour-2-peetri-kirik.jpg)](screenshots/tartu-ulejoe-tour-2-peetri-kirik.jpg)
 
 *Peetri kirik, the tallest structure of the tile at 59.1 m.*
 
-[![The camera flies down the Emajogi toward the spawn point](screenshots/ulejoe-tour-3-emajogi.jpg)](screenshots/ulejoe-tour-3-emajogi.jpg)
+[![The camera flies down the Emajogi toward the spawn point](screenshots/tartu-ulejoe-tour-3-emajogi.jpg)](screenshots/tartu-ulejoe-tour-3-emajogi.jpg)
 
 *The camera flies down the Emajogi toward the spawn point.*
 
-Every shot of the tour, and the video, are on the [`ulejoe` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/ulejoe).
+Every shot of the tour, and the video, are on the [`tartu-ulejoe` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/tartu-ulejoe).
 
 The bridges are in the orthophoto under the drone, but not in the geometry. A bridge is
 not a building, so the LOD2 data has none. Treat the river as open water until the
 bridge step exists.
 
-## tartu-base
+## tartu
 
 The whole city at low fidelity, 9 x 9 km and 81 km². It holds every cluster of
 `docs/locations.md` except [Tartu lennujaam](https://www.tartu-airport.ee/).
@@ -128,21 +133,21 @@ The whole city at low fidelity, 9 x 9 km and 81 km². It holds every cluster of
 - Status: built and loaded in the game on 2026-09-11. Load time, frame rate, position
   accuracy far from the origin and the chunk seams are still open questions.
 
-### The tour of `tartu-base`
+### The tour of `tartu`
 
-[![The whole 9 x 9 km tile from 3.4 km](screenshots/tartu-base-tour-1-overview.jpg)](screenshots/tartu-base-tour-1-overview.jpg)
+[![The whole 9 x 9 km tile from 3.4 km](screenshots/tartu-tour-1-overview.jpg)](screenshots/tartu-tour-1-overview.jpg)
 
 *The whole 9 x 9 km tile from 3.4 km.*
 
-[![The spawn point on the river, between the two bridges](screenshots/tartu-base-tour-4-spawn.jpg)](screenshots/tartu-base-tour-4-spawn.jpg)
+[![The spawn point on the river, between the two bridges](screenshots/tartu-tour-4-spawn.jpg)](screenshots/tartu-tour-4-spawn.jpg)
 
 *The spawn point on the river, between the two bridges.*
 
-Every shot of the tour, and the video, are on the [`tartu-base` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/tartu-base).
+Every shot of the tour, and the video, are on the [`tartu` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/tartu).
 
 Fly it for orientation and for long cruises. For freestyle, use a detailed tile.
 
-## annelinn-test
+## tartu-annelinn-test
 
 The first test tile, 1 km² of [Annelinn](https://et.wikipedia.org/wiki/Annelinn) with
 the west end of [Lohkva](https://et.wikipedia.org/wiki/Lohkva). It is the Maa-amet
@@ -159,17 +164,17 @@ the west end of [Lohkva](https://et.wikipedia.org/wiki/Lohkva). It is the Maa-am
 - Status: built and flown on 2026-09-11. It proved the textures, the material swap by
   name and the spawn behavior.
 
-### The tour of `annelinn-test`
+### The tour of `tartu-annelinn-test`
 
-[![The 1 km2 test tile from above](screenshots/annelinn-test-tour-1-overview.jpg)](screenshots/annelinn-test-tour-1-overview.jpg)
+[![The 1 km2 test tile from above](screenshots/tartu-annelinn-test-tour-1-overview.jpg)](screenshots/tartu-annelinn-test-tour-1-overview.jpg)
 
 *The 1 km2 test tile from above.*
 
-[![The spawn point with the probe objects](screenshots/annelinn-test-tour-4-spawn.jpg)](screenshots/annelinn-test-tour-4-spawn.jpg)
+[![The spawn point with the probe objects](screenshots/tartu-annelinn-test-tour-4-spawn.jpg)](screenshots/tartu-annelinn-test-tour-4-spawn.jpg)
 
 *The spawn point with the probe objects.*
 
-Every shot of the tour, and the video, are on the [`annelinn-test` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/annelinn-test).
+Every shot of the tour, and the video, are on the [`tartu-annelinn-test` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/tartu-annelinn-test).
 
 It stays in the repository as a probe carrier. Every new question about the game format
 gets a probe here first.

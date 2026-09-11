@@ -175,7 +175,7 @@ cat <<'INSTALL'
 1. Download the `.glb` file of a map from the assets below.
 2. Open the game folder. Steam: right click The Zone, Manage, Browse local files.
 3. Create the folder `custom_maps/<name>/` and put `<name>.glb` in it. The folder name
-   and the file name must be equal. Example: `custom_maps/annelinn-test/annelinn-test.glb`.
+   and the file name must be equal. Example: `custom_maps/tartu-annelinn-test/tartu-annelinn-test.glb`.
 4. Start the game, open Play Offline and pick the map from the custom maps.
 
 Each `<name>-build-report.json` lists the source data files and their dates.

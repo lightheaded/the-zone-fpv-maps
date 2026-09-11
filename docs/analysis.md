@@ -89,7 +89,7 @@ A base map of about 4 million triangles in a few hundred merged meshes is normal
 - Detailed maps of 2 to 6 km² are the right unit for freestyle and rehearsal. Each has 20 to 25 cm ground texture, all trees, facades, fences and lamp posts, and hand made hero assets. Photogrammetry patches come later inside these tiles.
 - Both types share one pipeline and one configuration format. Only the bounding box and the quality settings differ.
 
-Measured on 2026-09-11, the first build of `tartu-base` without trees and lines:
+Measured on 2026-09-11, the first build of `tartu` without trees and lines:
 
 | Part | Number |
 |------|--------|

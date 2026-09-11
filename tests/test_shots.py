@@ -45,8 +45,8 @@ def test_import_shots_names_the_pictures(tmp_path: Path):
     make_png(tmp_path / "one.png", (800, 450), age=600)
     make_png(tmp_path / "two.png", (800, 450))
     out = tmp_path / "docs"
-    written = import_shots([tmp_path], "vaksali", out, width=400)
-    assert [p.name for p in written] == ["vaksali-ingame-1.jpg", "vaksali-ingame-2.jpg"]
+    written = import_shots([tmp_path], "tartu-vaksali", out, width=400)
+    assert [p.name for p in written] == ["tartu-vaksali-ingame-1.jpg", "tartu-vaksali-ingame-2.jpg"]
     with Image.open(written[0]) as image:
         assert image.size == (400, 225)
         assert image.format == "JPEG"
@@ -58,8 +58,10 @@ def test_import_shots_can_add_to_a_map_that_has_pictures(tmp_path: Path):
     source.mkdir()
     make_png(source / "one.png", (800, 450))
     out = tmp_path / "docs"
-    import_shots([source], "ulejoe", out, width=200)
-    again = import_shots([source], "ulejoe", out, width=200, start=next_number(out, "ulejoe"))
-    assert [p.name for p in again] == ["ulejoe-ingame-2.jpg"]
-    assert next_number(out, "ulejoe") == 3
+    import_shots([source], "tartu-ulejoe", out, width=200)
+    again = import_shots(
+        [source], "tartu-ulejoe", out, width=200, start=next_number(out, "tartu-ulejoe")
+    )
+    assert [p.name for p in again] == ["tartu-ulejoe-ingame-2.jpg"]
+    assert next_number(out, "tartu-ulejoe") == 3
     assert next_number(out, "other") == 1

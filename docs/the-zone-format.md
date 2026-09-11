@@ -55,12 +55,12 @@ Our own maps, for the same comparison:
 
 | Map | File size | Triangles | Meshes | Materials | Extent | Embedded images |
 |-----|-----------|-----------|--------|-----------|--------|-----------------|
-| annelinn-test | 23 MB | 0.51 M | 14 | 10 | 1000 x 1000 m | 1 JPEG, 1 PNG, 11.3 MB |
-| tartu-base | 126 MB | 2.87 M | 108 | 3 | 9000 x 9000 m | 1 JPEG, 18.9 MB |
-| vaksali | 26.5 MB | 0.55 M | 3 | 3 | 1000 x 1000 m | 1 JPEG, 12.2 MB |
-| ulejoe | 25.8 MB | 0.54 M | 3 | 3 | 1000 x 1000 m | 1 JPEG, 11.6 MB |
+| tartu-annelinn-test | 23 MB | 0.51 M | 14 | 10 | 1000 x 1000 m | 1 JPEG, 1 PNG, 11.3 MB |
+| tartu | 126 MB | 2.87 M | 108 | 3 | 9000 x 9000 m | 1 JPEG, 18.9 MB |
+| tartu-vaksali | 26.5 MB | 0.55 M | 3 | 3 | 1000 x 1000 m | 1 JPEG, 12.2 MB |
+| tartu-ulejoe | 25.8 MB | 0.54 M | 3 | 3 | 1000 x 1000 m | 1 JPEG, 11.6 MB |
 
-Every map of the table loads in the game. `vaksali` and `ulejoe` were loaded on
+Every map of the table loads in the game. `tartu-vaksali` and `tartu-ulejoe` were loaded on
 2026-09-11 and neither crashed the game. No other property of them is measured yet.
 
 Conclusions:
@@ -101,7 +101,7 @@ from `custom_maps/<name>/` is open. Do not build on it.
 
 ## Open questions and the probes that answer them
 
-The test tile `maps/annelinn-test.toml` places these objects near the spawn point.
+The test tile `maps/tartu-annelinn-test.toml` places these objects near the spawn point.
 Fly to each one and record the answer in the table.
 
 | # | Question | Probe | Where | Answer |
@@ -117,7 +117,7 @@ Fly to each one and record the answer in the table.
 | 9 | Is there a world boundary? | fly 500 m to the edge | edge | open |
 | 10 | Load time of a 23 MB file? | | | a few seconds, 170 FPS on the Mac |
 
-The base map `tartu-base` asks four more questions. There are no probe objects in it,
+The base map `tartu` asks four more questions. There are no probe objects in it,
 so fly it and record the answers here.
 
 | # | Question | How to test | Answer |

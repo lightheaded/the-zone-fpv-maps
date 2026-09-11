@@ -5,7 +5,7 @@ At this latitude 0.01 degrees of latitude is 1.11 km and 0.01 degrees of longitu
 
 ## The base map box
 
-`maps/tartu-base.toml` covers L-EST97 656000 to 665000 east and 6468500 to 6477500
+`maps/tartu.toml` covers L-EST97 656000 to 665000 east and 6468500 to 6477500
 north. That is 9 x 9 km and 81 km². In WGS84 the corners are 58.32922, 26.66344 in the
 south west and 58.40665, 26.82339 in the north east. Every cluster below is inside it.
 [Tartu lennujaam](https://www.tartu-airport.ee/) is not, and the rural west of the city
@@ -32,8 +32,8 @@ Each cluster is one candidate for a detailed map. The size is the bounding box o
 
 | Map | L-EST97 box (E, N) | Cluster |
 |-----|--------------------|---------|
-| `vaksali` | 658000 6473000 to 659000 6474000, the 1:2000 sheet 473658 | the north half of cluster 4 |
-| `ulejoe` | 658600 6474850 to 659600 6475850 | the south half of cluster 2 |
+| `tartu-vaksali` | 658000 6473000 to 659000 6474000, the 1:2000 sheet 473658 | the north half of cluster 4 |
+| `tartu-ulejoe` | 658600 6474850 to 659600 6475850 | the south half of cluster 2 |
 
 A cluster is a plan, and a tile is a map. No tile covers a whole cluster, because
 1 km² is the area that holds a 12 cm ground texture. `docs/maps.md` lists every map

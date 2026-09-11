@@ -12,12 +12,12 @@ pipeline. It matters for the game, and later for photogrammetry and lidar work.
 2. Clone the repository and open a terminal in it.
 3. Run `uv sync`. This downloads Python 3.12 and the dependencies into `.venv`.
 4. Run `uv run pytest`. All tests must pass. They need no network.
-5. Run `uv run fpv-maps area maps/annelinn-test.toml` to see the bounding box.
+5. Run `uv run fpv-maps area maps/tartu-annelinn-test.toml` to see the bounding box.
 
 Build the test tile and copy it into the game:
 
 ```
-uv run fpv-maps build maps/annelinn-test.toml --install
+uv run fpv-maps build maps/tartu-annelinn-test.toml --install
 ```
 
 The first build downloads about 120 MB into `data/raw/`. Later builds reuse the files.
@@ -28,7 +28,7 @@ The base map of the whole city is larger. Its first build downloads 1.6 GB, keep
 The build itself takes about 11 seconds.
 
 ```
-uv run fpv-maps build maps/tartu-base.toml --install
+uv run fpv-maps build maps/tartu.toml --install
 ```
 
 If the game is not in the default Steam folder, set `THE_ZONE_DIR` to the game folder,
@@ -36,7 +36,7 @@ or pass `--game-dir`. On Windows, use PowerShell:
 
 ```
 $env:THE_ZONE_DIR = "D:\SteamLibrary\steamapps\common\The Zone FPV"
-uv run fpv-maps install maps/annelinn-test.toml
+uv run fpv-maps install maps/tartu-annelinn-test.toml
 ```
 
 ## Docker
@@ -46,7 +46,7 @@ Desktop uses WSL 2. The image builds native on amd64 and arm64.
 
 ```
 docker compose build
-docker compose run --rm pipeline build maps/annelinn-test.toml
+docker compose run --rm pipeline build maps/tartu-annelinn-test.toml
 ```
 
 The container sees `maps/` read only, and writes to `data/` and `dist/` on the host.
@@ -54,7 +54,7 @@ To copy the result into the game, run the install step natively, or mount the ga
 folder:
 
 ```
-docker compose run --rm -v "$THE_ZONE_DIR:/game" pipeline install maps/annelinn-test.toml --game-dir /game
+docker compose run --rm -v "$THE_ZONE_DIR:/game" pipeline install maps/tartu-annelinn-test.toml --game-dir /game
 ```
 
 ## Test a map in the game
@@ -105,14 +105,14 @@ one MP4 into `dist/<name>/tour/`. `--publish` copies the JPEG files into
 `docs/screenshots/`. The video never goes into git. See `docs/decisions.md`.
 
 ```
-uv run fpv-maps tour maps/vaksali.toml --publish
-uv run fpv-maps tour maps/vaksali.toml --shot tartu-mill --no-video   # one shot, fast
-uv run fpv-maps tour maps/vaksali.toml --size 1280x720 --fps 30       # a quick look
+uv run fpv-maps tour maps/tartu-vaksali.toml --publish
+uv run fpv-maps tour maps/tartu-vaksali.toml --shot tartu-mill --no-video   # one shot, fast
+uv run fpv-maps tour maps/tartu-vaksali.toml --size 1280x720 --fps 30       # a quick look
 ```
 
 A map that declares no `[tour]` section gets an automatic tour: a wide orbit, an orbit
 around each of the two tallest structures, and a reveal at the spawn point. To choose
-the shots, add a `[tour]` section. `maps/vaksali.toml` is the example. A target is
+the shots, add a `[tour]` section. `maps/tartu-vaksali.toml` is the example. A target is
 L-EST97 (east, north), or WGS84 with the key `target_wgs84`. The kinds are:
 
 - `orbit`: a circle around a target, at `radius_m` and `height_m` above the terrain.
@@ -132,7 +132,7 @@ The game has no free camera and no command line option that loads a map, so a pe
 flies the map and captures the pictures. Then:
 
 ```
-uv run fpv-maps shots maps/vaksali.toml ~/Pictures/raw-captures
+uv run fpv-maps shots maps/tartu-vaksali.toml ~/Pictures/raw-captures
 ```
 
 The command scales every picture to 1600 px, drops the metadata and writes
@@ -171,7 +171,7 @@ Measured on 2026-09-11 for both maps, with the same source files and the same lo
   the Linux runner in CI.
 - The file is not the same everywhere. The embedded JPEG differs between processor
   architectures, because the JPEG encoder in the Pillow wheel is built for the
-  architecture. `tartu-base` is 20 bytes larger on the amd64 runner than on an arm64
+  architecture. `tartu` is 20 bytes larger on the amd64 runner than on an arm64
   Mac, and every one of those bytes is in the image.
 - macOS arm64 and the Docker container on the same Mac write a file that is equal byte
   for byte.
@@ -221,7 +221,7 @@ dist/                 built maps and build reports, not in git
 
 ## Add a new map
 
-1. Copy `maps/annelinn-test.toml` to `maps/<name>.toml`.
+1. Copy `maps/tartu-annelinn-test.toml` to `maps/<name>.toml`.
 2. Set the name, the bounding box in L-EST97 or a WGS84 center with a size, and the
    municipalities that the box touches.
 3. Run `uv run fpv-maps area maps/<name>.toml` and check the sheets and the chunks.
@@ -229,7 +229,7 @@ dist/                 built maps and build reports, not in git
 5. Render the tour: `uv run fpv-maps tour maps/<name>.toml --publish`.
 6. Add a row and a section to `docs/maps.md`, with two tour pictures.
 
-For a map larger than about 4 km², copy `maps/tartu-base.toml` instead and keep three
+For a map larger than about 4 km², copy `maps/tartu.toml` instead and keep three
 settings from it:
 
 - `ground_texture.source = "estonia"`, so that the download stays small.

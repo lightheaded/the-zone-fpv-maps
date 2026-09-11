@@ -1,12 +1,12 @@
 # Build maps inside the container. Data, output and map configs live on the host.
 #
-#   docker compose run --rm pipeline build maps/annelinn-test.toml
+#   docker compose run --rm pipeline build maps/tartu-annelinn-test.toml
 #
 # To copy the result into the game, mount the game folder:
 #
-#   docker compose run --rm -v "$THE_ZONE_DIR:/game" pipeline install maps/annelinn-test.toml --game-dir /game
+#   docker compose run --rm -v "$THE_ZONE_DIR:/game" pipeline install maps/tartu-annelinn-test.toml --game-dir /game
 #
-# Or run the install step natively: uv run fpv-maps install maps/annelinn-test.toml
+# Or run the install step natively: uv run fpv-maps install maps/tartu-annelinn-test.toml
 services:
   pipeline:
     build: .

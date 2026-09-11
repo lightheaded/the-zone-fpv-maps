@@ -27,7 +27,7 @@ def test_no_municipalities_without_buildings(tmp_path):
 
 
 def test_map_config_lists_municipalities():
-    cfg = load_config(Path(__file__).parent.parent / "maps" / "annelinn-test.toml")
+    cfg = load_config(Path(__file__).parent.parent / "maps" / "tartu-annelinn-test.toml")
     assert cfg.municipalities == ("Tartu_linn", "Luunja_vald")
 
 
@@ -50,7 +50,7 @@ def test_unknown_ground_texture_source(tmp_path):
 
 
 def test_base_map_config():
-    cfg = load_config(Path(__file__).parent.parent / "maps" / "tartu-base.toml")
+    cfg = load_config(Path(__file__).parent.parent / "maps" / "tartu.toml")
     assert cfg.area_km2 == 81.0
     assert cfg.chunk_m == 1500.0
     assert cfg.ground_texture_source == "estonia"

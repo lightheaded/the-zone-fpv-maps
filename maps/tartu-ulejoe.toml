@@ -5,7 +5,7 @@
 # between the Vabadussild and the Kroonuaia sild. See docs/locations.md.
 
 [map]
-name = "ulejoe"
+name = "tartu-ulejoe"
 description = "1 km2 of Ulejoe in Tartu: the old factory block at Puiestee, the university stadium, Lodjakoda, the two spires of Peetri kirik and the Emajogi between two bridges."
 
 [area]

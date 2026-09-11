@@ -55,6 +55,9 @@ holds the license decisions.
 - Paths: `pathlib.Path` everywhere. Line endings are LF, enforced by `.gitattributes`.
 - Configuration: one `maps/<name>.toml` per map. The map name is also the folder and
   file name in the game, so it is letters, digits, `-` and `_` only.
+- Map names: every name starts with its city. `<city>` is the map of the whole city and
+  `<city>-<place>` is a tile in it, for example `tartu` and `tartu-vaksali`. See
+  `docs/decisions.md`.
 - Data cache: `data/raw/<product>/<file>`. Downloads are skipped when the file exists.
 - Output: `dist/<name>/<name>.glb` and `dist/<name>/build-report.json`. The report
   lists the source files and their dates for attribution.
@@ -67,14 +70,14 @@ uv sync                                        # install, first time and after p
 uv sync --extra tour                           # add the offscreen renderer of "tour"
 uv run pytest                                  # tests, no network needed
 uv run ruff check src tests && uv run ruff format src tests
-uv run fpv-maps area maps/annelinn-test.toml   # bounding box and map sheets
-uv run fpv-maps fetch maps/annelinn-test.toml  # download source data into data/raw
-uv run fpv-maps build maps/annelinn-test.toml --install
-uv run fpv-maps inspect dist/annelinn-test/annelinn-test.glb
-uv run fpv-maps tour maps/annelinn-test.toml --publish   # tour pictures and a video
-uv run fpv-maps shots maps/annelinn-test.toml <folder>   # import in-game screenshots
+uv run fpv-maps area maps/tartu-annelinn-test.toml   # bounding box and map sheets
+uv run fpv-maps fetch maps/tartu-annelinn-test.toml  # download source data into data/raw
+uv run fpv-maps build maps/tartu-annelinn-test.toml --install
+uv run fpv-maps inspect dist/tartu-annelinn-test/tartu-annelinn-test.glb
+uv run fpv-maps tour maps/tartu-annelinn-test.toml --publish   # tour pictures and a video
+uv run fpv-maps shots maps/tartu-annelinn-test.toml <folder>   # import in-game screenshots
 uv run fpv-maps gallery                        # the wiki index and map pages
-docker compose run --rm pipeline build maps/annelinn-test.toml
+docker compose run --rm pipeline build maps/tartu-annelinn-test.toml
 ```
 
 ## Releases: the commit message is the release note

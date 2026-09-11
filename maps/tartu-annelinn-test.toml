@@ -3,7 +3,7 @@
 # origin answer the open questions in docs/the-zone-format.md.
 
 [map]
-name = "annelinn-test"
+name = "tartu-annelinn-test"
 description = "1 km² test tile in Annelinn, Tartu. Terrain, orthophoto, LOD2 buildings, probes."
 
 [area]
