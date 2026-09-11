@@ -1,0 +1,76 @@
+from pathlib import Path
+
+from fpv_maps.buildings import build_building_meshes, read_obj
+from fpv_maps.export import write_glb
+from fpv_maps.inspect import inspect_glb
+from fpv_maps.materials import checker_image, jpeg_image, srgb_to_linear, texture_material
+from fpv_maps.preview import render_preview
+from fpv_maps.probes import build_probes
+from fpv_maps.terrain import build_terrain
+from tests.test_buildings import OBJ
+
+
+def test_export_roundtrip(tmp_path: Path, bbox, flat_field):
+    import numpy as np
+
+    origin = (662500.0, 6473500.0, 40.0)
+    terrain = build_terrain(flat_field, bbox, origin, step=250.0)
+    rgb = np.zeros((64, 64, 3), dtype=np.uint8)
+    rgb[..., 1] = 120
+    terrain.visual.material = texture_material("fpv_ground", jpeg_image(rgb, 80))
+
+    obj = tmp_path / "x.obj"
+    obj.write_text(OBJ)
+    buildings = build_building_meshes(
+        read_obj(obj, offset=(662500.0, 6473500.0, 40.0)),
+        origin,
+        "z_concrete2",
+        "z_pebbled_asphalt",
+    )
+    meshes = {"terrain": terrain, **{f"buildings_{k}": v for k, v in buildings.items()}}
+    meshes.update(build_probes(lambda x, z: 0.0))
+
+    out = tmp_path / "t.glb"
+    size = write_glb(meshes, out)
+    assert size == out.stat().st_size
+
+    stats = inspect_glb(out)
+    assert stats.meshes == len(meshes)
+    assert "terrain" in stats.node_names and "probe_wire-col" in stats.node_names
+    assert stats.suffixes == {"-col": 1}
+    assert set(stats.image_mime_types) == {"image/jpeg", "image/png"}
+    assert {"fpv_ground", "z_concrete2", "z_pebbled_asphalt", "z_rough-brick1"} <= set(
+        stats.material_names
+    )
+    assert stats.triangles > 0
+    assert stats.bounds_min[0] == -500 and stats.bounds_max[0] == 500
+
+
+def test_preview_image(tmp_path: Path, bbox, flat_field):
+    import numpy as np
+
+    origin = (662500.0, 6473500.0, 40.0)
+    terrain = build_terrain(flat_field, bbox, origin, step=250.0)
+    terrain.visual.material = texture_material(
+        "fpv_ground", jpeg_image(np.zeros((32, 32, 3), dtype=np.uint8), 80)
+    )
+    obj = tmp_path / "x.obj"
+    obj.write_text(OBJ)
+    roofs = build_building_meshes(read_obj(obj, offset=origin), origin, "z_a", "z_b")["roofs"]
+    out = render_preview(terrain, roofs, bbox, origin, tmp_path / "p.jpg", size_px=200)
+    from PIL import Image
+
+    with Image.open(out) as img:
+        assert img.size == (200, 200)
+        # The roof outline of the 10 m box near the origin is red on a black ground.
+        assert img.getpixel((100, 99))[0] > 150
+
+
+def test_srgb_to_linear():
+    assert srgb_to_linear(0) == 0.0
+    assert srgb_to_linear(255) == 1.0
+    assert abs(srgb_to_linear(128) - 0.2158) < 1e-3
+
+
+def test_checker_is_png():
+    assert checker_image().format == "PNG"

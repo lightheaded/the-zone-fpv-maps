@@ -1,0 +1,30 @@
+# The 1 km² test tile. It aligns with the Maa-amet 1:2000 sheet 473662 in Annelinn,
+# so that one orthophoto sheet and one lidar sheet cover it. The probes near the
+# origin answer the open questions in docs/the-zone-format.md.
+
+[map]
+name = "annelinn-test"
+description = "1 km² test tile in Annelinn, Tartu. Terrain, orthophoto, LOD2 buildings, probes."
+
+[area]
+# L-EST97 (EPSG:3301), order east, north: xmin, ymin, xmax, ymax.
+bbox = [662000, 6473000, 663000, 6474000]
+# The game origin and spawn point. Defaults to the center of the box.
+# origin = [662500, 6473500]
+
+[terrain]
+step_m = 2.0
+
+[ground_texture]
+size_px = 8192
+jpeg_quality = 88
+
+[buildings]
+enabled = true
+# Maa-amet publishes LOD2 per municipality. Lohkva, east of the ring road, is Luunja vald.
+municipalities = ["Tartu_linn", "Luunja_vald"]
+wall_material = "z_concrete2"
+roof_material = "z_pebbled_asphalt"
+
+[probes]
+enabled = true
