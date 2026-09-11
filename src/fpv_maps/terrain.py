@@ -1,4 +1,10 @@
-"""Terrain mesh from a digital terrain model."""
+"""Terrain mesh from a digital terrain model.
+
+A small map is one mesh. A large map is a grid of chunks. The game engine draws a
+mesh only when the camera can see it, so a chunked terrain costs less on a city map.
+Chunks share the lattice of the whole map, so two neighbors have equal edge vertices
+and there is no crack between them.
+"""
 
 from __future__ import annotations
 
@@ -53,16 +59,36 @@ def fill_nodata(heights: np.ndarray, nodata: float | None) -> np.ndarray:
     return out
 
 
-def build_terrain(
+@dataclass(frozen=True)
+class TerrainGrid:
+    """A lattice of terrain points in game axes, row 0 north and column 0 west.
+
+    ``vertices`` is (rows, columns, 3) in meters, (x east, y up, z south).
+    ``uv`` is (rows, columns, 2) over the whole map, (0, 0) south west, (1, 1) north east.
+    """
+
+    vertices: np.ndarray
+    uv: np.ndarray
+
+    @property
+    def rows(self) -> int:
+        return int(self.vertices.shape[0])
+
+    @property
+    def columns(self) -> int:
+        return int(self.vertices.shape[1])
+
+
+def terrain_grid(
     field: HeightField,
     bbox: BBox,
     origin: tuple[float, float, float],
     step: float,
-) -> trimesh.Trimesh:
-    """Grid mesh over ``bbox`` with vertex spacing ``step``, UVs stretched over the box.
+) -> TerrainGrid:
+    """Sample ``field`` on a lattice over ``bbox`` with a spacing of about ``step`` meters.
 
-    UV (0, 0) is the south west corner and (1, 1) the north east corner. The exporter
-    flips V, so row 0 of the ground texture is north, as in the orthophoto.
+    The lattice always ends on the box edges, so the true spacing is the box side
+    divided by a whole number of cells.
     """
     nx = int(round(bbox.width / step)) + 1
     ny = int(round(bbox.height / step)) + 1
@@ -72,11 +98,19 @@ def build_terrain(
     hh = field.sample(ee.ravel(), nn.ravel())
 
     enh = np.column_stack([ee.ravel(), nn.ravel(), hh])
-    vertices = to_game(enh, origin)
-
-    uv = np.column_stack(
-        [(ee.ravel() - bbox.xmin) / bbox.width, (nn.ravel() - bbox.ymin) / bbox.height]
+    vertices = to_game(enh, origin).reshape(ny, nx, 3)
+    uv = np.stack(
+        [(ee - bbox.xmin) / bbox.width, (nn - bbox.ymin) / bbox.height],
+        axis=-1,
     )
+    return TerrainGrid(vertices=vertices, uv=uv)
+
+
+def grid_mesh(grid: TerrainGrid, rows: slice, columns: slice) -> trimesh.Trimesh:
+    """One mesh from a rectangular part of ``grid``. Two triangles per lattice cell."""
+    vertices = grid.vertices[rows, columns].reshape(-1, 3)
+    uv = grid.uv[rows, columns].reshape(-1, 2)
+    ny, nx = grid.vertices[rows, columns].shape[:2]
 
     idx = np.arange(nx * ny).reshape(ny, nx)
     a = idx[:-1, :-1].ravel()
@@ -89,3 +123,53 @@ def build_terrain(
     mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
     mesh.visual = trimesh.visual.TextureVisuals(uv=uv)
     return mesh
+
+
+def build_terrain(
+    field: HeightField,
+    bbox: BBox,
+    origin: tuple[float, float, float],
+    step: float,
+) -> trimesh.Trimesh:
+    """One grid mesh over ``bbox`` with vertex spacing ``step``, UVs stretched over the box.
+
+    UV (0, 0) is the south west corner and (1, 1) the north east corner. The exporter
+    flips V, so row 0 of the ground texture is north, as in the orthophoto.
+    """
+    grid = terrain_grid(field, bbox, origin, step)
+    return grid_mesh(grid, slice(None), slice(None))
+
+
+def split_cells(cells: int, parts: int) -> list[slice]:
+    """Split ``cells`` lattice cells into at most ``parts`` runs of points.
+
+    Each slice selects the points of one run. Two neighbors share one point index,
+    so the meshes meet without a gap.
+    """
+    parts = max(1, min(parts, cells))
+    edges = [round(i * cells / parts) for i in range(parts + 1)]
+    return [slice(edges[i], edges[i + 1] + 1) for i in range(parts)]
+
+
+def build_terrain_chunks(
+    field: HeightField,
+    bbox: BBox,
+    origin: tuple[float, float, float],
+    step: float,
+    chunk_m: float,
+) -> dict[str, trimesh.Trimesh]:
+    """Grid meshes over ``bbox``, each about ``chunk_m`` meters wide.
+
+    A ``chunk_m`` of 0 or less gives one mesh named ``terrain``. Otherwise the names
+    are ``terrain_r<row>c<column>``, row 0 north and column 0 west.
+    """
+    grid = terrain_grid(field, bbox, origin, step)
+    if chunk_m <= 0:
+        return {"terrain": grid_mesh(grid, slice(None), slice(None))}
+    row_runs = split_cells(grid.rows - 1, max(1, round(bbox.height / chunk_m)))
+    column_runs = split_cells(grid.columns - 1, max(1, round(bbox.width / chunk_m)))
+    out: dict[str, trimesh.Trimesh] = {}
+    for r, rows in enumerate(row_runs):
+        for c, columns in enumerate(column_runs):
+            out[f"terrain_r{r:02d}c{c:02d}"] = grid_mesh(grid, rows, columns)
+    return out

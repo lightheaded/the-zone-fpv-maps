@@ -1,0 +1,53 @@
+# The low fidelity base map of the whole city. 9 x 9 km, 81 km2. It holds every
+# cluster in docs/locations.md except the airport, which is 6 km further south.
+# The box edges fall on the Maa-amet 1:10000 grid, so 6 elevation sheets and 6
+# orthophoto sheets cover it. See docs/analysis.md section 3 for the size budget.
+
+[map]
+name = "tartu-base"
+description = "The whole city of Tartu, 9 x 9 km. Terrain, orthophoto and every LOD2 building."
+
+[area]
+# L-EST97 (EPSG:3301), order east, north: xmin, ymin, xmax, ymax.
+bbox = [656000, 6468500, 665000, 6477500]
+# The spawn point is on the Emajogi, 134 m south east of the Kaarsild and 188 m north
+# west of the Voidu sild. It is 12 m from each bank, and the water is 31.4 m above sea
+# level in the EH2000 system. Water is open, so no building can enclose the drone, and
+# the camera faces north to the arch bridge, Toomemagi and the old town.
+origin_wgs84 = [58.37990, 26.72743]
+
+[terrain]
+# 10 m over 9 km is 901 x 901 points and 1.62 million triangles. The city is flat,
+# so the river valley and Toomemagi still read from the air.
+step_m = 10.0
+
+[chunks]
+# One mesh per 1.5 km square, for the terrain and for the buildings. The engine can
+# then skip a chunk that the camera cannot see. A single 81 km2 mesh is always drawn.
+size_m = 1500.0
+
+[ground_texture]
+# The 20 cm Estonia orthophoto, not the 10 cm city product: 6 sheets instead of 81.
+# 8192 px over 9 km is 1.1 m per pixel and about 0.36 GB of video memory.
+source = "estonia"
+size_px = 8192
+jpeg_quality = 85
+
+[buildings]
+enabled = true
+# The box reaches over the city border on every side. Maa-amet publishes LOD2 per
+# municipality, so every neighbor that the box touches must be in this list. Counted
+# on 2026-09-11: Tartu_linn 20186, Luunja_vald 1306, Kambja_vald 1248, Tartu_vald 624,
+# Kastre_vald 381. Nõo_vald gives 0 buildings, so it is not in the list.
+municipalities = [
+  "Tartu_linn",
+  "Tartu_vald",
+  "Luunja_vald",
+  "Kambja_vald",
+  "Kastre_vald",
+]
+wall_material = "z_concrete2"
+roof_material = "z_pebbled_asphalt"
+
+[probes]
+enabled = false

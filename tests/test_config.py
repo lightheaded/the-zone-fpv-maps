@@ -29,3 +29,34 @@ def test_no_municipalities_without_buildings(tmp_path):
 def test_map_config_lists_municipalities():
     cfg = load_config(Path(__file__).parent.parent / "maps" / "annelinn-test.toml")
     assert cfg.municipalities == ("Tartu_linn", "Luunja_vald")
+
+
+def test_defaults_have_no_chunks_and_the_city_orthophoto(tmp_path):
+    path = tmp_path / "test.toml"
+    path.write_text(MINIMAL + "\n[buildings]\nenabled = false\n")
+    cfg = load_config(path)
+    assert cfg.chunk_m == 0.0
+    assert cfg.ground_texture_source == "city"
+    assert cfg.area_km2 == 1.0
+
+
+def test_unknown_ground_texture_source(tmp_path):
+    path = tmp_path / "test.toml"
+    path.write_text(
+        MINIMAL + '\n[buildings]\nenabled = false\n\n[ground_texture]\nsource = "moon"\n'
+    )
+    with pytest.raises(ValueError, match="ground_texture.source"):
+        load_config(path)
+
+
+def test_base_map_config():
+    cfg = load_config(Path(__file__).parent.parent / "maps" / "tartu-base.toml")
+    assert cfg.area_km2 == 81.0
+    assert cfg.chunk_m == 1500.0
+    assert cfg.ground_texture_source == "estonia"
+    assert cfg.terrain_step_m == 10.0
+    assert cfg.municipalities[0] == "Tartu_linn"
+    assert len(cfg.municipalities) == 5
+    # The spawn point is inside the box and not at its center.
+    assert cfg.bbox.contains(*cfg.origin)
+    assert cfg.origin != cfg.bbox.center

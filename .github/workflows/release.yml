@@ -57,13 +57,20 @@ jobs:
 
       # The source data is public and does not change for a given file name, so a
       # cache hit is always valid. The key changes when a map config changes.
+      # Only the downloads go into the cache, not the files that the build unpacks
+      # from them. The base map downloads 1.6 GB but needs 2.8 GB on disk, and the
+      # pipeline unpacks a zip again when its folder is missing.
       - name: Cache the Maa-amet downloads
         uses: actions/cache@v4
         with:
-          path: data/raw
+          path: |
+            data/raw/dtm_1m
+            data/raw/**/*.zip
           key: maa-amet-${{ hashFiles('maps/*.toml') }}
           restore-keys: maa-amet-
 
+      # The base map is 9 x 9 km. Its first build downloads 1.6 GB and uses about
+      # 3 GB of memory. Later runs read the cache.
       - name: Build every map
         run: |
           mkdir -p release-assets

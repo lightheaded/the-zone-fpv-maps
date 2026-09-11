@@ -58,6 +58,8 @@ LIDAR_MADAL = Product("lidar_madal", "lidar_laz_madal", 614, 2000)
 BUILDINGS_LOD2 = Product("lod2", "hooned_lod2", 833, None)
 TREES_LOD0 = Product("trees", "vegetatsioon", 833, None)
 
+ORTHO_PRODUCTS = {"city": ORTHO_CITY_RGB, "estonia": ORTHO_EESTI_RGB}
+
 
 def sheet_2000(east: float, north: float) -> str:
     return f"{int(north // 1000) - 6000:03d}{int(east // 1000):03d}"
@@ -131,6 +133,16 @@ def newest_geotiff(files: list[str]) -> str | None:
     return max(tifs) if tifs else None
 
 
+def check_is_file(content_type: str, url: str) -> None:
+    """Raise when the portal answers with a web page instead of a file.
+
+    The download endpoint answers a wrong file name with status 200 and an HTML page.
+    A wrong municipality name in a map config reaches this point.
+    """
+    if content_type.split(";")[0].strip().lower().startswith("text/html"):
+        raise FileNotFoundError(f"the portal has no such file, it answered with a page: {url}")
+
+
 class Fetcher:
     """Download files into ``data/raw/<product>/`` and skip files that exist."""
 
@@ -154,6 +166,7 @@ class Fetcher:
         tmp = dest.with_suffix(dest.suffix + ".part")
         with self.client.stream("GET", url) as resp:
             resp.raise_for_status()
+            check_is_file(resp.headers.get("Content-Type", ""), url)
             total = int(resp.headers.get("Content-Length", 0)) or None
             with (
                 Progress(
@@ -191,9 +204,19 @@ class Fetcher:
         return [self.fetch(DTM_1M, f"{s}_dtm_1m.tif", s) for s in sheets_for(bbox, 10000)]
 
     def fetch_ortho_city(self, bbox: BBox) -> list[Path]:
-        paths = []
-        for sheet in sheets_for(bbox, 2000):
-            zip_path = self.fetch_sheet_newest_geotiff(ORTHO_CITY_RGB, sheet)
+        return self.fetch_ortho(bbox, "city")
+
+    def fetch_ortho(self, bbox: BBox, source: str = "city") -> list[Path]:
+        """Orthophoto sheets for ``bbox``. ``source`` is ``city`` or ``estonia``.
+
+        The city product has 10 cm pixels on 1 x 1 km sheets. The Estonia product has
+        20 cm pixels on 5 x 5 km sheets. A city of 9 x 9 km needs 81 city sheets but
+        only 6 Estonia sheets, so a base map uses ``estonia``.
+        """
+        product = ORTHO_PRODUCTS[source]
+        paths: list[Path] = []
+        for sheet in sheets_for(bbox, product.grid or 2000):
+            zip_path = self.fetch_sheet_newest_geotiff(product, sheet)
             paths.extend(extract(zip_path, suffixes=(".tif", ".tfw")))
         return [p for p in paths if p.suffix.lower() == ".tif"]
 

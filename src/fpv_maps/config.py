@@ -8,6 +8,8 @@ from pathlib import Path
 
 from fpv_maps.crs import BBox, wgs84_to_lest97
 
+ORTHO_SOURCES = ("city", "estonia")
+
 
 @dataclass(frozen=True)
 class MapConfig:
@@ -18,7 +20,9 @@ class MapConfig:
     bbox: BBox
     origin: tuple[float, float]
     terrain_step_m: float
+    chunk_m: float
     ground_texture_px: int
+    ground_texture_source: str
     jpeg_quality: int
     buildings_enabled: bool
     municipalities: tuple[str, ...]
@@ -34,6 +38,10 @@ class MapConfig:
     @property
     def dist_dir(self) -> Path:
         return self.path.parent.parent / "dist" / self.name
+
+    @property
+    def area_km2(self) -> float:
+        return self.bbox.width * self.bbox.height / 1e6
 
 
 def load_config(path: str | Path) -> MapConfig:
@@ -62,6 +70,13 @@ def load_config(path: str | Path) -> MapConfig:
     ground = raw.get("ground_texture", {})
     buildings = raw.get("buildings", {})
     probes = raw.get("probes", {})
+    chunks = raw.get("chunks", {})
+
+    source = str(ground.get("source", "city"))
+    if source not in ORTHO_SOURCES:
+        raise ValueError(
+            f"ground_texture.source must be one of {sorted(ORTHO_SOURCES)}: {source!r}"
+        )
 
     name = raw["map"]["name"]
     if not name.replace("-", "").replace("_", "").isalnum():
@@ -78,7 +93,9 @@ def load_config(path: str | Path) -> MapConfig:
         bbox=bbox,
         origin=origin,
         terrain_step_m=float(terrain.get("step_m", 2.0)),
+        chunk_m=float(chunks.get("size_m", 0.0)),
         ground_texture_px=int(ground.get("size_px", 8192)),
+        ground_texture_source=source,
         jpeg_quality=int(ground.get("jpeg_quality", 88)),
         buildings_enabled=buildings_enabled,
         municipalities=municipalities,

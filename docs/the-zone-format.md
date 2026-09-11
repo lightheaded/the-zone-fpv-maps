@@ -32,11 +32,19 @@ exported from [Blender](https://www.blender.org/) with the Khronos glTF exporter
 | 2 | 110 MB | 1.33 M | 1715 | 919 | about 200 x 1000 m, 1000 m tall | none || shown |
 | plaza | 76 MB | 0.98 M | 2831 | 3340 | about 1400 x 1000 m | 7 PNG, 6.7 MB |
 
+Our own maps, for the same comparison:
+
+| Map | File size | Triangles | Meshes | Materials | Extent | Embedded images |
+|-----|-----------|-----------|--------|-----------|--------|-----------------|
+| annelinn-test | 23 MB | 0.51 M | 14 | 10 | 1000 x 1000 m | 1 JPEG, 1 PNG, 11.3 MB |
+| tartu-base | 126 MB | 2.87 M | 108 | 3 | 9000 x 9000 m | 1 JPEG, 18.9 MB |
+
 Conclusions:
 
 - A 1 km² tile with 0.5 to 2 million triangles is inside the range that the game
-  ships. The whole city base map at 4 million triangles is two times the largest
-  official map. Test it before you rely on it.
+  ships. The base map of the whole city is 126 MB and 2.87 million triangles, which
+  is 1.6 times the triangles of the largest official map and 0.85 times its file
+  size. Test it before you rely on it.
 - One official map embeds PNG textures. This suggests that embedded textures work.
 - Official map 1 uses the [Godot](https://godotengine.org/) name suffix `-col` on 917 nodes. Official maps go
   through the Godot editor import, which honors the suffix. Whether the runtime loader
@@ -84,8 +92,32 @@ Fly to each one and record the answer in the table.
 | 9 | Is there a world boundary? | fly 500 m to the edge | edge | open |
 | 10 | Load time of a 23 MB file? | | | a few seconds, 170 FPS on the Mac |
 
+The base map `tartu-base` asks four more questions. There are no probe objects in it,
+so fly it and record the answers here.
+
+| # | Question | How to test | Answer |
+|---|----------|-------------|--------|
+| 11 | Does the game load a 126 MB file, and how long does it take? | start the map with a stop watch | open |
+| 12 | Does the frame rate hold with 108 meshes over 81 km²? | fly a straight line across the map | open |
+| 13 | Does the game keep position accuracy 4.5 km from the origin? | fly to a corner and hover | open |
+| 14 | Do the terrain chunks show a seam or a crack? | fly low over a chunk border, 1500 m grid from the spawn | open |
+
 Also record: frame rate on both machines, and whether the terrain has visible steps
 at the 2 m grid.
+
+## Known gaps of the base map
+
+- The ground texture is 1.1 m per pixel. Roads and roofs read from 100 m up, and
+  single cars do not.
+- The terrain grid is 10 m. The bank of the Emajõgi and the slope of Toomemägi lose
+  their edge. A detailed map of the same place uses 2 m.
+- There is no water surface. The elevation model gives the water level of the flight
+  day, so the river is a flat strip of terrain, and the drone lands on it.
+- Walls and roofs use two in-game materials for all 23745 buildings. Every house in
+  the city has the same concrete wall and the same asphalt roof.
+- Trees, power lines, towers, bridges and fences are not in it. The bridges of the
+  Emajõgi are gaps in the terrain texture with nothing above them.
+- Buildings whose center lies outside the box are dropped, as in the test tile.
 
 ## Known gaps of the test tile
 

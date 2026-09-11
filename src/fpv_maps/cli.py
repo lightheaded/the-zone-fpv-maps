@@ -36,8 +36,19 @@ def area(config: Path) -> None:
     console.print(f"bbox WGS84: SW {sw[0]:.5f}, {sw[1]:.5f}  NE {ne[0]:.5f}, {ne[1]:.5f}")
     lat, lon = lest97_to_wgs84(*cfg.origin)
     console.print(f"origin: E {cfg.origin[0]:.1f} N {cfg.origin[1]:.1f}  ({lat:.5f}, {lon:.5f})")
-    console.print(f"1:2000 sheets (ortho, lidar): {' '.join(sheets_for(b, 2000))}")
-    console.print(f"1:10000 sheets (DTM): {' '.join(sheets_for(b, 10000))}")
+    from fpv_maps.fetch import ORTHO_PRODUCTS
+
+    grid = ORTHO_PRODUCTS[cfg.ground_texture_source].grid or 2000
+    ortho = sheets_for(b, grid)
+    dtm = sheets_for(b, 10000)
+    console.print(f"orthophoto '{cfg.ground_texture_source}', 1:{grid} grid: {len(ortho)} sheets")
+    console.print(f"  {' '.join(ortho)}")
+    console.print(f"DTM 1 m, 1:10000 grid: {len(dtm)} sheets")
+    console.print(f"  {' '.join(dtm)}")
+    if cfg.chunk_m > 0:
+        rows = max(1, round(b.height / cfg.chunk_m))
+        columns = max(1, round(b.width / cfg.chunk_m))
+        console.print(f"chunks: {rows} x {columns} of about {cfg.chunk_m:.0f} m")
 
 
 @main.command()
@@ -49,7 +60,9 @@ def fetch(config: Path) -> None:
     cfg = load_config(config)
     fetcher = Fetcher(cfg.data_dir)
     try:
-        paths = fetcher.fetch_dtm(cfg.bbox) + fetcher.fetch_ortho_city(cfg.bbox)
+        paths = fetcher.fetch_dtm(cfg.bbox) + fetcher.fetch_ortho(
+            cfg.bbox, cfg.ground_texture_source
+        )
         for municipality in cfg.municipalities if cfg.buildings_enabled else ():
             paths.extend(fetcher.fetch_lod2(municipality))
     finally:

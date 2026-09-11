@@ -12,10 +12,16 @@ from pathlib import Path
 
 import numpy as np
 import trimesh
+from trimesh.visual.material import PBRMaterial
 
 from fpv_maps.crs import BBox, to_game
+from fpv_maps.materials import template_material
 
 _NUMBER = re.compile(r"[-+]?\d+(?:\.\d+)?")
+
+
+def _as_material(material: str | PBRMaterial) -> PBRMaterial:
+    return template_material(material) if isinstance(material, str) else material
 
 
 @dataclass
@@ -42,6 +48,9 @@ class BuildingSet:
 
     def inside(self, bbox: BBox) -> BuildingSet:
         return BuildingSet([b for b in self.buildings if bbox.contains(*b.centroid)])
+
+    def triangles(self) -> int:
+        return sum(len(b.faces) for b in self.buildings)
 
 
 def read_offset(fwt_path: Path) -> tuple[float, float, float]:
@@ -138,17 +147,16 @@ def _planar_uv(vertices: np.ndarray, normals_per_vertex: np.ndarray, scale: floa
 def build_building_meshes(
     buildings: BuildingSet,
     origin: tuple[float, float, float],
-    wall_material: str,
-    roof_material: str,
+    wall_material: str | PBRMaterial,
+    roof_material: str | PBRMaterial,
     uv_scale_m: float = 4.0,
 ) -> dict[str, trimesh.Trimesh]:
     """Merge all buildings into two meshes, walls and roofs, in game axes.
 
     A face is a roof when its normal points up more than 30 degrees. Faces are
-    unwelded so that each face gets its own material and UVs.
+    unwelded so that each face gets its own material and UVs. Pass a ``PBRMaterial``
+    instead of a name to share one material between many chunks.
     """
-    from fpv_maps.materials import template_material
-
     wall_tris: list[np.ndarray] = []
     roof_tris: list[np.ndarray] = []
     for b in buildings.buildings:
@@ -162,8 +170,8 @@ def build_building_meshes(
 
     out: dict[str, trimesh.Trimesh] = {}
     for key, tris, mat in (
-        ("walls", wall_tris, wall_material),
-        ("roofs", roof_tris, roof_material),
+        ("walls", wall_tris, _as_material(wall_material)),
+        ("roofs", roof_tris, _as_material(roof_material)),
     ):
         if not tris:
             continue
@@ -175,7 +183,51 @@ def build_building_meshes(
         normals = np.repeat(_face_normals(verts, faces), 3, axis=0)
         mesh = trimesh.Trimesh(vertices=verts, faces=faces, process=False)
         mesh.visual = trimesh.visual.TextureVisuals(
-            uv=_planar_uv(verts, normals, uv_scale_m), material=template_material(mat)
+            uv=_planar_uv(verts, normals, uv_scale_m), material=mat
         )
         out[key] = mesh
+    return out
+
+
+def chunk_buildings(buildings: BuildingSet, bbox: BBox, chunk_m: float) -> dict[str, BuildingSet]:
+    """Group buildings into a grid of square cells of about ``chunk_m`` meters.
+
+    The centroid of a building decides its cell, so a building is never cut. A
+    ``chunk_m`` of 0 or less gives one group with an empty key. Empty cells are
+    dropped. Keys are ``r<row>c<column>``, row 0 north and column 0 west.
+    """
+    if chunk_m <= 0:
+        return {"": buildings}
+    rows = max(1, round(bbox.height / chunk_m))
+    columns = max(1, round(bbox.width / chunk_m))
+    out: dict[str, BuildingSet] = {}
+    for b in buildings.buildings:
+        east, north = b.centroid
+        c = min(columns - 1, max(0, int((east - bbox.xmin) / bbox.width * columns)))
+        r = min(rows - 1, max(0, int((bbox.ymax - north) / bbox.height * rows)))
+        out.setdefault(f"r{r:02d}c{c:02d}", BuildingSet()).buildings.append(b)
+    return dict(sorted(out.items()))
+
+
+def build_building_chunks(
+    buildings: BuildingSet,
+    bbox: BBox,
+    origin: tuple[float, float, float],
+    wall_material: str,
+    roof_material: str,
+    chunk_m: float = 0.0,
+    uv_scale_m: float = 4.0,
+) -> dict[str, trimesh.Trimesh]:
+    """Wall and roof meshes for every non empty chunk, with one shared material each.
+
+    Names are ``buildings_walls`` and ``buildings_roofs`` without chunks, and
+    ``buildings_r<row>c<column>_walls`` with chunks.
+    """
+    walls = template_material(wall_material)
+    roofs = template_material(roof_material)
+    out: dict[str, trimesh.Trimesh] = {}
+    for key, subset in chunk_buildings(buildings, bbox, chunk_m).items():
+        prefix = f"buildings_{key}_" if key else "buildings_"
+        for part, mesh in build_building_meshes(subset, origin, walls, roofs, uv_scale_m).items():
+            out[f"{prefix}{part}"] = mesh
     return out

@@ -21,7 +21,15 @@ uv run fpv-maps build maps/annelinn-test.toml --install
 ```
 
 The first build downloads about 120 MB into `data/raw/`. Later builds reuse the files.
-A build of the test tile takes about 20 seconds on a laptop.
+A build of the test tile takes about 6 seconds on a laptop.
+
+The base map of the whole city is larger. Its first build downloads 1.6 GB, keeps
+2.8 GB on disk after the zip files are unpacked, and needs about 3 GB of memory.
+The build itself takes about 11 seconds.
+
+```
+uv run fpv-maps build maps/tartu-base.toml --install
+```
 
 If the game is not in the default Steam folder, set `THE_ZONE_DIR` to the game folder,
 or pass `--game-dir`. On Windows, use PowerShell:
@@ -89,8 +97,8 @@ src/fpv_maps/
   crs.py              L-EST97 to game axes, the only place that converts
   fetch.py            Maa-amet URL patterns, sheet numbers, cached downloads
   geotiff.py          DTM and orthophoto sheets to arrays
-  terrain.py          height field to grid mesh with UVs
-  buildings.py        LOD2 OBJ to wall and roof meshes
+  terrain.py          height field to one grid mesh or a grid of chunks
+  buildings.py        LOD2 OBJ to wall and roof meshes, grouped into chunks
   materials.py        template material names, JPEG and PNG textures
   probes.py           test objects near the spawn point
   export.py           named meshes to one glTF binary file
@@ -108,8 +116,15 @@ dist/                 built maps and build reports, not in git
 1. Copy `maps/annelinn-test.toml` to `maps/<name>.toml`.
 2. Set the name, the bounding box in L-EST97 or a WGS84 center with a size, and the
    municipalities that the box touches.
-3. Run `uv run fpv-maps area maps/<name>.toml` and check the sheets.
+3. Run `uv run fpv-maps area maps/<name>.toml` and check the sheets and the chunks.
 4. Build, install, fly.
+
+For a map larger than about 4 km², copy `maps/tartu-base.toml` instead and keep three
+settings from it:
+
+- `ground_texture.source = "estonia"`, so that the download stays small.
+- `chunks.size_m`, so that the engine can skip a mesh that the camera cannot see.
+- A `terrain.step_m` of 8 to 12 m. A 2 m grid over 81 km² is 40 million triangles.
 
 ## Data budget
 
@@ -117,9 +132,12 @@ dist/                 built maps and build reports, not in git
 |----------|-------|------|
 | DTM 1 m GeoTIFF | 5 x 5 km | 60 to 80 MB |
 | City orthophoto 10 cm GeoTIFF | 1 x 1 km | 25 to 30 MB zipped |
+| Estonia orthophoto 20 cm GeoTIFF | 5 x 5 km | about 185 MB zipped, 370 MB unpacked |
 | Lidar, city flight, LAZ | 1 x 1 km | about 280 MB |
 | LOD2 buildings OBJ, Tartu linn | whole city | 12 MB zipped, 64 MB unpacked |
 | LOD2 buildings OBJ, Luunja vald | whole parish | 1.4 MB zipped |
 | Trees LOD0 GPKG, Tartu linn | whole city | 39 MB zipped |
 
-The whole city needs about 90 orthophoto sheets, 2.5 GB. Keep `data/` on a fast disk.
+The whole city at 10 cm needs about 90 orthophoto sheets, 2.5 GB. The same area needs
+only 6 sheets of the 20 cm product, so the base map sets `ground_texture.source` to
+`estonia`. Keep `data/` on a fast disk.

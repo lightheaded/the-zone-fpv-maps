@@ -1,6 +1,6 @@
 # Tartu for The Zone: feasibility and plan
 
-Date: 2026-09-11. Status: proposal, before the first test tile.
+Date: 2026-09-11. Status: the test tile and the base map are built. The measured numbers are in this document and in `docs/the-zone-format.md`. The rest is still a plan.
 
 ## Summary
 
@@ -89,6 +89,21 @@ A base map of about 4 million triangles in a few hundred merged meshes is normal
 - Detailed maps of 2 to 6 km² are the right unit for freestyle and rehearsal. Each has 20 to 25 cm ground texture, all trees, facades, fences and lamp posts, and hand made hero assets. Photogrammetry patches come later inside these tiles.
 - Both types share one pipeline and one configuration format. Only the bounding box and the quality settings differ.
 
+Measured on 2026-09-11, the first build of `tartu-base` without trees and lines:
+
+| Part | Number |
+|------|--------|
+| Area | 81 km², 9 x 9 km |
+| Triangles | 2.87 million: 1.62 million terrain, 1.25 million buildings |
+| Buildings | 23,745 from five municipalities |
+| Meshes | 108: 36 terrain chunks, 36 wall chunks, 36 roof chunks |
+| Materials | 3, and one embedded JPEG of 18.9 MB |
+| File size | 126 MB |
+| Build time | 11 seconds after the download, 3.1 GB of memory at the peak |
+| Source data | 1.1 GB orthophoto, 478 MB elevation model, 153 MB buildings |
+
+So trees and power lines have a budget of about 1 million triangles before the map passes the 4 million estimate of this section.
+
 ## 4. Textures for walls
 
 The orthophoto covers roofs and ground. Nothing in the open data covers walls directly. Options, in order of automation:
@@ -153,8 +168,8 @@ First public release with the base map and two detailed maps: about 120 to 160 h
 
 ## 8. Roadmap
 
-1. Week 1: repository, Docker image, fetch script, test tile in the game. Ask in the Discord channel `#custom-map-help` about texture support, collision and file size.
-2. Weeks 2 to 4: pipeline v0 and the base map.
+1. Week 1: repository, Docker image, fetch script, test tile in the game. Ask in the Discord channel `#custom-map-help` about texture support, collision and file size. Done on 2026-09-11.
+2. Weeks 2 to 4: pipeline v0 and the base map. The base map is built and installed on 2026-09-11. The flight test is open.
 3. Weeks 5 to 6: Annelinn ja Lohkva detailed map, tree and wire generators.
 4. Weeks 7 to 10: Tähtvere ja Vaksali with the laululava and the substation. Facade work.
 5. Later: Kesklinn, Raadi, drone scans of the most played spots.

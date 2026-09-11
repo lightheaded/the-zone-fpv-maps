@@ -2,7 +2,13 @@ from pathlib import Path
 
 import numpy as np
 
-from fpv_maps.buildings import build_building_meshes, read_obj, read_offset
+from fpv_maps.buildings import (
+    build_building_chunks,
+    build_building_meshes,
+    chunk_buildings,
+    read_obj,
+    read_offset,
+)
 from fpv_maps.crs import BBox
 
 OBJ = """# two boxes, FME style: one usemtl block per building, no groups
@@ -70,3 +76,44 @@ def test_inside_and_meshes(tmp_path: Path):
     assert meshes["walls"].visual.material.name == "z_concrete2"
     # Roof at height 5 in game y.
     assert np.allclose(meshes["roofs"].vertices[:, 1], 5.0)
+
+
+def test_chunk_buildings_by_centroid(tmp_path: Path):
+    obj = tmp_path / "x.obj"
+    obj.write_text(OBJ)
+    bs = read_obj(obj)
+    # A 200 m box with 100 m chunks: building_a is at (5, 5), building_b at (100.4, 100.4).
+    box = BBox(0, 0, 200, 200)
+    chunks = chunk_buildings(bs, box, chunk_m=100.0)
+    # Row 0 is north, so the building in the south west corner is row 1, column 0.
+    assert sorted(chunks) == ["r00c01", "r01c00"]
+    assert [b.name for b in chunks["r01c00"].buildings] == ["building_a"]
+    assert [b.name for b in chunks["r00c01"].buildings] == ["building_b"]
+    assert list(chunk_buildings(bs, box, chunk_m=0.0)) == [""]
+
+
+def test_build_building_chunks_names_and_shared_materials(tmp_path: Path):
+    obj = tmp_path / "x.obj"
+    obj.write_text(OBJ)
+    bs = read_obj(obj)
+    box = BBox(0, 0, 200, 200)
+    meshes = build_building_chunks(bs, box, (0.0, 0.0, 0.0), "z_w", "z_r", chunk_m=100.0)
+    assert set(meshes) == {
+        "buildings_r01c00_walls",
+        "buildings_r01c00_roofs",
+        "buildings_r00c01_walls",
+        "buildings_r00c01_roofs",
+    }
+    # Every chunk points at the same two material objects, so the file holds two.
+    walls = {id(m.visual.material) for k, m in meshes.items() if k.endswith("_walls")}
+    assert len(walls) == 1
+    assert meshes["buildings_r01c00_walls"].visual.material.name == "z_w"
+
+    plain = build_building_chunks(bs, box, (0.0, 0.0, 0.0), "z_w", "z_r", chunk_m=0.0)
+    assert set(plain) == {"buildings_walls", "buildings_roofs"}
+
+
+def test_triangle_count(tmp_path: Path):
+    obj = tmp_path / "x.obj"
+    obj.write_text(OBJ)
+    assert read_obj(obj).triangles() == 18

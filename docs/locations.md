@@ -3,6 +3,16 @@
 Coordinates are WGS84 (latitude, longitude) from [OpenStreetMap](https://www.openstreetmap.org/), September 2026.
 At this latitude 0.01 degrees of latitude is 1.11 km and 0.01 degrees of longitude is 0.58 km.
 
+## The base map box
+
+`maps/tartu-base.toml` covers L-EST97 656000 to 665000 east and 6468500 to 6477500
+north. That is 9 x 9 km and 81 km². In WGS84 the corners are 58.32922, 26.66344 in the
+south west and 58.40665, 26.82339 in the north east. Every cluster below is inside it.
+[Tartu lennujaam](https://www.tartu-airport.ee/) is not, and the rural west of the city
+municipality is not. The spawn point is on the [Emajõgi](https://et.wikipedia.org/wiki/Emaj%C3%B5gi)
+at 58.37990, 26.72743, between the [Kaarsild](https://et.wikipedia.org/wiki/Kaarsild)
+and the Võidu sild.
+
 ## Clusters
 
 Each cluster is one candidate for a detailed map. The size is the bounding box of the landmarks plus a margin.

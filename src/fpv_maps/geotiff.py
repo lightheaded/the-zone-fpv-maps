@@ -13,16 +13,38 @@ from fpv_maps.crs import BBox
 from fpv_maps.terrain import HeightField, fill_nodata
 
 
-def read_heights(paths: list[Path], bbox: BBox, pad_m: float = 4.0) -> HeightField:
-    """Merge DTM sheets and return the heights over ``bbox`` plus a margin."""
+def dtm_resolution(step_m: float, native_m: float) -> float:
+    """The cell size to read the elevation model at for a terrain of spacing ``step_m``.
+
+    Two cells per terrain step keep every hill that the mesh can show. The result is
+    never finer than the data. A whole city at 1 m would need too much memory: 81 km
+    square is 81 million cells.
+    """
+    return max(native_m, step_m / 2.0)
+
+
+def read_heights(
+    paths: list[Path], bbox: BBox, pad_m: float = 4.0, res_m: float | None = None
+) -> HeightField:
+    """Merge DTM sheets and return the heights over ``bbox`` plus a margin.
+
+    ``res_m`` is the cell size in meters. The default is the cell size of the data.
+    A larger value averages the cells while they are read and saves memory.
+    """
     if not paths:
         raise ValueError("no DTM sheets given")
     box = bbox.buffer(pad_m)
     sources = [rasterio.open(p) for p in paths]
     try:
-        res = sources[0].res[0]
+        res = float(res_m or sources[0].res[0])
         nodata = sources[0].nodata
-        data, transform = merge(sources, bounds=box.as_tuple(), res=(res, res), nodata=nodata)
+        data, transform = merge(
+            sources,
+            bounds=box.as_tuple(),
+            res=(res, res),
+            nodata=nodata,
+            resampling=Resampling.average,
+        )
     finally:
         for src in sources:
             src.close()

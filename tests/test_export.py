@@ -46,24 +46,34 @@ def test_export_roundtrip(tmp_path: Path, bbox, flat_field):
     assert stats.bounds_min[0] == -500 and stats.bounds_max[0] == 500
 
 
-def test_preview_image(tmp_path: Path, bbox, flat_field):
+def test_preview_image(tmp_path: Path, bbox):
     import numpy as np
 
     origin = (662500.0, 6473500.0, 40.0)
-    terrain = build_terrain(flat_field, bbox, origin, step=250.0)
-    terrain.visual.material = texture_material(
-        "fpv_ground", jpeg_image(np.zeros((32, 32, 3), dtype=np.uint8), 80)
-    )
+    ground = np.zeros((32, 32, 3), dtype=np.uint8)
     obj = tmp_path / "x.obj"
     obj.write_text(OBJ)
     roofs = build_building_meshes(read_obj(obj, offset=origin), origin, "z_a", "z_b")["roofs"]
-    out = render_preview(terrain, roofs, bbox, origin, tmp_path / "p.jpg", size_px=200)
+    out = render_preview(ground, [roofs], bbox, origin, tmp_path / "p.jpg", size_px=200)
     from PIL import Image
 
     with Image.open(out) as img:
         assert img.size == (200, 200)
-        # The roof outline of the 10 m box near the origin is red on a black ground.
-        assert img.getpixel((100, 99))[0] > 150
+        red = np.asarray(img.convert("RGB"))[..., 0]
+        # The 10 m box sits at the origin, which is the center pixel of the box.
+        assert red[97:103, 98:104].max() > 50
+        # The ground stays black.
+        assert red[:80, :80].max() < 20
+
+
+def test_preview_without_roofs(tmp_path: Path, bbox):
+    import numpy as np
+
+    ground = np.zeros((16, 16, 3), dtype=np.uint8)
+    out = render_preview(
+        ground, [], bbox, (662500.0, 6473500.0, 40.0), tmp_path / "p.jpg", size_px=120
+    )
+    assert out.exists()
 
 
 def test_srgb_to_linear():

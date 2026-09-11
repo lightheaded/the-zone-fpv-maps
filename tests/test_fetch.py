@@ -3,8 +3,11 @@ import pytest
 
 from fpv_maps.crs import BBox
 from fpv_maps.fetch import (
+    BUILDINGS_LOD2,
     DTM_1M,
     ORTHO_CITY_RGB,
+    ORTHO_PRODUCTS,
+    check_is_file,
     download_url,
     list_files,
     newest_geotiff,
@@ -91,3 +94,29 @@ def test_list_files_parses_search_fragment():
             "473662_OF_RGB_ECW_2024_04_27.zip",
             "473662_OF_RGB_GeoTIFF_2024_04_27.zip",
         ]
+
+
+def test_check_is_file_rejects_a_web_page():
+    # The portal answers a wrong file name with status 200 and an HTML page.
+    with pytest.raises(FileNotFoundError, match="no such file"):
+        check_is_file("text/html;charset=utf-8", "https://example.invalid/x")
+    check_is_file("application/zip", "https://example.invalid/x")
+    check_is_file("application/octet-stream", "https://example.invalid/x")
+
+
+def test_ortho_products_use_different_grids():
+    assert ORTHO_PRODUCTS["city"].grid == 2000
+    assert ORTHO_PRODUCTS["estonia"].grid == 10000
+
+
+def test_the_base_map_box_needs_few_estonia_sheets():
+    # 9 x 9 km over Tartu: 81 sheets of the city product, 6 of the Estonia product.
+    box = BBox(656000, 6468500, 665000, 6477500)
+    assert len(sheets_for(box, 2000)) == 90
+    assert sheets_for(box, 10000) == ["54654", "54663", "54752", "54754", "54761", "54763"]
+
+
+def test_urlencode_keeps_an_estonian_letter():
+    # Noo vald is written with the letter o with a tilde in the Maa-amet file name.
+    url = download_url(BUILDINGS_LOD2, "hooned_lod2-Nõo_vald-obj.zip")
+    assert "hooned_lod2-N%C3%B5o_vald-obj.zip" in url

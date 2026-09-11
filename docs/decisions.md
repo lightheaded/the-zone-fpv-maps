@@ -83,3 +83,62 @@ before the install.
 Why: a map built in CI is reproducible from the config and the data date. A map built
 on a laptop is not. The commit history already explains every change, so the release
 page reads it instead of a second text that nobody writes.
+
+## 2026-09-11: Large maps use the 20 cm Estonia orthophoto, small maps the 10 cm city one
+
+Decision: `ground_texture.source` picks the product. `city` is the 10 cm orthophoto on
+1 x 1 km sheets. `estonia` is the 20 cm orthophoto on 5 x 5 km sheets. The base map
+uses `estonia`.
+
+Why: the base map box needs 90 city sheets, about 2.5 GB, but only 6 Estonia sheets,
+1.1 GB. The ground texture of the base map is 1.1 m per pixel, so the extra detail of
+the 10 cm product is thrown away in the same step. A 1 km² tile keeps `city`.
+
+## 2026-09-11: A large map is a grid of chunks, not one mesh
+
+Decision: `chunks.size_m` splits the terrain and the buildings into square cells. The
+base map uses 1500 m, which gives 36 terrain meshes and 72 building meshes. A map
+without the setting stays one terrain mesh, as before.
+
+Why: a game engine draws a mesh only when the camera can see it. One 81 km² mesh is
+always drawn in full. The chunks share the lattice of the whole map, so two neighbors
+have equal edge vertices and no crack appears. Every chunk points at the same material
+object, so the file still holds one ground image and three materials.
+
+## 2026-09-11: The elevation model is read at half the terrain step
+
+Decision: `dtm_resolution` reads the 1 m elevation model at `step / 2`, never finer
+than the data. The base map reads at 5 m for a 10 m terrain.
+
+Why: 81 km² at 1 m is 81 million cells and 648 MB in memory, and a 10 m mesh cannot
+show that detail. The Maa-amet sheets are averaged while they are read, and the test
+`test_read_heights_does_not_average_nodata_into_the_terrain` shows that a data hole
+does not pull the terrain down.
+
+## 2026-09-11: The base map is a 9 x 9 km square, not the whole city municipality
+
+Decision: `maps/tartu-base.toml` covers L-EST97 656000 to 665000 east and 6468500 to
+6477500 north. That is 81 km². It holds every cluster in `docs/locations.md` except
+[Tartu lennujaam](https://www.tartu-airport.ee/), which is 6 km further south.
+
+Why: the city of Tartu took in Tähtvere vald in 2017, so the municipality reaches
+14 km west to Ilmatsalu and Rahinge. Those are fields and villages. A square box over
+the built city gives more flying value per megabyte. The box edges fall on the
+Maa-amet 1:10000 grid, so 6 elevation sheets and 6 orthophoto sheets cover it.
+
+Cost: 2282 of the 22468 city buildings fall outside, 2254 of them west and 504 north.
+Five municipalities meet inside the box and all five are in the config. Nõo vald
+touches the corner but has no building inside, so it is not in the list.
+
+## 2026-09-11: The base map spawns on the Emajõgi, not at the center of the box
+
+Decision: the origin of `tartu-base` is 58.37990 north, 26.72743 east. That is mid
+river, 134 m south east of the [Kaarsild](https://et.wikipedia.org/wiki/Kaarsild) and 188 m north west of the Võidu sild,
+12 m from each bank, 31.4 m above sea level in EH2000.
+
+Why: the center of the box is a field in Ropka. The game spawns the drone at the
+origin, on the ground, with the camera to the north. Open water cannot hold a
+building, so the drone can never spawn inside one, and the first view is the arch
+bridge with [Toomemägi](https://et.wikipedia.org/wiki/Toomem%C3%A4gi) and the old town behind it. The point was found from the
+elevation model and the orthophoto, not by eye: water is the flattest and darkest
+part of the box.
