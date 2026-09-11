@@ -74,6 +74,89 @@ Status: proposal. The maintainer decides before the first public push.
 - Implications: a blur step before commit, and a rented C2 drone for the city.
 - Alternatives: photogrammetry from ground photos for single buildings, or a rented drone operator.
 
+## License reference TL;DR
+
+One entry per license that this project touches. "Must" lists the conditions, "cannot" the limits.
+
+### Maa- ja Ruumiamet open data license (2025-01-01)
+
+- Can: copy, change, combine, distribute, and sell the data and works made from it.
+- Must: name the licensor, the data set and the data date. Ship the license text or link with redistributed data.
+- Cannot: claim endorsement by the licensor. Cannot hold the licensor liable for errors.
+- Alternatives: none. It is the only license for this data. It is in effect CC BY 4.0 with an extra rule on the data date.
+
+### Apache-2.0
+
+- Can: use, change, distribute, sublicense, and sell. Closed derivatives are allowed.
+- Must: keep the license text, the copyright and `NOTICE` lines. Mark changed files.
+- Cannot: use the project trademarks. A patent suit against the project ends your patent license.
+- Implication: contributors grant a patent license by contributing, without a separate agreement. Incompatible with GPL-2.0 code, compatible with GPL-3.0 code.
+- Alternatives: MIT, GPL-3.0.
+
+### MIT
+
+- Can: everything Apache-2.0 allows.
+- Must: keep the license text and copyright line.
+- Cannot: nothing more. There is no patent clause and no trademark clause.
+- Implication: the shortest option. No protection if a contributor later claims a patent.
+- Alternatives: Apache-2.0 when patents or a contribution clause matter.
+
+### GPL-3.0
+
+- Can: use, change, and sell.
+- Must: publish the full source of any distributed derivative under GPL-3.0. Keep notices and install information.
+- Cannot: link the code into a closed product and distribute it. Cannot add rules that GPL-3.0 does not allow.
+- Implication: a simulator vendor could not embed the pipeline in a closed tool. For a small pipeline this cost brings little.
+- Alternatives: Apache-2.0 or MIT for a hobby tool that others must be free to adopt.
+
+### CC BY 4.0
+
+- Can: copy, remix, distribute, and sell, in any medium.
+- Must: credit the author, link the license, note changes. Attribution can be a line in a credits screen or a file.
+- Cannot: apply technical measures that block the rights. Cannot imply endorsement.
+- Implication: the right match for the Maa-amet inputs, because both need attribution only. Not meant for software, use it for maps, textures and models.
+- Alternatives: CC BY-SA, CC0, CC BY-NC.
+
+### CC BY-SA 4.0
+
+- Can: as CC BY.
+- Must: as CC BY, and license every adaptation under CC BY-SA or a compatible license.
+- Cannot: license a remix under CC BY, or bundle the work into a closed asset pack.
+- Implication: a single CC BY-SA texture forces the whole map that adapts it to CC BY-SA. This is the Mapillary problem.
+- Alternatives: CC BY if the sources allow it.
+
+### CC BY-NC 4.0
+
+- Can: copy, remix, distribute for non commercial purposes.
+- Must: as CC BY.
+- Cannot: use commercially. "Commercial" is undefined in detail and creates doubt for a paid simulator or a sponsored channel.
+- Implication: not an open license by the Open Definition. The game developer could not adopt the map as official in a paid game without a separate permission.
+- Alternatives: CC BY with a request, not a rule, to ask before commercial use.
+
+### CC0 1.0
+
+- Can: everything, with no conditions. A public domain dedication.
+- Must: nothing.
+- Cannot: waive moral rights in some countries. Cannot remove the attribution that upstream licenses demand.
+- Implication: our own attribution would be gone, the Maa-amet attribution would still be required, so the map could not truly be CC0.
+- Alternatives: CC BY.
+
+### ODbL 1.0 (OpenStreetMap)
+
+- Can: use, change, and distribute the database. Make "produced works" such as maps, images and game levels under any license.
+- Must: attribute. Publish any derived database under ODbL. Offer the derived database when you publish a produced work that used it.
+- Cannot: use technical measures that block the rights. Cannot publish the database itself under another license.
+- Implication: a `.glb` map is a produced work and can be CC BY. The GeoPackage that produced it is a derived database if it contains OSM data.
+- Alternatives: ETAK under the Maa-amet license, which has no share-alike rule.
+
+### Developer Certificate of Origin (DCO)
+
+- Can: accept contributions with a `Signed-off-by` line in each commit.
+- Must: the contributor states that they have the right to submit the work under the project license.
+- Cannot: transfer copyright, and cannot change the license later without every contributor.
+- Implication: light process, no paperwork. A license change later needs consent from all contributors.
+- Alternatives: a contributor license agreement, which allows relicensing but scares away hobby contributors.
+
 ## Inputs
 
 | Source | License | What we must do |
