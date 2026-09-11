@@ -42,7 +42,7 @@ Maa-amet 1:2000 sheet 473658, so one orthophoto sheet and one elevation sheet co
   buildings of Tartu linn, exported 2026-09-05.
 - Build: 545,540 triangles, 387,621 vertices, 3 meshes, 3 materials, one JPEG of
   12.2 MB, 26.5 MB in total.
-- Status: built, not yet flown.
+- Status: built, and it loads in the game on 2026-09-11. Nothing else is checked.
 
 Every landmark of this tile stands on public ground, so a person can photograph the
 walls without a permit. That is why it is the first candidate for photo facades. See
@@ -68,7 +68,7 @@ elevation sheets feed one texture. All four sheets are from the same flight of
   elevation sheets 54752 and 54754, LOD2 buildings of Tartu linn, exported 2026-09-05.
 - Build: 543,465 triangles, 381,396 vertices, 3 meshes, 3 materials, one JPEG of
   11.6 MB, 25.8 MB in total.
-- Status: built, not yet flown.
+- Status: built, and it loads in the game on 2026-09-11. Nothing else is checked.
 
 The bridges are in the orthophoto under the drone, but not in the geometry. A bridge is
 not a building, so the LOD2 data has none. Treat the river as open water until the

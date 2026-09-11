@@ -41,6 +41,9 @@ Our own maps, for the same comparison:
 | vaksali | 26.5 MB | 0.55 M | 3 | 3 | 1000 x 1000 m | 1 JPEG, 12.2 MB |
 | ulejoe | 25.8 MB | 0.54 M | 3 | 3 | 1000 x 1000 m | 1 JPEG, 11.6 MB |
 
+Every map of the table loads in the game. `vaksali` and `ulejoe` were loaded on
+2026-09-11 and neither crashed the game. No other property of them is measured yet.
+
 Conclusions:
 
 - A 1 km² tile with 0.5 to 2 million triangles is inside the range that the game

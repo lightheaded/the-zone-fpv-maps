@@ -2,7 +2,7 @@
 
 Maps of real places for the FPV drone simulator [The Zone](https://store.steampowered.com/app/3491280/). One reproducible pipeline turns open geodata into a map file that the game loads. The first maps are of [Tartu](https://en.wikipedia.org/wiki/Tartu), Estonia, built from [Maa- ja Ruumiamet](https://geoportaal.maaruum.ee/) open geodata.
 
-Status: four maps build from the open data. The test tile loads in the game, and so does the base map of the whole city. The two detailed tiles wait for their first flight. See `docs/the-zone-format.md` for what is verified and what is open, and `docs/maps.md` for the inventory of every map.
+Status: four maps build from the open data, and all four load in the game. The test tile is flown. The base map and the two detailed tiles need a real flight, which measures the frame rate and finds the buildings with a wrong shape. See `docs/the-zone-format.md` for what is verified and what is open, and `docs/maps.md` for the inventory of every map.
 
 ## Install a map
 
