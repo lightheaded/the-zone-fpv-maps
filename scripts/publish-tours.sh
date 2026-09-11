@@ -1,31 +1,42 @@
 #!/usr/bin/env bash
-# Publish the tour videos and the wiki gallery page.
+# Publish the tour videos and the wiki pages.
 #
 # The tour video of a map is 30 to 100 MB, so it never goes into git. It goes to the
-# release as an asset. The wiki page links the pictures from the repository and the
+# release as an asset. The wiki pages link the pictures from the repository and the
 # videos from the newest release.
 #
 # The renderer needs an OpenGL 3.3 context, which a build agent does not have, so this
 # script runs on a workstation after the release workflow finished.
 #
-#   scripts/publish-tours.sh v0.4.0            # videos and the wiki page
-#   scripts/publish-tours.sh v0.4.0 --no-wiki  # videos only
+#   scripts/publish-tours.sh v0.4.0              # videos and wiki pages
+#   scripts/publish-tours.sh v0.4.0 --no-wiki    # videos only
+#   scripts/publish-tours.sh v0.4.0 --wiki-only  # wiki pages only
 #
-# The wiki must exist before the first run. Open the Wiki tab of the repository and
-# create the first page, then run this script.
+# The wiki must exist before the first run. GitHub creates the wiki repository when a
+# person saves the first page. Open the Wiki tab, save any page, then run this script.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 tag="${1:-}"
 wiki=1
+videos=1
 for arg in "$@"; do
-  [ "$arg" = "--no-wiki" ] && wiki=0
+  case "$arg" in
+    --no-wiki) wiki=0 ;;
+    --wiki-only) videos=0 ;;
+  esac
 done
 
-if [ -z "$tag" ] || [ "$tag" = "--no-wiki" ]; then
-  echo "usage: scripts/publish-tours.sh <tag> [--no-wiki]" >&2
-  exit 2
+case "$tag" in
+  "" | --*)
+    echo "usage: scripts/publish-tours.sh <tag> [--no-wiki | --wiki-only]" >&2
+    exit 2
+    ;;
+esac
+
+if [ "$videos" -eq 0 ]; then
+  echo "==> the videos are skipped"
 fi
 
 echo "==> render a tour for every map that has none"
@@ -36,16 +47,18 @@ for cfg in maps/*.toml; do
   fi
 done
 
-echo "==> upload the videos to the release $tag"
-videos=(dist/*/tour/*-tour.mp4)
-if [ ! -s "${videos[0]}" ]; then
-  echo "no tour video was found. Run 'uv run fpv-maps tour maps/<name>.toml' first." >&2
-  exit 1
+if [ "$videos" -eq 1 ]; then
+  echo "==> upload the videos to the release $tag"
+  files=(dist/*/tour/*-tour.mp4)
+  if [ ! -s "${files[0]}" ]; then
+    echo "no tour video was found. Run 'uv run fpv-maps tour maps/<name>.toml' first." >&2
+    exit 1
+  fi
+  gh release upload "$tag" "${files[@]}" --clobber
 fi
-gh release upload "$tag" "${videos[@]}" --clobber
 
 if [ "$wiki" -eq 0 ]; then
-  echo "==> the wiki page is skipped"
+  echo "==> the wiki pages are skipped"
   exit 0
 fi
 

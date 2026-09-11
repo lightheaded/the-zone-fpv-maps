@@ -149,8 +149,18 @@ repository. Use `--append` to add pictures to a map that has some.
 - `_Sidebar.md` and `_Footer.md`, the navigation and the attribution.
 
 Every picture is linked from the repository, so the wiki holds no second copy. Every
-video is linked from the newest release. `scripts/publish-tours.sh <tag>` uploads the
-videos and pushes the pages. The pages are generated, so never edit them in the wiki.
+video is linked from the newest release. The pages are generated, so never edit them in
+the wiki.
+
+```
+scripts/publish-tours.sh v0.4.0              # videos and wiki pages
+scripts/publish-tours.sh v0.4.0 --no-wiki    # videos only
+scripts/publish-tours.sh v0.4.0 --wiki-only  # wiki pages only
+```
+
+GitHub creates the wiki repository when a person saves the first page. Before the first
+run, open the Wiki tab of the repository and save any page. Nothing can push to a wiki
+that has no page, and GitHub has no API for that step.
 
 ## How reproducible a build is
 

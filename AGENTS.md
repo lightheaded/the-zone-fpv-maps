@@ -116,6 +116,7 @@ Cut a release:
 6. Watch the workflow. If the privacy gate stops it, delete the tag, reword, tag again.
 7. Run `scripts/publish-tours.sh vX.Y.Z`. It uploads the tour videos to the release and
    pushes the wiki pages. The renderer needs a GPU, so a build agent cannot do it.
+   The wiki must hold one page before the first run, and only a person can create it.
 
 `scripts/check-privacy.sh` runs in CI over the tracked files and in the release over
 the notes. It finds home paths, personal addresses, private network addresses and
