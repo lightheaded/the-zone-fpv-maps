@@ -29,7 +29,9 @@ holds the license decisions.
 3. **Sustainable code.** One pipeline for every map, driven by a TOML file in `maps/`.
    No manual steps that only one machine can repeat. The build must run on macOS,
    Windows and Linux, natively with `uv` and inside Docker. Prefer boring, well
-   maintained libraries. Pin versions in `uv.lock`.
+   maintained libraries. Pin versions in `uv.lock`. The pictures follow the same rule:
+   the pipeline renders the preview and the tour. Only an in-game screenshot needs a
+   person, because the game has no free camera.
 4. **High quality.** Tests for every module, and they run without network access.
    [ruff](https://docs.astral.sh/ruff/) clean. Small functions with docstrings that state units and axis order.
    Verify a claim about the game or the data before you write it down as a fact.
@@ -62,12 +64,16 @@ holds the license decisions.
 
 ```
 uv sync                                        # install, first time and after pyproject changes
+uv sync --extra tour                           # add the offscreen renderer of "tour"
 uv run pytest                                  # tests, no network needed
 uv run ruff check src tests && uv run ruff format src tests
 uv run fpv-maps area maps/annelinn-test.toml   # bounding box and map sheets
 uv run fpv-maps fetch maps/annelinn-test.toml  # download source data into data/raw
 uv run fpv-maps build maps/annelinn-test.toml --install
 uv run fpv-maps inspect dist/annelinn-test/annelinn-test.glb
+uv run fpv-maps tour maps/annelinn-test.toml --publish   # tour pictures and a video
+uv run fpv-maps shots maps/annelinn-test.toml <folder>   # import in-game screenshots
+uv run fpv-maps gallery                        # the wiki page of every map
 docker compose run --rm pipeline build maps/annelinn-test.toml
 ```
 
@@ -88,8 +94,10 @@ and publishes the GitHub release with the map files, previews and build reports.
   `docs/screenshots/`, then the install steps and the attribution. A release page is
   a change list, so it does not repeat the maps of earlier releases. The assets hold
   every map in every release, and `docs/maps.md` is the inventory of them all.
-- A new map needs a row in `docs/maps.md` and a preview in `docs/screenshots/` before
-  the tag. The workflow refuses a map without a preview.
+- A new map needs a row in `docs/maps.md`, a preview and at least one tour picture in
+  `docs/screenshots/` before the tag. The workflow refuses a map without them.
+- The tour videos are not in git. `scripts/publish-tours.sh <tag>` uploads them to the
+  release and pushes the wiki gallery, after the workflow finished.
 
 So every commit on `main` needs a subject that stands alone as a change list line,
 and a body that explains the change to a reader who was not there. Reword `fix bug`
@@ -98,12 +106,15 @@ and squash bullet lists before they reach `main`.
 Cut a release:
 
 1. Build every map and copy `dist/<name>/<name>-preview.jpg` to `docs/screenshots/`.
-   Add in-game screenshots as `docs/screenshots/<name>-ingame-<n>.jpg`, 1600 px wide.
+   Render the tours: `uv run fpv-maps tour maps/<name>.toml --publish`.
+   Add in-game screenshots with `uv run fpv-maps shots maps/<name>.toml <folder>`.
 2. Set the version in `pyproject.toml` and `src/fpv_maps/__init__.py`, run `uv lock`.
 3. Commit with the subject `Release X.Y.Z` and a body that says what the release is for.
 4. Run `scripts/release-notes.sh` and read the result. It is the public page.
 5. Tag with a signature, `git tag -s vX.Y.Z -m "Release X.Y.Z"`, and push the tag.
 6. Watch the workflow. If the privacy gate stops it, delete the tag, reword, tag again.
+7. Run `scripts/publish-tours.sh vX.Y.Z`. It uploads the tour videos to the release and
+   pushes the wiki gallery. The renderer needs a GPU, so a build agent cannot do it.
 
 `scripts/check-privacy.sh` runs in CI over the tracked files and in the release over
 the notes. It finds home paths, personal addresses, private network addresses and

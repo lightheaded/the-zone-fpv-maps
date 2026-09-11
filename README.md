@@ -14,7 +14,8 @@ Status: four maps build from the open data, and all four load in the game. The t
 ## Maps
 
 `docs/maps.md` is the inventory. It holds the box, the spawn point, the source data and
-the numbers of every map.
+the numbers of every map. Every map has a rendered tour: pictures in `docs/maps.md` and
+on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-tours), and a video in the newest release.
 
 ### vaksali
 
@@ -24,11 +25,15 @@ Every landmark of this tile stands on public ground, so a person can photograph 
 
 ![vaksali from above](docs/screenshots/vaksali-preview.jpg)
 
+![The Tartu Mill elevator in vaksali](docs/screenshots/vaksali-tour-2-tartu-mill.jpg)
+
 ### ulejoe
 
 1 km² of [Ülejõe](https://et.wikipedia.org/wiki/%C3%9Clej%C3%B5e) at 12 cm per pixel. It holds the old factory wings around a courtyard at Puiestee 13b, the [Tartu](https://en.wikipedia.org/wiki/Tartu) Ülikooli staadion, [Lodjakoda](https://lodi.ee/), the two spires of Peetri kirik at 59 m, and the [Emajõgi](https://et.wikipedia.org/wiki/Emaj%C3%B5gi) between two bridges. 883 buildings from the LOD2 data. The drone spawns on the water, 89 m from the Kroonuaia sild and 89 m from the Vabadussild.
 
 ![ulejoe from above](docs/screenshots/ulejoe-preview.jpg)
+
+![Peetri kirik in ulejoe](docs/screenshots/ulejoe-tour-2-peetri-kirik.jpg)
 
 ### tartu-base
 
@@ -37,6 +42,8 @@ The whole city at low fidelity, 9 x 9 km and 81 km². Terrain from the 1 m eleva
 Use it for orientation and for long cruises. For freestyle, wait for the detailed maps.
 
 ![tartu-base from above](docs/screenshots/tartu-base-preview.jpg)
+
+![The whole city tile from 3.4 km](docs/screenshots/tartu-base-tour-1-overview.jpg)
 
 ### annelinn-test
 
@@ -60,6 +67,14 @@ The base map downloads 1.6 GB, keeps 2.8 GB on disk, and needs about 3 GB of mem
 
 ```
 uv run fpv-maps build maps/tartu-base.toml --install
+```
+
+Render the tour of a map, as pictures and as a video. The renderer is an extra,
+because [moderngl](https://moderngl.readthedocs.io/) needs a C++ compiler on Linux and Windows:
+
+```
+uv sync --extra tour
+uv run fpv-maps tour maps/vaksali.toml --publish
 ```
 
 `docs/development.md` explains the setup on macOS, Windows and Linux, native and with Docker.

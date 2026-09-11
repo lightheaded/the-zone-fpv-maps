@@ -37,6 +37,16 @@ jobs:
             test -s "docs/screenshots/$name-preview.jpg" || { echo "docs/screenshots/$name-preview.jpg is missing. Build the map and copy the preview."; exit 1; }
           done
 
+      # A build agent has no GPU, so it never renders a tour. The pictures come from a
+      # workstation and they are in git. See docs/decisions.md.
+      - name: Check that every map has a tour picture
+        run: |
+          for cfg in maps/*.toml; do
+            name=$(grep -m1 '^name = ' "$cfg" | sed -E 's/name = "(.*)"/\1/')
+            count=$(ls docs/screenshots/"$name"-tour-*.jpg 2>/dev/null | wc -l)
+            test "$count" -gt 0 || { echo "docs/screenshots/$name-tour-*.jpg is missing. Run 'fpv-maps tour maps/$name.toml --publish'."; exit 1; }
+          done
+
       - name: Refuse tracked text that points at one machine or one person
         run: scripts/check-privacy.sh
 
@@ -91,3 +101,8 @@ jobs:
             --notes-file release-notes.md \
             --verify-tag \
             release-assets/*
+
+      # The tour videos are too large for git and a build agent cannot render them.
+      # Upload them from a workstation: scripts/publish-tours.sh <tag>.
+      - name: Say what is left to do
+        run: echo "Now run scripts/publish-tours.sh ${{ github.ref_name }} to add the tour videos and the wiki gallery."

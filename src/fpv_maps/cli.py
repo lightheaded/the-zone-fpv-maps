@@ -107,6 +107,131 @@ def _install(name: str, glb: Path, game_dir: Path | None) -> None:
     console.print(f"[green]installed[/] {target}")
 
 
+@main.command()
+@click.argument("config", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--out", type=click.Path(file_okay=False, path_type=Path), default=None)
+@click.option("--shot", default=None, help="Render one shot of the tour by name.")
+@click.option("--size", default=None, help="Frame size, for example 1920x1080.")
+@click.option("--fps", type=int, default=None, help="Frames per second of the video.")
+@click.option("--seconds", type=float, default=None, help="Scale the tour to this length.")
+@click.option("--no-video", is_flag=True, help="Write the still pictures only.")
+@click.option("--publish", is_flag=True, help="Copy the stills into docs/screenshots.")
+def tour(
+    config: Path,
+    out: Path | None,
+    shot: str | None,
+    size: str | None,
+    fps: int | None,
+    seconds: float | None,
+    no_video: bool,
+    publish: bool,
+) -> None:
+    """Render the camera tour of a built map: still pictures and a video."""
+    import shutil
+    from dataclasses import replace
+
+    from rich.progress import Progress
+
+    from fpv_maps.render import write_tour
+    from fpv_maps.tour import Tour, load_tour
+
+    cfg = load_config(config)
+    glb = cfg.dist_dir / f"{cfg.name}.glb"
+    if not glb.exists():
+        raise click.ClickException(f"{glb} does not exist. Run 'fpv-maps build' first.")
+
+    plan = load_tour(cfg.path, cfg.name, cfg.origin) or Tour(name=cfg.name, shots=())
+    if size:
+        width, _, height = size.lower().partition("x")
+        plan = replace(plan, width=int(width), height=int(height))
+    if fps:
+        plan = replace(plan, fps=fps)
+    if not plan.shots:
+        console.print(
+            r"[yellow]the map declares no \[tour] shots, so this is the automatic tour[/]"
+        )
+
+    out_dir = out or (cfg.dist_dir / "tour")
+    with Progress(console=console, transient=True) as progress:
+        task = progress.add_task(f"render {cfg.name}", total=None)
+
+        def on_frame(done: int, total: int) -> None:
+            progress.update(task, completed=done, total=total)
+
+        result = write_tour(
+            glb,
+            plan,
+            out_dir,
+            only=shot,
+            video=not no_video,
+            seconds=seconds,
+            on_frame=on_frame,
+        )
+
+    rate = result.frames / max(result.seconds, 0.1)
+    console.print(f"[green]rendered[/] {result.frames} frames in {result.seconds} s, {rate:.0f}/s")
+    for still in result.stills:
+        console.print(f"  {still}")
+    if result.video is not None:
+        console.print(f"  {result.video}  {result.video.stat().st_size / 1e6:.1f} MB")
+    if publish:
+        target = cfg.path.parent.parent / "docs" / "screenshots"
+        target.mkdir(parents=True, exist_ok=True)
+        for still in result.stills:
+            shutil.copyfile(still, target / still.name)
+        console.print(f"[green]published[/] {len(result.stills)} stills into {target}")
+
+
+@main.command()
+@click.argument("config", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument("sources", nargs=-1, type=click.Path(exists=True, path_type=Path))
+@click.option("--width", type=int, default=1600, help="Width of the result in pixels.")
+@click.option("--append", is_flag=True, help="Keep the pictures that the map has.")
+def shots(config: Path, sources: tuple[Path, ...], width: int, append: bool) -> None:
+    """Import in-game screenshots into docs/screenshots with the correct name.
+
+    SOURCES are picture files or folders. The oldest picture becomes number one.
+    """
+    from fpv_maps.shots import import_shots, next_number
+
+    if not sources:
+        raise click.ClickException("name at least one picture file or folder")
+    cfg = load_config(config)
+    out_dir = cfg.path.parent.parent / "docs" / "screenshots"
+    start = next_number(out_dir, cfg.name) if append else 1
+    written = import_shots(sources, cfg.name, out_dir, width=width, start=start)
+    if not written:
+        raise click.ClickException("no picture was found")
+    for path in written:
+        console.print(f"  {path}  {path.stat().st_size / 1e3:.0f} kB")
+    console.print(f"[green]imported[/] {len(written)} in-game screenshots of {cfg.name}")
+
+
+@main.command()
+@click.option("--out", type=click.Path(file_okay=False, path_type=Path), default=None)
+@click.option("--repo", default=None, help="The owner/name of the repository.")
+@click.option("--branch", default="main", help="The branch that holds the pictures.")
+def gallery(out: Path | None, repo: str | None, branch: str) -> None:
+    """Write the wiki gallery page of every map in maps/."""
+    from fpv_maps.gallery import repo_slug, write_gallery
+
+    root = Path(__file__).resolve().parent.parent.parent
+    configs = sorted(root.glob("maps/*.toml"))
+    if not configs:
+        raise click.ClickException("maps/ holds no configuration")
+    maps = [load_config(path) for path in configs]
+    out_dir = out or (root / "dist" / "wiki")
+    page = write_gallery(
+        maps,
+        root / "docs" / "screenshots",
+        out_dir,
+        repo or repo_slug(root),
+        branch,
+    )
+    console.print(f"[green]wrote[/] {page}  {page.stat().st_size / 1e3:.1f} kB")
+    console.print("Push it with scripts/publish-tours.sh.")
+
+
 @main.command(name="inspect")
 @click.argument("glb", type=click.Path(exists=True, dir_okay=False, path_type=Path))
 @click.option("--json", "as_json", is_flag=True, help="Print the full statistics as JSON.")

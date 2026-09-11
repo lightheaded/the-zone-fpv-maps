@@ -75,7 +75,76 @@ uv run fpv-maps fetch   maps/<name>.toml     # download source data
 uv run fpv-maps build   maps/<name>.toml     # build dist/<name>/<name>.glb
 uv run fpv-maps install maps/<name>.toml     # copy into the game
 uv run fpv-maps inspect dist/<name>/<name>.glb
+uv run fpv-maps tour    maps/<name>.toml     # tour pictures and a tour video
+uv run fpv-maps shots   maps/<name>.toml <folder>   # import in-game screenshots
+uv run fpv-maps gallery                      # write the wiki page
 ```
+
+## Pictures of a map
+
+A map carries three kinds of picture. All three live in `docs/screenshots/`.
+
+| Picture | File | Who makes it |
+|---------|------|--------------|
+| Preview, from above | `<name>-preview.jpg` | `fpv-maps build` |
+| Tour, one per shot | `<name>-tour-<n>-<shot>.jpg` | `fpv-maps tour` |
+| In the game | `<name>-ingame-<n>.jpg` | a person, then `fpv-maps shots` |
+
+### The tour
+
+The renderer is an optional extra, because [moderngl](https://moderngl.readthedocs.io/) needs a C++ compiler on Linux
+and Windows. Install it once:
+
+```
+uv sync --extra tour
+```
+
+`fpv-maps tour maps/<name>.toml` flies a camera over `dist/<name>/<name>.glb` and
+renders every frame with an offscreen OpenGL context. It writes one JPEG per shot and
+one MP4 into `dist/<name>/tour/`. `--publish` copies the JPEG files into
+`docs/screenshots/`. The video never goes into git. See `docs/decisions.md`.
+
+```
+uv run fpv-maps tour maps/vaksali.toml --publish
+uv run fpv-maps tour maps/vaksali.toml --shot tartu-mill --no-video   # one shot, fast
+uv run fpv-maps tour maps/vaksali.toml --size 1280x720 --fps 30       # a quick look
+```
+
+A map that declares no `[tour]` section gets an automatic tour: a wide orbit, an orbit
+around each of the two tallest structures, and a reveal at the spawn point. To choose
+the shots, add a `[tour]` section. `maps/vaksali.toml` is the example. A target is
+L-EST97 (east, north), or WGS84 with the key `target_wgs84`. The kinds are:
+
+- `orbit`: a circle around a target, at `radius_m` and `height_m` above the terrain.
+- `reveal`: the camera rises and pulls back from the target.
+- `fly`: a straight line from `start` to `end`, looking ahead.
+
+Speed on a workstation GPU, at 1920 x 1080: 43 to 80 frames per second, so a tour of
+50 seconds takes about one minute. The renderer needs an OpenGL 3.3 context. macOS,
+Windows and Linux with a GPU driver give one. The container has Mesa, which draws the
+same picture in software at about 5 frames per second at 320 x 180. Use the container
+to check that the renderer runs, not to render a release. A build agent has no GPU, so
+CI never renders a tour.
+
+### In-game screenshots
+
+The game has no free camera and no command line option that loads a map, so a person
+flies the map and captures the pictures. Then:
+
+```
+uv run fpv-maps shots maps/vaksali.toml ~/Pictures/raw-captures
+```
+
+The command scales every picture to 1600 px, drops the metadata and writes
+`docs/screenshots/<name>-ingame-<n>.jpg`. The oldest picture becomes number one. The
+metadata of a screenshot can name a user and a machine, so it never reaches the
+repository. Use `--append` to add pictures to a map that has some.
+
+### The wiki gallery
+
+`fpv-maps gallery` writes `dist/wiki/Map-tours.md`. It links every picture from the
+repository and every tour video from the newest release.
+`scripts/publish-tours.sh <tag>` uploads the videos to the release and pushes the page.
 
 ## How reproducible a build is
 
@@ -123,6 +192,11 @@ src/fpv_maps/
   inspect.py          statistics of a glTF binary file
   install.py          copy into the game folder
   build.py            the pipeline, step by step
+  preview.py          the picture of a map from above
+  tour.py             camera shots, camera math, the tour of a map
+  render.py           offscreen OpenGL renderer, stills and video
+  shots.py            in-game screenshots into the documentation
+  gallery.py          the wiki page of every map
 tests/                pytest, synthetic data, no network
 docs/                 analysis, decisions, formats, licensing, locations, sources
 data/                 downloaded geodata cache, not in git
@@ -136,6 +210,8 @@ dist/                 built maps and build reports, not in git
    municipalities that the box touches.
 3. Run `uv run fpv-maps area maps/<name>.toml` and check the sheets and the chunks.
 4. Build, install, fly.
+5. Render the tour: `uv run fpv-maps tour maps/<name>.toml --publish`.
+6. Add a row and a section to `docs/maps.md`, with two tour pictures.
 
 For a map larger than about 4 km², copy `maps/tartu-base.toml` instead and keep three
 settings from it:

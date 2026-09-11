@@ -34,3 +34,66 @@ roof_material = "z_pebbled_asphalt"
 
 [probes]
 enabled = false
+
+# The camera tour that "fpv-maps tour" renders. Every target is L-EST97 (east, north).
+# The three landmarks are the tallest structures of the tile. Their positions come from
+# the built map, and their heights and distances agree with docs/maps.md: the elevator
+# 204 m south west of the spawn at 48.6 m, the water tower 594 m north east at 34.6 m,
+# and Pauluse kirik 431 m east at 25.2 m.
+[tour]
+fps = 60
+size = [1920, 1080]
+
+[[tour.shot]]
+name = "overview"
+kind = "orbit"
+seconds = 12
+target = [658500, 6473500]
+radius_m = 700
+height_m = 420
+turns = 0.30
+look_height_m = 20
+fov_deg = 42
+
+[[tour.shot]]
+name = "tartu-mill"
+kind = "orbit"
+seconds = 11
+target = [658326, 6473151]
+radius_m = 120
+height_m = 100
+turns = 0.45
+start_deg = 210
+look_height_m = 27
+
+[[tour.shot]]
+name = "veetorn"
+kind = "orbit"
+seconds = 9
+target = [658894, 6473703]
+radius_m = 95
+height_m = 72
+turns = 0.40
+start_deg = 30
+look_height_m = 19
+
+[[tour.shot]]
+name = "pauluse-kirik"
+kind = "orbit"
+seconds = 9
+target = [658870, 6473351]
+radius_m = 80
+height_m = 55
+turns = 0.35
+start_deg = 120
+look_height_m = 14
+
+[[tour.shot]]
+name = "spawn"
+kind = "reveal"
+seconds = 9
+target = [658440, 6473320]
+radius_m = 230
+height_m = 95
+turns = 0.22
+look_height_m = 8

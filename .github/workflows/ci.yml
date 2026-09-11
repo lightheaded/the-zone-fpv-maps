@@ -32,6 +32,30 @@ jobs:
       - name: Smoke test the CLI
         run: uv run fpv-maps area maps/annelinn-test.toml
 
+  # The renderer is an optional extra, because glcontext needs a C++ compiler outside
+  # macOS. Mesa draws in software here, so the tests render small pictures only.
+  renderer:
+    name: The offscreen renderer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: OpenGL, to build glcontext and to draw
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            g++ libx11-dev libgl1-mesa-dev libegl1-mesa-dev \
+            libegl1 libgl1 libglx-mesa0 libgl1-mesa-dri libgbm1
+      - name: Install with the tour extra
+        run: uv sync --frozen --extra tour
+      - name: Test the renderer
+        env:
+          LIBGL_ALWAYS_SOFTWARE: 1
+          EGL_PLATFORM: surfaceless
+        run: uv run pytest tests/test_render.py -v
+
   privacy:
     name: No text points at one machine or one person
     runs-on: ubuntu-latest

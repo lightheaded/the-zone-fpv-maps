@@ -51,3 +51,51 @@ roof_material = "z_pebbled_asphalt"
 
 [probes]
 enabled = false
+
+# The camera tour that "fpv-maps tour" renders. Every target is L-EST97 (east, north).
+# The tour holds a wide orbit, a cruise over the city from south to north, the tallest
+# LOD2 structure of the map at 104 m above the terrain, and the spawn point on the
+# river. The height and the position of the tall structure come from the built map.
+[tour]
+fps = 60
+size = [1920, 1080]
+
+[[tour.shot]]
+name = "overview"
+kind = "orbit"
+seconds = 14
+target = [660500, 6473000]
+radius_m = 5600
+height_m = 3400
+turns = 0.30
+look_height_m = 60
+fov_deg = 42
+
+[[tour.shot]]
+name = "cruise"
+kind = "fly"
+seconds = 14
+start = [659516, 6470400]
+end = [659516, 6476800]
+height_m = 620
+
+[[tour.shot]]
+name = "tallest"
+kind = "orbit"
+seconds = 10
+target = [663303, 6473348]
+radius_m = 260
+height_m = 210
+turns = 0.35
+start_deg = 200
+look_height_m = 57
+
+[[tour.shot]]
+name = "spawn"
+kind = "reveal"
+seconds = 10
+target = [659516, 6474291]
+radius_m = 320
+height_m = 130
+turns = 0.22
+look_height_m = 10

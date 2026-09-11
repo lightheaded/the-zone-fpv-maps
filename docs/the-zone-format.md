@@ -21,6 +21,25 @@ On macOS the game folder is `$HOME/Library/Application Support/Steam/steamapps/c
 On Windows it is `C:\Program Files (x86)\Steam\steamapps\common\The Zone FPV` by default.
 The pipeline reads the environment variable `THE_ZONE_DIR` first.
 
+## The game engine
+
+Read from the installed build of 2026-09-11. The facts matter for automation: they say
+what a script can drive and what needs a person. See `docs/decisions.md`.
+
+- The game is an export of [Godot](https://godotengine.org/) 4.5.1 stable. The macOS bundle holds one
+  executable of 188 MB and one package file of 10.5 GB. It links the Steam addon.
+- The engine accepts the standard Godot options, among them `--write-movie`,
+  `--fixed-fps`, `--resolution`, `--quit-after`, `--fullscreen` and `--headless`.
+  Movie Maker mode therefore works, and it writes frame locked video.
+- The game reads a gamepad as an RC radio. The settings file holds a channel map, a
+  rate profile per axis and a keybind list. A flight comes from stick input.
+- The package holds a custom map editor, a map browser, an upload step and a download
+  step. It holds no free camera, no spectator, no replay and no photo mode.
+- No command line option loads a map. A capture must navigate the menu.
+
+The user settings live at `Godot/app_userdata/The Zone/settings.cfg` in the
+application data folder of the operating system. The game writes a log beside it.
+
 ## Official maps as a size reference
 
 Read with `fpv-maps inspect` from the three official map files. All three were

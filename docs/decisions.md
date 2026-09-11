@@ -193,3 +193,63 @@ Why: a release page is a change list. A reader who opens v0.3.0 wants to know wh
 new. A reader who wants the full list reads the repository, which is always current,
 and a release page from four months ago is not. The assets stay complete because a
 reader must never need to walk back through old releases to find one map file.
+
+## 2026-09-11: The map tour is rendered from the glTF file, not captured in the game
+
+Decision: `fpv-maps tour` renders the tour pictures and the tour video from
+`dist/<name>/<name>.glb` with an offscreen OpenGL context. The pipeline never drives
+the game. In-game screenshots stay a human step, and `fpv-maps shots` prepares them.
+
+Why: the game cannot be automated. These facts come from the installed build of
+2026-09-11, and `docs/the-zone-format.md` holds them in full:
+
+- The game is a Godot 4.5.1 export. The engine accepts `--write-movie`, `--fixed-fps`
+  and `--resolution`, so a frame locked capture is possible.
+- The game has no free camera, no spectator, no replay and no photo mode.
+- The game reads a gamepad as an RC radio. A flight comes from stick input.
+- No command line option loads a map. A capture must navigate the menu.
+
+So an automated in-game tour needs synthetic input for the menu and for the flight.
+That breaks with every game update, it needs an accessibility permission on macOS, and
+Movie Maker mode separates the game clock from the wall clock, so the same input gives
+a different flight every run. A build agent can never run it: the game is proprietary,
+it is 10.5 GB and it needs Steam and a GPU.
+
+The renderer reads the file that the game loads, so the geometry, the ground texture
+and the spawn point are the true ones. It runs on macOS, Windows and Linux, it needs no
+game, and it renders 1920 x 1080 at 44 to 71 frames per second on a workstation GPU.
+
+Cost: the picture is not the picture of the game. There is no shadow, no vegetation and
+no in-game material, and a wall carries the fallback color of the material name. The
+tour therefore shows the shape of a map, not the look of a flight. That is what the
+inventory needs. A person who wants the look of the game adds in-game screenshots.
+
+The renderer is an optional extra of the package, `uv sync --extra tour`. glcontext,
+which moderngl needs, ships source only for Linux and Windows, so a required dependency
+would force a C++ compiler on every contributor and on every CI job. The pipeline
+itself installs from wheels alone, and it stays that way.
+
+Not chosen: a photoreal render with Blender Cycles. It looks better and it costs hours
+per map, a heavy dependency and a second material system.
+
+Note on the sun: the orthophoto carries the shadows of the flight of 2024-04-27, with
+the sun in the south. The renderer puts its sun in the south too and casts no shadow of
+its own, so the two never disagree.
+
+## 2026-09-11: Tour videos live in the release, the wiki holds the gallery
+
+Decision: `docs/maps.md` stays the inventory and shows two tour pictures per map. Every
+tour picture goes into `docs/screenshots/`. The tour video goes to the release as an
+asset, never into git. `fpv-maps gallery` writes a wiki page that links every picture
+from the repository and every video from the newest release.
+`scripts/publish-tours.sh` uploads the videos and pushes the page.
+
+Why: a tour video is 30 to 100 MB. Git keeps every version of it forever, and a
+collaborator who clones the pipeline does not want them. A release asset costs nothing
+in the clone and it is versioned with the map file that it shows. The wiki is a
+separate repository, so a long gallery page does not add noise to a pull request. The
+pictures are linked, not copied, so the wiki never holds a second copy that ages.
+
+Cost: the wiki page is generated, so nobody must edit it by hand. A map that changes
+needs `scripts/publish-tours.sh` again. GitHub does not play an MP4 asset in the page,
+so the link starts a download.

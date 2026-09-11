@@ -16,6 +16,20 @@ size, because the JPEG encoder differs. The geometry is the same everywhere. See
 | [`tartu-base`](#tartu-base) | 9 x 9 km | 1.10 m | 23,745 | 2.87 M | 126 MB | v0.2.0 |
 | [`annelinn-test`](#annelinn-test) | 1 x 1 km | 12.2 cm | 145 | 0.51 M | 23.1 MB | v0.1.0 |
 
+## The pictures of a map
+
+Every map carries three kinds of picture, and `docs/development.md` says how to make
+them.
+
+- The preview is the ground texture from above, with the roofs marked red. The build
+  writes it.
+- The tour pictures come from `fpv-maps tour`. It flies a camera over the built file
+  and renders the frames offline. They show the shape of a map: the geometry, the
+  ground texture and the spawn point are the true ones, but there is no shadow, no
+  vegetation and no in-game material. Two of them stand in each section below.
+- The in-game pictures come from a person who flies the map. The game has no free
+  camera, so no script can make them. They are the only picture of the true look.
+
 ## What every map holds today
 
 - Terrain from the Maa-amet 1 m elevation model, as one mesh or as a grid of chunks.
@@ -44,6 +58,18 @@ Maa-amet 1:2000 sheet 473658, so one orthophoto sheet and one elevation sheet co
   12.2 MB, 26.5 MB in total.
 - Status: built, and it loads in the game on 2026-09-11. Nothing else is checked.
 
+### The tour of `vaksali`
+
+[![The Tartu Mill elevator, 48.6 m above the terrain](screenshots/vaksali-tour-2-tartu-mill.jpg)](screenshots/vaksali-tour-2-tartu-mill.jpg)
+
+*The Tartu Mill elevator, 48.6 m above the terrain.*
+
+[![The spawn point in the open freight yard](screenshots/vaksali-tour-5-spawn.jpg)](screenshots/vaksali-tour-5-spawn.jpg)
+
+*The spawn point in the open freight yard.*
+
+Every shot and the tour video are on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-tours).
+
 Every landmark of this tile stands on public ground, so a person can photograph the
 walls without a permit. That is why it is the first candidate for photo facades. See
 `docs/decisions.md`.
@@ -70,6 +96,18 @@ elevation sheets feed one texture. All four sheets are from the same flight of
   11.6 MB, 25.8 MB in total.
 - Status: built, and it loads in the game on 2026-09-11. Nothing else is checked.
 
+### The tour of `ulejoe`
+
+[![Peetri kirik, the tallest structure of the tile at 59.1 m](screenshots/ulejoe-tour-2-peetri-kirik.jpg)](screenshots/ulejoe-tour-2-peetri-kirik.jpg)
+
+*Peetri kirik, the tallest structure of the tile at 59.1 m.*
+
+[![The camera flies down the Emajogi toward the spawn point](screenshots/ulejoe-tour-3-emajogi.jpg)](screenshots/ulejoe-tour-3-emajogi.jpg)
+
+*The camera flies down the Emajogi toward the spawn point.*
+
+Every shot and the tour video are on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-tours).
+
 The bridges are in the orthophoto under the drone, but not in the geometry. A bridge is
 not a building, so the LOD2 data has none. Treat the river as open water until the
 bridge step exists.
@@ -90,6 +128,18 @@ The whole city at low fidelity, 9 x 9 km and 81 km². It holds every cluster of
 - Status: built and loaded in the game on 2026-09-11. Load time, frame rate, position
   accuracy far from the origin and the chunk seams are still open questions.
 
+### The tour of `tartu-base`
+
+[![The whole 9 x 9 km tile from 3.4 km](screenshots/tartu-base-tour-1-overview.jpg)](screenshots/tartu-base-tour-1-overview.jpg)
+
+*The whole 9 x 9 km tile from 3.4 km.*
+
+[![The spawn point on the river, between the two bridges](screenshots/tartu-base-tour-4-spawn.jpg)](screenshots/tartu-base-tour-4-spawn.jpg)
+
+*The spawn point on the river, between the two bridges.*
+
+Every shot and the tour video are on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-tours).
+
 Fly it for orientation and for long cruises. For freestyle, use a detailed tile.
 
 ## annelinn-test
@@ -109,6 +159,18 @@ the west end of [Lohkva](https://et.wikipedia.org/wiki/Lohkva). It is the Maa-am
 - Status: built and flown on 2026-09-11. It proved the textures, the material swap by
   name and the spawn behavior.
 
+### The tour of `annelinn-test`
+
+[![The 1 km2 test tile from above](screenshots/annelinn-test-tour-1-overview.jpg)](screenshots/annelinn-test-tour-1-overview.jpg)
+
+*The 1 km2 test tile from above.*
+
+[![The spawn point with the probe objects](screenshots/annelinn-test-tour-4-spawn.jpg)](screenshots/annelinn-test-tour-4-spawn.jpg)
+
+*The spawn point with the probe objects.*
+
+Every shot and the tour video are on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-tours).
+
 It stays in the repository as a probe carrier. Every new question about the game format
 gets a probe here first.
 
@@ -116,6 +178,10 @@ gets a probe here first.
 
 1. Build the map and copy `dist/<name>/<name>-preview.jpg` to `docs/screenshots/`.
    Without the preview, the release workflow stops and `uv run pytest` fails.
-2. Add a row to the table above and a section with the same headings as the others.
-3. Name the cluster of `docs/locations.md` that the box covers, in that file.
-4. The release notes name the new map by themselves, from the git history.
+2. Render the tour: `uv run fpv-maps tour maps/<name>.toml --publish`. Without a tour
+   picture the release workflow stops.
+3. Add a row to the table above and a section with the same headings as the others.
+4. Name the cluster of `docs/locations.md` that the box covers, in that file.
+5. The release notes name the new map by themselves, from the git history.
+6. After the release, run `scripts/publish-tours.sh <tag>` to upload the tour videos
+   and to update the wiki gallery.

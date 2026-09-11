@@ -18,6 +18,16 @@ dependencies = [
     "pyogrio>=0.13.0",
 ]
 
+# The offscreen renderer of "fpv-maps tour". It is optional, because glcontext, which
+# moderngl needs, ships source only for Linux and Windows, so it needs a C++ compiler.
+# The pipeline itself installs everywhere with wheels alone. Install it with
+# "uv sync --extra tour".
+[project.optional-dependencies]
+tour = [
+    "moderngl>=5.10",
+    "imageio-ffmpeg>=0.5",
+]
+
 [project.scripts]
 fpv-maps = "fpv_maps.cli:main"
 

@@ -32,3 +32,53 @@ roof_material = "z_pebbled_asphalt"
 
 [probes]
 enabled = false
+
+# The camera tour that "fpv-maps tour" renders. Every target is L-EST97 (east, north).
+# Peetri kirik is the tallest structure of the tile at 59.1 m, which agrees with the
+# 59 m spires in docs/maps.md. The river line comes from the lowest six percent of the
+# terrain cells of the built map. Their long axis runs north west to south east.
+[tour]
+fps = 60
+size = [1920, 1080]
+
+[[tour.shot]]
+name = "overview"
+kind = "orbit"
+seconds = 12
+target = [659100, 6475350]
+radius_m = 700
+height_m = 420
+turns = 0.30
+look_height_m = 20
+fov_deg = 42
+
+[[tour.shot]]
+name = "peetri-kirik"
+kind = "orbit"
+seconds = 11
+target = [659523, 6475444]
+radius_m = 150
+height_m = 120
+turns = 0.40
+start_deg = 250
+look_height_m = 33
+
+[[tour.shot]]
+name = "emajogi"
+kind = "fly"
+seconds = 12
+start = [658566, 6475482]
+end = [659272, 6474924]
+height_m = 48
+look_ahead_m = 150
+look_height_m = 4
+
+[[tour.shot]]
+name = "spawn"
+kind = "reveal"
+seconds = 9
+target = [659228, 6474937]
+radius_m = 240
+height_m = 90
+turns = 0.22
+look_height_m = 6
