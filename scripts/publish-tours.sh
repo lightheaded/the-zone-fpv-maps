@@ -49,7 +49,7 @@ if [ "$wiki" -eq 0 ]; then
   exit 0
 fi
 
-echo "==> write and push the wiki page"
+echo "==> write and push the wiki pages"
 uv run fpv-maps gallery
 remote=$(git remote get-url origin)
 wiki_remote="${remote%.git}.wiki.git"
@@ -65,9 +65,9 @@ fi
 cp dist/wiki/*.md "$work/wiki/"
 git -C "$work/wiki" add -A
 if git -C "$work/wiki" diff --cached --quiet; then
-  echo "the wiki page did not change"
+  echo "the wiki did not change"
   exit 0
 fi
-git -C "$work/wiki" commit -q -m "Update the map tours for $tag"
+git -C "$work/wiki" commit -q -m "Update the map pages for $tag"
 git -C "$work/wiki" push -q
-echo "the wiki page is published"
+echo "the wiki is published"

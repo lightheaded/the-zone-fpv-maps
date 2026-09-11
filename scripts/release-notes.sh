@@ -142,7 +142,7 @@ for cfg in $new_maps; do
     echo "![$name, from the rendered tour]($repo_url/raw/$tag/$tour_shot)"
     echo
     echo "The tour video is \`$name-tour.mp4\` in the assets below. Every shot of it is on"
-    echo "the [wiki gallery]($repo_url/wiki/Map-tours)."
+    echo "the [\`$name\` wiki page]($repo_url/wiki/$name)."
     echo
   fi
   for shot in docs/screenshots/"$name"-ingame-*.jpg; do

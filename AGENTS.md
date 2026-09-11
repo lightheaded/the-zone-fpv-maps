@@ -73,7 +73,7 @@ uv run fpv-maps build maps/annelinn-test.toml --install
 uv run fpv-maps inspect dist/annelinn-test/annelinn-test.glb
 uv run fpv-maps tour maps/annelinn-test.toml --publish   # tour pictures and a video
 uv run fpv-maps shots maps/annelinn-test.toml <folder>   # import in-game screenshots
-uv run fpv-maps gallery                        # the wiki page of every map
+uv run fpv-maps gallery                        # the wiki index and map pages
 docker compose run --rm pipeline build maps/annelinn-test.toml
 ```
 
@@ -98,7 +98,7 @@ and publishes the GitHub release with the map files, previews and build reports.
 - A new map needs a row in `docs/maps.md`, a preview and at least one tour picture in
   `docs/screenshots/` before the tag. The workflow refuses a map without them.
 - The tour videos are not in git. `scripts/publish-tours.sh <tag>` uploads them to the
-  release and pushes the wiki gallery, after the workflow finished.
+  release and pushes the wiki pages, after the workflow finished.
 
 So every commit on `main` needs a subject that stands alone as a change list line,
 and a body that explains the change to a reader who was not there. Reword `fix bug`
@@ -115,7 +115,7 @@ Cut a release:
 5. Tag with a signature, `git tag -s vX.Y.Z -m "Release X.Y.Z"`, and push the tag.
 6. Watch the workflow. If the privacy gate stops it, delete the tag, reword, tag again.
 7. Run `scripts/publish-tours.sh vX.Y.Z`. It uploads the tour videos to the release and
-   pushes the wiki gallery. The renderer needs a GPU, so a build agent cannot do it.
+   pushes the wiki pages. The renderer needs a GPU, so a build agent cannot do it.
 
 `scripts/check-privacy.sh` runs in CI over the tracked files and in the release over
 the notes. It finds home paths, personal addresses, private network addresses and

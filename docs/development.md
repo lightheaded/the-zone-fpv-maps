@@ -77,7 +77,7 @@ uv run fpv-maps install maps/<name>.toml     # copy into the game
 uv run fpv-maps inspect dist/<name>/<name>.glb
 uv run fpv-maps tour    maps/<name>.toml     # tour pictures and a tour video
 uv run fpv-maps shots   maps/<name>.toml <folder>   # import in-game screenshots
-uv run fpv-maps gallery                      # write the wiki page
+uv run fpv-maps gallery                      # write the wiki pages
 ```
 
 ## Pictures of a map
@@ -140,11 +140,17 @@ The command scales every picture to 1600 px, drops the metadata and writes
 metadata of a screenshot can name a user and a machine, so it never reaches the
 repository. Use `--append` to add pictures to a map that has some.
 
-### The wiki gallery
+### The wiki
 
-`fpv-maps gallery` writes `dist/wiki/Map-tours.md`. It links every picture from the
-repository and every tour video from the newest release.
-`scripts/publish-tours.sh <tag>` uploads the videos to the release and pushes the page.
+`fpv-maps gallery` writes the wiki pages into `dist/wiki/`:
+
+- `Home.md`, the index, with one row and one picture per map.
+- `<name>.md`, one page per map, with every picture of that map.
+- `_Sidebar.md` and `_Footer.md`, the navigation and the attribution.
+
+Every picture is linked from the repository, so the wiki holds no second copy. Every
+video is linked from the newest release. `scripts/publish-tours.sh <tag>` uploads the
+videos and pushes the pages. The pages are generated, so never edit them in the wiki.
 
 ## How reproducible a build is
 
@@ -196,7 +202,7 @@ src/fpv_maps/
   tour.py             camera shots, camera math, the tour of a map
   render.py           offscreen OpenGL renderer, stills and video
   shots.py            in-game screenshots into the documentation
-  gallery.py          the wiki page of every map
+  gallery.py          the wiki pages: the index and one page per map
 tests/                pytest, synthetic data, no network
 docs/                 analysis, decisions, formats, licensing, locations, sources
 data/                 downloaded geodata cache, not in git

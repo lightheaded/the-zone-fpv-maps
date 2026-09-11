@@ -212,8 +212,8 @@ def shots(config: Path, sources: tuple[Path, ...], width: int, append: bool) -> 
 @click.option("--repo", default=None, help="The owner/name of the repository.")
 @click.option("--branch", default="main", help="The branch that holds the pictures.")
 def gallery(out: Path | None, repo: str | None, branch: str) -> None:
-    """Write the wiki gallery page of every map in maps/."""
-    from fpv_maps.gallery import repo_slug, write_gallery
+    """Write the wiki pages: the index, one page per map, the navigation."""
+    from fpv_maps.gallery import repo_slug, write_wiki
 
     root = Path(__file__).resolve().parent.parent.parent
     configs = sorted(root.glob("maps/*.toml"))
@@ -221,15 +221,18 @@ def gallery(out: Path | None, repo: str | None, branch: str) -> None:
         raise click.ClickException("maps/ holds no configuration")
     maps = [load_config(path) for path in configs]
     out_dir = out or (root / "dist" / "wiki")
-    page = write_gallery(
+    pages = write_wiki(
         maps,
         root / "docs" / "screenshots",
+        root / "dist",
         out_dir,
         repo or repo_slug(root),
         branch,
     )
-    console.print(f"[green]wrote[/] {page}  {page.stat().st_size / 1e3:.1f} kB")
-    console.print("Push it with scripts/publish-tours.sh.")
+    for page in pages:
+        console.print(f"  {page.name}  {page.stat().st_size / 1e3:.1f} kB")
+    console.print(f"[green]wrote[/] {len(pages)} wiki pages into {out_dir}")
+    console.print("Push them with scripts/publish-tours.sh.")
 
 
 @main.command(name="inspect")

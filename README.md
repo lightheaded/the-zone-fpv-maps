@@ -14,8 +14,13 @@ Status: four maps build from the open data, and all four load in the game. The t
 ## Maps
 
 `docs/maps.md` is the inventory. It holds the box, the spawn point, the source data and
-the numbers of every map. Every map has a rendered tour: pictures in `docs/maps.md` and
-on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-tours), and a video in the newest release.
+the numbers of every map. The [wiki](https://github.com/lightheaded/the-zone-fpv-maps/wiki) is the picture house: every map has a page
+there with its whole camera tour, and the tour video is an asset of the newest release.
+
+A tour picture is rendered from the map file, not captured in the game. The geometry,
+the ground texture and the spawn point are the true ones, but there is no shadow and no
+in-game material. A picture that says "in the game" comes from a person who flew the
+map.
 
 ### vaksali
 
@@ -23,17 +28,37 @@ on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-
 
 Every landmark of this tile stands on public ground, so a person can photograph the walls without a permit. It is the first candidate for photo facades.
 
-![vaksali from above](docs/screenshots/vaksali-preview.jpg)
+![The Tartu Mill elevator, 48.6 m above the terrain, beside its silos](docs/screenshots/vaksali-tour-2-tartu-mill.jpg)
 
-![The Tartu Mill elevator in vaksali](docs/screenshots/vaksali-tour-2-tartu-mill.jpg)
+*The Tartu Mill elevator, 48.6 m above the terrain, beside its silos.*
+
+![The freight yard at the spawn point, with the rails and the wagons of the orthophoto](docs/screenshots/vaksali-tour-5-spawn.jpg)
+
+*The freight yard at the spawn point, with the rails and the wagons of the orthophoto.*
+
+![The whole tile from above, with every roof marked red](docs/screenshots/vaksali-preview.jpg)
+
+*The whole tile from above, with every roof marked red.*
+
+More pictures and the tour video: the [`vaksali` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/vaksali).
 
 ### ulejoe
 
 1 km² of [Ülejõe](https://et.wikipedia.org/wiki/%C3%9Clej%C3%B5e) at 12 cm per pixel. It holds the old factory wings around a courtyard at Puiestee 13b, the [Tartu](https://en.wikipedia.org/wiki/Tartu) Ülikooli staadion, [Lodjakoda](https://lodi.ee/), the two spires of Peetri kirik at 59 m, and the [Emajõgi](https://et.wikipedia.org/wiki/Emaj%C3%B5gi) between two bridges. 883 buildings from the LOD2 data. The drone spawns on the water, 89 m from the Kroonuaia sild and 89 m from the Vabadussild.
 
-![ulejoe from above](docs/screenshots/ulejoe-preview.jpg)
+![The camera flies down the Emajogi toward the spawn point](docs/screenshots/ulejoe-tour-3-emajogi.jpg)
 
-![Peetri kirik in ulejoe](docs/screenshots/ulejoe-tour-2-peetri-kirik.jpg)
+*The camera flies down the Emajogi toward the spawn point.*
+
+![Peetri kirik, the tallest structure of the tile at 59.1 m](docs/screenshots/ulejoe-tour-2-peetri-kirik.jpg)
+
+*Peetri kirik, the tallest structure of the tile at 59.1 m.*
+
+![The whole tile from above, with every roof marked red](docs/screenshots/ulejoe-preview.jpg)
+
+*The whole tile from above, with every roof marked red.*
+
+More pictures and the tour video: the [`ulejoe` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/ulejoe).
 
 ### tartu-base
 
@@ -41,17 +66,33 @@ The whole city at low fidelity, 9 x 9 km and 81 km². Terrain from the 1 m eleva
 
 Use it for orientation and for long cruises. For freestyle, wait for the detailed maps.
 
-![tartu-base from above](docs/screenshots/tartu-base-preview.jpg)
+![The whole 9 x 9 km tile from 3.4 km](docs/screenshots/tartu-base-tour-1-overview.jpg)
 
-![The whole city tile from 3.4 km](docs/screenshots/tartu-base-tour-1-overview.jpg)
+*The whole 9 x 9 km tile from 3.4 km.*
+
+![A cruise over the city at 620 m, with the Emajogi below](docs/screenshots/tartu-base-tour-2-cruise.jpg)
+
+*A cruise over the city at 620 m, with the Emajogi below.*
+
+More pictures and the tour video: the [`tartu-base` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/tartu-base).
 
 ### annelinn-test
 
 1 km² of Annelinn with the west end of Lohkva. Terrain from the 1 m elevation model, the 10 cm orthophoto of April 2024 as ground texture, 145 buildings from the LOD2 data, and test objects near the spawn point. The buildings use the in-game concrete and asphalt textures.
 
-![annelinn-test from above](docs/screenshots/annelinn-test-preview.jpg)
+![In the game, on the first flight of 2026-09-11](docs/screenshots/annelinn-test-ingame-1.jpg)
 
-![annelinn-test in the game](docs/screenshots/annelinn-test-ingame-1.jpg)
+*In the game, on the first flight of 2026-09-11.*
+
+![The panel houses of Annelinn, from the rendered tour](docs/screenshots/annelinn-test-tour-1-overview.jpg)
+
+*The panel houses of Annelinn, from the rendered tour.*
+
+![The whole tile from above, with every roof marked red](docs/screenshots/annelinn-test-preview.jpg)
+
+*The whole tile from above, with every roof marked red.*
+
+More pictures and the tour video: the [`annelinn-test` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/annelinn-test).
 
 ## Build a map yourself
 

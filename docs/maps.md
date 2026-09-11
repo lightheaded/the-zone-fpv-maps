@@ -68,7 +68,7 @@ Maa-amet 1:2000 sheet 473658, so one orthophoto sheet and one elevation sheet co
 
 *The spawn point in the open freight yard.*
 
-Every shot and the tour video are on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-tours).
+Every shot of the tour, and the video, are on the [`vaksali` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/vaksali).
 
 Every landmark of this tile stands on public ground, so a person can photograph the
 walls without a permit. That is why it is the first candidate for photo facades. See
@@ -106,7 +106,7 @@ elevation sheets feed one texture. All four sheets are from the same flight of
 
 *The camera flies down the Emajogi toward the spawn point.*
 
-Every shot and the tour video are on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-tours).
+Every shot of the tour, and the video, are on the [`ulejoe` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/ulejoe).
 
 The bridges are in the orthophoto under the drone, but not in the geometry. A bridge is
 not a building, so the LOD2 data has none. Treat the river as open water until the
@@ -138,7 +138,7 @@ The whole city at low fidelity, 9 x 9 km and 81 km². It holds every cluster of
 
 *The spawn point on the river, between the two bridges.*
 
-Every shot and the tour video are on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-tours).
+Every shot of the tour, and the video, are on the [`tartu-base` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/tartu-base).
 
 Fly it for orientation and for long cruises. For freestyle, use a detailed tile.
 
@@ -169,7 +169,7 @@ the west end of [Lohkva](https://et.wikipedia.org/wiki/Lohkva). It is the Maa-am
 
 *The spawn point with the probe objects.*
 
-Every shot and the tour video are on the [wiki gallery](https://github.com/lightheaded/the-zone-fpv-maps/wiki/Map-tours).
+Every shot of the tour, and the video, are on the [`annelinn-test` wiki page](https://github.com/lightheaded/the-zone-fpv-maps/wiki/annelinn-test).
 
 It stays in the repository as a probe carrier. Every new question about the game format
 gets a probe here first.

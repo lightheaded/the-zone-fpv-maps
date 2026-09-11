@@ -240,8 +240,9 @@ its own, so the two never disagree.
 
 Decision: `docs/maps.md` stays the inventory and shows two tour pictures per map. Every
 tour picture goes into `docs/screenshots/`. The tour video goes to the release as an
-asset, never into git. `fpv-maps gallery` writes a wiki page that links every picture
-from the repository and every video from the newest release.
+asset, never into git. `fpv-maps gallery` writes the wiki: an index page, one page per
+map, a sidebar and a footer. Every picture is linked from the repository and every video
+from the newest release.
 `scripts/publish-tours.sh` uploads the videos and pushes the page.
 
 Why: a tour video is 30 to 100 MB. Git keeps every version of it forever, and a
@@ -250,6 +251,6 @@ in the clone and it is versioned with the map file that it shows. The wiki is a
 separate repository, so a long gallery page does not add noise to a pull request. The
 pictures are linked, not copied, so the wiki never holds a second copy that ages.
 
-Cost: the wiki page is generated, so nobody must edit it by hand. A map that changes
+Cost: the wiki pages are generated, so nobody must edit them by hand. A map that changes
 needs `scripts/publish-tours.sh` again. GitHub does not play an MP4 asset in the page,
 so the link starts a download.
