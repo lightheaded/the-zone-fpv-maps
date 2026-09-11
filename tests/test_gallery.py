@@ -157,6 +157,16 @@ def test_write_wiki_writes_every_page(demo, tmp_path: Path):
     assert "Maa- ja Ruumiamet" in (tmp_path / "wiki" / "_Footer.md").read_text(encoding="utf-8")
 
 
+def test_write_wiki_removes_the_page_of_a_map_that_is_gone(demo, tmp_path: Path):
+    configs, shots, dist = demo
+    out = tmp_path / "wiki"
+    write_wiki(configs, shots, dist, out, "owner/repo")
+    (out / "gone.md").write_text("# gone")
+    write_wiki(configs, shots, dist, out, "owner/repo")
+    assert not (out / "gone.md").exists()
+    assert (out / "demo.md").exists()
+
+
 def test_repo_slug_reads_the_remote(tmp_path: Path):
     import subprocess
 

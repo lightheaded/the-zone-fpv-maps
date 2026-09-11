@@ -294,6 +294,13 @@ def write_wiki(
     for cfg in maps:
         pages[f"{cfg.name}.md"] = map_page(cfg, screenshots, dist, links)
 
+    # A map that is gone must not keep its page. Remove every Markdown file of an
+    # earlier run that this run does not write. The folder holds generated pages only.
+    if (out_dir / HOME).is_file():
+        for old in out_dir.glob("*.md"):
+            if old.name not in pages:
+                old.unlink()
+
     written: list[Path] = []
     for name, text in pages.items():
         path = out_dir / name
