@@ -1,0 +1,36 @@
+# A 1 km2 tile of the Tartu industry belt, over Ropka, Karlova and Vaksali. The box
+# is the Maa-amet 1:2000 sheet 473658, so one orthophoto sheet and one elevation
+# sheet cover it. It holds the Tartu Mill elevator, the railway station with its
+# freight yard, Aparaaditehas, the veetorn and Pauluse kirik. The tile is the first
+# candidate for photo facades, because a person can photograph every landmark from
+# public ground. See docs/locations.md and docs/analysis.md section 4.
+
+[map]
+name = "vaksali"
+description = "1 km2 of the Tartu industry belt: the Tartu Mill elevator, the railway yard, Aparaaditehas, the water tower and Pauluse kirik."
+
+[area]
+# L-EST97 (EPSG:3301), order east, north: xmin, ymin, xmax, ymax.
+bbox = [658000, 6473000, 659000, 6474000]
+# The spawn point is in the open freight yard. The nearest LOD2 building stands 121 m
+# away and the ground is 63.2 m above sea level, so nothing encloses the drone. The
+# Tartu Mill silos are 210 m south west, Pauluse kirik 425 m east and the veetorn
+# 590 m north east.
+origin = [658440, 6473320]
+
+[terrain]
+step_m = 2.0
+
+[ground_texture]
+# 8192 px over 1000 m is 12 cm per pixel. The city orthophoto is 10 cm.
+size_px = 8192
+jpeg_quality = 88
+
+[buildings]
+enabled = true
+municipalities = ["Tartu_linn"]
+wall_material = "z_concrete2"
+roof_material = "z_pebbled_asphalt"
+
+[probes]
+enabled = false

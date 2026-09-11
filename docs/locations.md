@@ -28,6 +28,17 @@ Each cluster is one candidate for a detailed map. The size is the bounding box o
 | 7 | Ropka, [Ihaste](https://et.wikipedia.org/wiki/Ihaste) ja [Aardlapalu](https://et.wikipedia.org/wiki/Aardlapalu) | Ihaste sild (Idaringtee), Emajõgi meanders, Aardlapalu liivakarjäär, Tartu Veevärk plant, Tööstuse alajaam, [Tartu vangla](https://www.vangla.ee/et/asutused-kontaktid/tartu-vangla) | 3 x 3 km, 9 km² | Low. Few buildings. Prison and airport zones limit drone flights. |
 | 8 | [Lõunakeskus](https://lounakeskus.com/) | Lõunakeskus, Lääneringtee, Lemmatsi alajaam | 1 x 1 km, 1 km² | Low. Low priority. |
 
+## Tiles that are built
+
+| Map | L-EST97 box (E, N) | Cluster |
+|-----|--------------------|---------|
+| `vaksali` | 658000 6473000 to 659000 6474000, the 1:2000 sheet 473658 | the north half of cluster 4 |
+| `ulejoe` | 658600 6474850 to 659600 6475850 | the south half of cluster 2 |
+
+A cluster is a plan, and a tile is a map. No tile covers a whole cluster, because
+1 km² is the area that holds a 12 cm ground texture. `docs/maps.md` lists every map
+with its numbers.
+
 ## Landmark coordinates
 
 | Landmark | Lat | Lon | Note |

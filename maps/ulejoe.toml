@@ -1,0 +1,34 @@
+# A 1 km2 tile of Ulejoe in Tartu, with the river and the north edge of the old town
+# bank. The box does not align to the Maa-amet 1:2000 grid, so four orthophoto sheets
+# and two elevation sheets feed one 8192 px texture. It holds the old factory block at
+# Puiestee 13b, the university stadium, Lodjakoda, Peetri kirik and the Emajogi
+# between the Vabadussild and the Kroonuaia sild. See docs/locations.md.
+
+[map]
+name = "ulejoe"
+description = "1 km2 of Ulejoe in Tartu: the old factory block at Puiestee, the university stadium, Lodjakoda, the two spires of Peetri kirik and the Emajogi between two bridges."
+
+[area]
+# L-EST97 (EPSG:3301), order east, north: xmin, ymin, xmax, ymax.
+bbox = [658600, 6474850, 659600, 6475850]
+# The spawn point is on the Emajogi, 89 m from the Kroonuaia sild and 89 m from the
+# Vabadussild. The water is 31.5 m above sea level in the EH2000 system and the
+# nearest LOD2 building stands 38 m away on the south bank, so the water is open.
+origin = [659228, 6474937]
+
+[terrain]
+step_m = 2.0
+
+[ground_texture]
+# 8192 px over 1000 m is 12 cm per pixel. The city orthophoto is 10 cm.
+size_px = 8192
+jpeg_quality = 88
+
+[buildings]
+enabled = true
+municipalities = ["Tartu_linn"]
+wall_material = "z_concrete2"
+roof_material = "z_pebbled_asphalt"
+
+[probes]
+enabled = false

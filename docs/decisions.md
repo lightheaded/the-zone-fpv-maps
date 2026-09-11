@@ -142,3 +142,43 @@ building, so the drone can never spawn inside one, and the first view is the arc
 bridge with [Toomemägi](https://et.wikipedia.org/wiki/Toomem%C3%A4gi) and the old town behind it. The point was found from the
 elevation model and the orthophoto, not by eye: water is the flattest and darkest
 part of the box.
+
+## 2026-09-11: The first two detailed tiles are vaksali and ulejoe
+
+Decision: the first two detailed maps are `vaksali`, the 1:2000 sheet 473658 in
+the industry belt, and `ulejoe`, a 1 km² box over the [Emajõgi](https://et.wikipedia.org/wiki/Emaj%C3%B5gi) and
+[Ülejõe](https://et.wikipedia.org/wiki/%C3%9Clej%C3%B5e). They come before
+[Annelinn](https://et.wikipedia.org/wiki/Annelinn), which `docs/analysis.md` names first.
+
+Why: the wall texture is the limit of the whole project, not the geometry. The open data
+gives roofs at 10 cm and shapes at LOD2, and nothing open gives a facade. Own ground
+photos are the only source with no permit and no size limit, and they need a landmark
+that a person can walk around on public ground. Both tiles pass that test. The
+[Aparaaditehas](https://aparaaditehas.ee/) courtyards are open to visitors, and the
+veetorn, Pauluse kirik, the station, Lodjakoda, the stadium and the factory block at
+Puiestee stand on public streets. A drone cannot replace the walk: a 907 g aircraft
+without a class label flies A3 only, 150 m from a built up area.
+
+The two tiles also carry the height that freestyle needs. Measured in the LOD2 data of
+2026-09-05: `vaksali` holds 774 buildings with a median height of 6.2 m, 17 of
+them over 20 m, a 49.0 m tower at the [Tartu Mill](https://tartumill.ee/) block and a
+35.4 m water tower. `ulejoe` holds 882 buildings with a median height of 5.4 m, 10 of
+them over 20 m, the 59.4 m spires of Peetri kirik, and two factory blocks of
+107 x 80 m and 66 x 76 m.
+
+Cost: neither tile is a whole cluster of `docs/locations.md`. `vaksali` is the
+north half of cluster 4 and `ulejoe` is the south half of cluster 2. The rest of each
+cluster waits for a later map.
+
+## 2026-09-11: A detailed tile is 1 km² at 12 cm, even over four orthophoto sheets
+
+Decision: a detailed tile is 1 x 1 km with an 8192 px ground texture. That is 12 cm per
+pixel. `vaksali` aligns to the Maa-amet 1:2000 grid and needs one orthophoto
+sheet. `ulejoe` does not align, and needs four.
+
+Why: 12 cm is the finest ground texture that the memory budget in `docs/analysis.md`
+allows. A 16384 px texture needs 1.4 GB of video memory instead of 0.36 GB. The
+landmarks of Ülejõe span 802 x 675 m, and no sheet aligned box holds them all: a
+2 x 1 km box puts the Kroonuaia sild 5 m from its edge, and a 2 x 2 km box costs the
+same four sheets but drops the texture to 24 cm. Four downloads of 30 MB are cheaper
+than the lost detail.

@@ -2,7 +2,7 @@
 
 Maps of real places for the FPV drone simulator [The Zone](https://store.steampowered.com/app/3491280/). One reproducible pipeline turns open geodata into a map file that the game loads. The first maps are of [Tartu](https://en.wikipedia.org/wiki/Tartu), Estonia, built from [Maa- ja Ruumiamet](https://geoportaal.maaruum.ee/) open geodata.
 
-Status: the first test tile loads in the game. The base map of the whole city is built and waits for its first flight. See `docs/the-zone-format.md` for what is verified and what is open.
+Status: four maps build from the open data. The test tile loads in the game, and so does the base map of the whole city. The two detailed tiles wait for their first flight. See `docs/the-zone-format.md` for what is verified and what is open, and `docs/maps.md` for the inventory of every map.
 
 ## Install a map
 
@@ -12,6 +12,23 @@ Status: the first test tile loads in the game. The base map of the whole city is
 4. Start the game, open Play Offline and pick the map from the custom maps.
 
 ## Maps
+
+`docs/maps.md` is the inventory. It holds the box, the spawn point, the source data and
+the numbers of every map.
+
+### vaksali
+
+1 km² of the Tartu industry belt at 12 cm per pixel, over Ropka, Karlova and Vaksali. It holds the [Tartu Mill](https://tartumill.ee/) grain elevator with its 49 m tower, the railway station with its freight yard, [Aparaaditehas](https://aparaaditehas.ee/), the 35 m veetorn and Pauluse kirik. 776 buildings from the LOD2 data. The drone spawns in the open freight yard, 121 m from the nearest building.
+
+Every landmark of this tile stands on public ground, so a person can photograph the walls without a permit. It is the first candidate for photo facades.
+
+![vaksali from above](docs/screenshots/vaksali-preview.jpg)
+
+### ulejoe
+
+1 km² of [Ülejõe](https://et.wikipedia.org/wiki/%C3%9Clej%C3%B5e) at 12 cm per pixel. It holds the old factory wings around a courtyard at Puiestee 13b, the [Tartu](https://en.wikipedia.org/wiki/Tartu) Ülikooli staadion, [Lodjakoda](https://lodi.ee/), the two spires of Peetri kirik at 59 m, and the [Emajõgi](https://et.wikipedia.org/wiki/Emaj%C3%B5gi) between two bridges. 883 buildings from the LOD2 data. The drone spawns on the water, 89 m from the Kroonuaia sild and 89 m from the Vabadussild.
+
+![ulejoe from above](docs/screenshots/ulejoe-preview.jpg)
 
 ### tartu-base
 
@@ -51,8 +68,10 @@ uv run fpv-maps build maps/tartu-base.toml --install
 
 ### Tartu
 
-- Detailed maps of 2 to 6 km² each: `annelinn-lohkva`, `tahtvere-vaksali`, `kesklinn`, `raadi`, and more. For freestyle and rehearsal.
-- Trees, power lines, lattice towers, bridges and a water surface for `tartu-base`.
+- More detailed tiles of 1 km²: `annelinn-lohkva`, `tahtvere`, `kesklinn`, `raadi`. For freestyle and rehearsal.
+- Photo facades on the walls, from own ground photos. `vaksali` and `ulejoe` come first.
+- Trees, power lines, lattice towers, bridges and a water surface.
+- Hand made hero assets: the silos of Tartu Mill, the church spires, the laululava and the telemast.
 
 ## Documentation
 
@@ -60,6 +79,7 @@ uv run fpv-maps build maps/tartu-base.toml --install
 - `docs/the-zone-format.md`: what the game loads, verified facts, open questions.
 - `docs/decisions.md`: decision log.
 - `docs/development.md`: setup and commands.
+- `docs/maps.md`: the inventory of every map.
 - `docs/locations.md`: map tiles and landmarks in Tartu.
 - `docs/licensing.md`: license decisions.
 - `AGENTS.md`: rules for contributors and coding agents.

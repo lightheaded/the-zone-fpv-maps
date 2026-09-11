@@ -38,11 +38,14 @@ Our own maps, for the same comparison:
 |-----|-----------|-----------|--------|-----------|--------|-----------------|
 | annelinn-test | 23 MB | 0.51 M | 14 | 10 | 1000 x 1000 m | 1 JPEG, 1 PNG, 11.3 MB |
 | tartu-base | 126 MB | 2.87 M | 108 | 3 | 9000 x 9000 m | 1 JPEG, 18.9 MB |
+| vaksali | 26.5 MB | 0.55 M | 3 | 3 | 1000 x 1000 m | 1 JPEG, 12.2 MB |
+| ulejoe | 25.8 MB | 0.54 M | 3 | 3 | 1000 x 1000 m | 1 JPEG, 11.6 MB |
 
 Conclusions:
 
 - A 1 km² tile with 0.5 to 2 million triangles is inside the range that the game
-  ships. The base map of the whole city is 126 MB and 2.87 million triangles, which
+  ships. A detailed tile of 1 km² holds about 0.55 million triangles and 26 MB, of
+  which the ground texture is 12 MB. Three meshes carry it: terrain, walls and roofs. The base map of the whole city is 126 MB and 2.87 million triangles, which
   is 1.6 times the triangles of the largest official map and 0.85 times its file
   size. Test it before you rely on it.
 - One official map embeds PNG textures. This suggests that embedded textures work.

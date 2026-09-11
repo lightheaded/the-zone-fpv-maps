@@ -60,3 +60,26 @@ def test_base_map_config():
     # The spawn point is inside the box and not at its center.
     assert cfg.bbox.contains(*cfg.origin)
     assert cfg.origin != cfg.bbox.center
+
+
+MAPS = sorted((Path(__file__).parent.parent / "maps").glob("*.toml"))
+
+
+@pytest.mark.parametrize("path", MAPS, ids=lambda p: p.stem)
+def test_every_map_config_is_valid(path):
+    """Every file in maps/ loads, and the map name is the file name."""
+    cfg = load_config(path)
+    assert cfg.name == path.stem
+    assert cfg.description
+    assert cfg.bbox.width > 0
+    assert cfg.bbox.height > 0
+    # The game spawns the drone at the origin. An origin outside the box has no terrain.
+    assert cfg.bbox.contains(*cfg.origin)
+
+
+@pytest.mark.parametrize("path", MAPS, ids=lambda p: p.stem)
+def test_every_map_has_a_preview(path):
+    """The release workflow refuses a map without a preview. Fail here first."""
+    preview = path.parent.parent / "docs" / "screenshots" / f"{path.stem}-preview.jpg"
+    assert preview.is_file()
+    assert preview.stat().st_size > 0
