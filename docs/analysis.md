@@ -118,7 +118,7 @@ See `docs/locations.md` for coordinates and the corrected grouping, and `docs/li
 3. Kesklinn ja Emajõgi. The most recognizable and the hardest. Spires and the Kaarsild need hand work.
 4. Raadi. ERM and the runway, cheap to build, good for speed.
 5. Vaksali, Maarjamõisa ja Tammelinn. Station, Tartu Mill, hospital, telemast.
-6. Ülejõe ja Supilinn. Lodjakoda and the Tarkon factory block. Can merge with Kesklinn later as one 6 km² map if the game handles it.
+6. Ülejõe ja Supilinn. Lodjakoda and the Haine Paelavabrik block. Can merge with Kesklinn later as one 6 km² map if the game handles it.
 7. Ropka, Ihaste ja Aardlapalu. Quarry and river meanders.
 8. Lõunakeskus.
 

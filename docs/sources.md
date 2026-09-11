@@ -28,7 +28,8 @@
 
 ## Tartu places
 
-- Former Tartu Kontrollaparatuuri Tehas, now Tarkon Kinnisvara: https://ehitusleht.ee/tarkon-kinnisvara-aratab-musti-kaste-valmistanud-tehase-hoone-tartus-taas-elule/
+- Haine Paelavabrik block, Puiestee 13b: location from the maintainer, coordinates from Nominatim.
+- Former Tartu Kontrollaparatuuri Tehas, now Tarkon Kinnisvara, low priority: https://ehitusleht.ee/tarkon-kinnisvara-aratab-musti-kaste-valmistanud-tehase-hoone-tartus-taas-elule/
 - Tartu Mill contact: https://tartumill.ee/kontakt
 - Tartu elektrijaam in Lohkva: https://tartu.ee/et/tartu-elektrijaam
 - Grüne Fee contact: https://grynefee.ee/en/contact-us/
