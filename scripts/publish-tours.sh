@@ -62,6 +62,16 @@ if ! git clone --quiet --depth 1 "$wiki_remote" "$work/wiki"; then
   exit 1
 fi
 
+# The wiki is a second repository, and a fresh clone of it reads the global git
+# identity. That can be another identity than the one of this repository, and a wiki
+# commit is public. Copy the identity and the signing settings of this repository.
+for key in user.name user.email user.signingkey gpg.format commit.gpgsign; do
+  value=$(git config --get "$key" || true)
+  if [ -n "$value" ]; then
+    git -C "$work/wiki" config "$key" "$value"
+  fi
+done
+
 cp dist/wiki/*.md "$work/wiki/"
 git -C "$work/wiki" add -A
 if git -C "$work/wiki" diff --cached --quiet; then
