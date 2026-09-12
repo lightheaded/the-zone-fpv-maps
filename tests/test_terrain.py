@@ -36,8 +36,11 @@ def test_build_terrain_grid(bbox, flat_field):
     assert (mesh.face_normals[:, 1] > 0.99).all()
     uv = mesh.visual.uv
     assert uv.min() >= 0 and uv.max() <= 1
-    # Vertex 0 is the north west corner: u = 0, v = 1.
-    assert np.allclose(uv[0], [0, 1])
+    # Vertex 0 is the north west corner: u = 0, v = 0. V grows south, so row 0 of the
+    # ground texture lands on the north edge, which is where the orthophoto keeps it.
+    assert np.allclose(uv[0], [0, 0])
+    # The south east corner is the far end of both axes.
+    assert np.allclose(uv[-1], [1, 1])
 
 
 def test_split_cells_shares_edge_points():
@@ -67,13 +70,14 @@ def test_terrain_chunks_cover_the_box_without_cracks(bbox, flat_field):
     lo = np.min([m.bounds[0] for m in chunks.values()], axis=0)
     hi = np.max([m.bounds[1] for m in chunks.values()], axis=0)
     assert lo[0] == -500 and hi[0] == 500 and lo[2] == -500 and hi[2] == 500
-    # Chunk r00c00 is the north west corner, so its UV reaches (0, 1).
+    # Chunk r00c00 is the north west corner, so its UV starts at (0, 0).
     uv = chunks["terrain_r00c00"].visual.uv
-    assert np.allclose(uv.min(axis=0), [0.0, 0.8])
-    assert np.allclose(uv.max(axis=0), [0.2, 1.0])
-    # Chunk r03c03 is the south east corner and reaches (1, 0).
+    assert np.allclose(uv.min(axis=0), [0.0, 0.0])
+    assert np.allclose(uv.max(axis=0), [0.2, 0.2])
+    # Chunk r03c03 is the south east corner and reaches (1, 1).
     uv = chunks["terrain_r03c03"].visual.uv
-    assert np.allclose(uv.max(axis=0), [1.0, 0.2])
+    assert np.allclose(uv.min(axis=0), [0.8, 0.8])
+    assert np.allclose(uv.max(axis=0), [1.0, 1.0])
 
 
 def test_terrain_chunks_off_gives_one_mesh(bbox, flat_field):

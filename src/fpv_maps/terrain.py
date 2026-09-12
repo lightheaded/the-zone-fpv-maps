@@ -64,7 +64,7 @@ class TerrainGrid:
     """A lattice of terrain points in game axes, row 0 north and column 0 west.
 
     ``vertices`` is (rows, columns, 3) in meters, (x east, y up, z south).
-    ``uv`` is (rows, columns, 2) over the whole map, (0, 0) south west, (1, 1) north east.
+    ``uv`` is (rows, columns, 2) over the whole map, (0, 0) north west, (1, 1) south east.
     """
 
     vertices: np.ndarray
@@ -99,8 +99,12 @@ def terrain_grid(
 
     enh = np.column_stack([ee.ravel(), nn.ravel(), hh])
     vertices = to_game(enh, origin).reshape(ny, nx, 3)
+    # V grows south, because glTF reads V = 0 from row 0 of the image and row 0 of
+    # the orthophoto is north. A V that grows north turns the ground texture upside
+    # down over the whole map: every building then sits on a picture of somewhere
+    # else, mirrored about the middle latitude of the box.
     uv = np.stack(
-        [(ee - bbox.xmin) / bbox.width, (nn - bbox.ymin) / bbox.height],
+        [(ee - bbox.xmin) / bbox.width, (bbox.ymax - nn) / bbox.height],
         axis=-1,
     )
     return TerrainGrid(vertices=vertices, uv=uv)
@@ -133,8 +137,8 @@ def build_terrain(
 ) -> trimesh.Trimesh:
     """One grid mesh over ``bbox`` with vertex spacing ``step``, UVs stretched over the box.
 
-    UV (0, 0) is the south west corner and (1, 1) the north east corner. The exporter
-    flips V, so row 0 of the ground texture is north, as in the orthophoto.
+    UV (0, 0) is the north west corner and (1, 1) the south east corner, which puts
+    row 0 of the ground texture at the north edge of the map, as in the orthophoto.
     """
     grid = terrain_grid(field, bbox, origin, step)
     return grid_mesh(grid, slice(None), slice(None))

@@ -84,3 +84,34 @@ def test_srgb_to_linear():
 
 def test_checker_is_png():
     assert checker_image().format == "PNG"
+
+
+def test_the_exported_ground_uv_follows_gltf(tmp_path: Path, bbox, flat_field):
+    """North in the ground texture must land on the north edge of the exported map.
+
+    glTF reads V = 0 from row 0 of the image, and row 0 of the orthophoto is north, so
+    the north edge of the terrain must carry V = 0. This reads the exported file rather
+    than the renderer on purpose. The renderer once flipped the texture on upload, which
+    cancelled a terrain that numbered V the other way round: every tour picture came out
+    right while the map that shipped to the game had its ground mirrored north to south.
+    A test that draws cannot see that, because it sees both faults at once.
+    """
+    import numpy as np
+    import trimesh
+
+    origin = (662500.0, 6473500.0, 40.0)
+    terrain = build_terrain(flat_field, bbox, origin, step=250.0)
+    rgb = np.zeros((64, 64, 3), dtype=np.uint8)
+    terrain.visual.material = texture_material("fpv_ground", jpeg_image(rgb, 80))
+    glb = tmp_path / "ground.glb"
+    write_glb({"terrain": terrain}, glb)
+
+    scene = trimesh.load(glb, process=False)
+    mesh = scene.geometry["terrain"]
+    vertices = np.asarray(mesh.vertices)
+    uv = np.asarray(mesh.visual.uv)
+    # Game axes put north at -z, so the smallest z is the north edge of the map.
+    north = vertices[:, 2] == vertices[:, 2].min()
+    south = vertices[:, 2] == vertices[:, 2].max()
+    assert uv[north, 1].max() < 0.01, "the north edge reads row 0 of the ground texture"
+    assert uv[south, 1].min() > 0.99, "the south edge reads the last row"
