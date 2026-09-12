@@ -73,6 +73,11 @@ shape of the `[drone]` and `[course]` sections.
 Repeat on both machines. Fill the table with `uv run fpv-maps benchmark --out
 docs/benchmark-table.md`, which writes the cost half, and add the frame rates by hand.
 
+Name the machines in the report. A frame rate without a GPU, a resolution and a
+quality preset beside it is not a measurement. The two columns of the table below are
+one laptop and one desktop with a recent 32 GB card, which is close to the ceiling of
+what a player has, so a variant that does not hold up there will not hold up anywhere.
+
 ## What a map costs
 
 Written by `fpv-maps benchmark`. The texture memory is the worst case of a runtime
