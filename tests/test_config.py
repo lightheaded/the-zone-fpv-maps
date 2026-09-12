@@ -79,7 +79,12 @@ def test_every_map_config_is_valid(path):
 
 @pytest.mark.parametrize("path", MAPS, ids=lambda p: p.stem)
 def test_every_map_has_a_preview(path):
-    """The release workflow refuses a map without a preview. Fail here first."""
+    """The release workflow refuses a map without a preview. Fail here first.
+
+    A private map has no published preview by design, so it is skipped.
+    """
+    if load_config(path).private:
+        pytest.skip("a private map is never published, so it needs no preview")
     preview = path.parent.parent / "docs" / "screenshots" / f"{path.stem}-preview.jpg"
     assert preview.is_file()
     assert preview.stat().st_size > 0

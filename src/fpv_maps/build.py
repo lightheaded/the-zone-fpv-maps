@@ -23,6 +23,7 @@ from fpv_maps.drone import (
     select_tiles,
 )
 from fpv_maps.export import write_glb
+from fpv_maps.facades import build_facade_buildings
 from fpv_maps.fetch import LICENSE_URL, Fetcher
 from fpv_maps.geotiff import dtm_resolution, read_heights, read_rgb
 from fpv_maps.inspect import inspect_glb
@@ -138,16 +139,40 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
         for obj_path, fwt_path in lod2_files:
             buildings.extend(read_obj(obj_path, read_offset(fwt_path)).inside(cfg.bbox))
         report["buildings_in_bbox"] = len(buildings)
-        meshes.update(
-            build_building_chunks(
-                buildings,
-                cfg.bbox,
-                origin,
-                cfg.wall_material,
-                cfg.roof_material,
-                cfg.chunk_m,
+        if cfg.facades.enabled:
+            # A whole photo frame is about a kilometre across, so the camera fit needs
+            # terrain well outside the map box. It is read coarse: it only carries the
+            # four corners of a frame, never a triangle of the map.
+            log("facades from oblique photos")
+            wide = cfg.bbox.buffer(2000.0)
+            fetcher = Fetcher(cfg.data_dir, quiet=quiet)
+            try:
+                wide_dtm = fetcher.fetch_dtm(wide)
+            finally:
+                fetcher.close()
+            corner_field = read_heights(wide_dtm, wide, res_m=5.0)
+            facade_meshes, facade_report = build_facade_buildings(
+                buildings, cfg, origin, field, corner_field, rgb, ground, log=log
             )
-        )
+            meshes.update(facade_meshes)
+            report["facades"] = facade_report
+            report["sources"].append(
+                {
+                    "dataset": "Oblique photos, Maa- ja Ruumiamet Fotoladu",
+                    "files": [p["image"] for p in facade_report["photos"]],
+                }
+            )
+        else:
+            meshes.update(
+                build_building_chunks(
+                    buildings,
+                    cfg.bbox,
+                    origin,
+                    cfg.wall_material,
+                    cfg.roof_material,
+                    cfg.chunk_m,
+                )
+            )
 
     def ground_height(x: float, z: float) -> float:
         return field.sample_one(origin[0] + x, origin[1] - z) - origin[2]
@@ -219,6 +244,18 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
     stats = inspect_glb(out)
     report["glb"] = {k: v for k, v in asdict(stats).items() if k not in ("node_names",)}
     report["seconds"] = round(time.time() - t0, 1)
+    if cfg.private:
+        # A map over a private site must not carry its address. The bounding box, the
+        # origin and the names of the Maa-amet sheets each name the place to the
+        # metre, and a report is the file most likely to be pasted somewhere public
+        # next to a frame rate. The mesh itself has local coordinates only, so it
+        # gives nothing away. Redact here rather than at the publish step: a rule that
+        # a person has to remember is a rule that is broken once.
+        for key in ("bbox_lest97", "origin_lest97", "origin_height_eh2000"):
+            report.pop(key, None)
+        for source in report["sources"]:
+            source.pop("files", None)
+        report["private"] = True
     (cfg.dist_dir / f"{cfg.name}-build-report.json").write_text(
         json.dumps(report, indent=2), encoding="utf-8"
     )

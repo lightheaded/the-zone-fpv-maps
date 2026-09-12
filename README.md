@@ -125,13 +125,14 @@ uv run fpv-maps tour maps/tartu-vaksali.toml --publish
 ### Tartu
 
 - More detailed tiles of 1 km²: `annelinn-lohkva`, `tahtvere`, `kesklinn`, `raadi`. For freestyle and rehearsal.
-- Photo facades on the walls, from own ground photos. `tartu-vaksali` and `tartu-ulejoe` come first.
+- Photo facades on the walls. The pipeline builds them today from the Maa- ja Ruumiamet oblique photos, and `docs/facades.md` describes every step. The maps it makes are not published: the photos are not licensed for redistribution until the access request in `docs/licensing.md` D6 is answered.
 - Trees, power lines, lattice towers, bridges and a water surface.
 - Hand made hero assets: the silos of Tartu Mill, the church spires, the laululava and the telemast.
 
 ## Documentation
 
 - `docs/analysis.md`: feasibility study and plan for Tartu.
+- `docs/facades.md`: how a wall gets a photo of itself from an oblique aerial frame.
 - `docs/the-zone-format.md`: what the game loads, verified facts, open questions.
 - `docs/decisions.md`: decision log.
 - `docs/development.md`: setup and commands.

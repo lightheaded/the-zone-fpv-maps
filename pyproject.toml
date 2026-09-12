@@ -34,6 +34,13 @@ tour = [
 survey = [
     "DracoPy>=1.4",
 ]
+# Photo textured facades. The camera resection is a non linear least squares fit and
+# nothing in the base dependencies solves one. scipy ships wheels everywhere, so this
+# extra needs no compiler either. It is optional because only a map with a [facades]
+# section needs it, and only maps that are never published have one.
+facades = [
+    "scipy>=1.13",
+]
 
 [project.scripts]
 fpv-maps = "fpv_maps.cli:main"

@@ -1,0 +1,131 @@
+# The Tartu old town with photo textured walls. Same box, same spawn and the same
+# tour as tartu-old-town, so the two can be compared shot for shot. The walls take
+# their picture from the Maa- ja Ruumiamet oblique photos and the roofs take the
+# orthophoto, in place of the two in-game materials that every other map uses.
+#
+# This map is NOT publishable. The oblique photos are not licensed for
+# redistribution, and a baked atlas is a derivative of them. Build it, fly it, keep
+# it. See docs/licensing.md and docs/facades.md.
+
+[map]
+name = "tartu-old-town-facades"
+description = "The Tartu old town with walls textured from oblique photos and roofs from the orthophoto. Not publishable."
+# The oblique photos may not be redistributed, so nothing built from them is
+# published: no release asset, no wiki page, no screenshot. See docs/licensing.md D6.
+private = true
+
+[area]
+# L-EST97 (EPSG:3301), order east, north: xmin, ymin, xmax, ymax.
+bbox = [658750, 6473850, 659750, 6474850]
+# The spawn point is on Raekoja plats, in the open between the raekoda and the
+# Emajogi end of the square. The square is 60 m wide, so the drone starts enclosed
+# on two sides, which is what an old town flight feels like.
+origin = [659221, 6474313]
+
+[terrain]
+# Toomemagi rises about 25 m over the square, so the tile needs the fine step.
+step_m = 2.0
+
+[ground_texture]
+# 8192 px over 1000 m is 12 cm per pixel. The city orthophoto is 10 cm.
+size_px = 8192
+jpeg_quality = 88
+
+[buildings]
+enabled = true
+municipalities = ["Tartu_linn"]
+# Both are unused while [facades] is on. They stay so that turning facades off gives
+# the plain map back with no other edit.
+wall_material = "z_concrete2"
+roof_material = "z_pebbled_asphalt"
+
+[facades]
+enabled = true
+# Level 12 is half of the full 7952 px frame, which is about 18 cm on a wall. The
+# full frame is four times the tiles for detail that the atlas texel throws away.
+level = 12
+# 9 cm on the wall. The level 12 tiles are about 18 cm, so this samples them twice
+# over. That is deliberate: at one texel per photo pixel the atlas aliases, and a
+# facade seen from 3 m away in a narrow street is all aliasing. It costs file size
+# and no extra tiles.
+texel_m = 0.09
+atlas_px = 16384
+# 14 photos, chosen one per compass octant first. A wall faces one way, so the spread
+# of directions buys more coverage than the same number of the best scoring photos.
+max_sources = 22
+max_candidates = 90
+min_correlation = 0.30
+jpeg_quality = 85
+
+[probes]
+enabled = false
+
+# The camera tour that "fpv-maps tour" renders. Every target is L-EST97 (east, north).
+[tour]
+fps = 60
+size = [1920, 1080]
+
+[[tour.shot]]
+name = "overview"
+kind = "orbit"
+seconds = 12
+target = [659250, 6474350]
+radius_m = 700
+height_m = 420
+turns = 0.30
+look_height_m = 20
+fov_deg = 42
+
+[[tour.shot]]
+name = "raekoja-plats"
+kind = "orbit"
+seconds = 11
+target = [659221, 6474313]
+radius_m = 110
+height_m = 70
+turns = 0.45
+start_deg = 210
+look_height_m = 14
+
+[[tour.shot]]
+name = "toomemagi"
+kind = "orbit"
+seconds = 10
+target = [658812, 6474302]
+radius_m = 130
+height_m = 90
+turns = 0.40
+start_deg = 30
+look_height_m = 20
+
+[[tour.shot]]
+name = "jaani-kirik"
+kind = "orbit"
+seconds = 9
+target = [659072, 6474580]
+radius_m = 90
+height_m = 75
+turns = 0.35
+start_deg = 120
+look_height_m = 22
+
+[[tour.shot]]
+name = "kaarsild"
+kind = "orbit"
+seconds = 9
+target = [659420, 6474384]
+radius_m = 120
+height_m = 60
+turns = 0.35
+start_deg = 300
+look_height_m = 10
+
+[[tour.shot]]
+name = "spawn"
+kind = "reveal"
+seconds = 9
+target = [659221, 6474313]
+radius_m = 200
+height_m = 85
+turns = 0.22
+look_height_m = 8

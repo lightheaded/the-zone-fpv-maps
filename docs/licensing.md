@@ -54,6 +54,19 @@ Pertains to: facade textures in the second release.
 - Rationale: the photos are open data with attribution, but the viewer offers no export, and the [Chancellor of Justice](https://www.oiguskantsler.ee/sites/default/files/2025-11/Orto-%20ja%20kaldaerofotode%20avalikustamine.pdf) review of 2025 makes access uncertain. A written yes protects the project.
 - Alternatives: own drone photos, procedural facades.
 
+**Decided 2026-09-12: publish the process, not the map.** The pipeline can build a
+facade map today, at proof of concept tile volume, and `docs/facades.md` describes
+every step of how. That document, the code and the measured numbers are published.
+The built map is not. A baked facade atlas is a derivative of the photos, so until
+the written yes arrives:
+
+- No `.glb` built with `[facades]` on goes into a release, the wiki or the repository.
+- No screenshot and no tour video of such a map is published either. A picture of the
+  facades is a picture of the photos.
+- The tile cache under `data/fotoladu` stays local. `.gitignore` already blocks `data/`.
+
+`maps/tartu-old-town-facades.toml` carries the same warning at the top of the file.
+
 ## 2. Licenses that come with the inputs
 
 No choice here. Each entry says what we can do, what we cannot do, and what it means for the project.

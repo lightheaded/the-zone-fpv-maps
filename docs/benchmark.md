@@ -44,7 +44,31 @@ has no mesh and no orthophoto of its own, so the terrain comes from the 9.8 cm l
 elevation model, the buildings from the open LOD2 model and the ground texture from the
 open 10 cm orthophoto. The family walks the terrain step from 2 m to 0.5 m.
 
-The pair `vahi-molla-fine` and `vahi-molla-fine-flat` is the important one. They hold
+`suburb-1-lidar` was added on 2026-09-12 and takes the whole lidar footprint, 800 m
+square, at a 0.4 m terrain step. That is 8.0 million triangles, half again as many as
+the largest photogrammetry variant, and it is the map to fly to read the ground.
+
+### The lidar has no model
+
+Worth stating plainly, because the family name invites the opposite reading. **No map
+here is built from lidar geometry.** The L2 delivery holds exactly one product: a bare
+earth elevation raster with 9.8 cm cells over 825 x 854 m. There is no point cloud, no
+surface model and no reconstructed mesh in it.
+
+So a "lidar building" is not possible from what the survey delivered. Every building in
+the lidar family is the open LOD2 model, and the lidar contributes the ground under it
+and nothing else. Bare earth also means the trees and the houses are not in the
+terrain: the raster is the shape of the soil.
+
+To build models from the lidar the survey has to deliver the classified point cloud.
+That is a question for the survey company, not a gap in this pipeline.
+
+The photogrammetry family is the one with real measured geometry, and it covers 163 x
+140 m: the reconstruction, the orthophoto and the surface model all stop there. That is
+why the two families exist and why they cannot be merged into one map with the best of
+both. A survey mesh over the whole 800 m box needs another flight.
+
+The pair `suburb-1-fine` and `suburb-1-fine-flat` is the important one. They hold
 the same geometry and differ only in the texture, by a factor of eight. If the frame
 rate moves between them, texture memory is the limit. If it does not, triangles are.
 Nothing else in the family separates those two.
@@ -88,15 +112,16 @@ too high and the memory column is an upper bound.
 | Map | Box | Mesh error | Tile texture | Terrain | Ground px | Triangles | Meshes | Images | File | Texture VRAM | FPS desktop |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | `tartu-vaksali` | 1000 m | - | - | 2.00 m | 12.2 cm | 551,969 | 3 | 1 | 26 MB | 0.25 GB | 1005 |
-| `vahi-molla-lite` | 200 m | 0.25 m | 256 px | 1.00 m | 4.9 cm | 563,913 | 165 | 126 | 29 MB | 0.12 GB | |
-| `vahi-molla` | 200 m | 0.12 m | 512 px | 0.50 m | 2.4 cm | 1,293,119 | 269 | 230 | 63 MB | 0.63 GB | 696 |
-| `vahi-molla-fine` | 200 m | 0.06 m | 1024 px | 0.50 m | 2.4 cm | 2,282,712 | 421 | 382 | 109 MB | 2.32 GB | 663 |
-| `vahi-molla-fine-flat` | 200 m | 0.06 m | 256 px | 0.50 m | 2.4 cm | 2,282,712 | 421 | 382 | 91 MB | 0.46 GB | 577 |
-| `vahi-molla-max-8k` | 200 m | 0.03 m | 1024 px | 0.25 m | 2.4 cm | 5,215,426 | 723 | 684 | 222 MB | 1.83 GB | 427 |
-| `vahi-molla-max` | 200 m | 0.03 m | 1024 px | 0.25 m | 1.2 cm | 5,215,426 | 723 | 684 | 251 MB | 4.89 GB | 450 |
-| `vahi-molla-wide-lite` | 640 m | - | - | 2.00 m | 15.6 cm | 206,390 | 116 | 1 | 5 MB | 0.08 GB | |
-| `vahi-molla-wide` | 640 m | - | - | 1.00 m | 7.8 cm | 820,790 | 116 | 1 | 19 MB | 0.33 GB | |
-| `vahi-molla-wide-max` | 640 m | - | - | 0.50 m | 7.8 cm | 3,278,390 | 116 | 1 | 44 MB | 0.33 GB | |
+| `suburb-1-lite` | 200 m | 0.25 m | 256 px | 1.00 m | 4.9 cm | 563,913 | 165 | 126 | 29 MB | 0.12 GB | |
+| `suburb-1` | 200 m | 0.12 m | 512 px | 0.50 m | 2.4 cm | 1,293,119 | 269 | 230 | 63 MB | 0.63 GB | 696 |
+| `suburb-1-fine` | 200 m | 0.06 m | 1024 px | 0.50 m | 2.4 cm | 2,282,712 | 421 | 382 | 109 MB | 2.32 GB | 663 |
+| `suburb-1-fine-flat` | 200 m | 0.06 m | 256 px | 0.50 m | 2.4 cm | 2,282,712 | 421 | 382 | 91 MB | 0.46 GB | 577 |
+| `suburb-1-max-8k` | 200 m | 0.03 m | 1024 px | 0.25 m | 2.4 cm | 5,215,426 | 723 | 684 | 222 MB | 1.83 GB | 427 |
+| `suburb-1-max` | 200 m | 0.03 m | 1024 px | 0.25 m | 1.2 cm | 5,215,426 | 723 | 684 | 251 MB | 4.89 GB | 450 |
+| `suburb-1-wide-lite` | 640 m | - | - | 2.00 m | 15.6 cm | 206,390 | 116 | 1 | 5 MB | 0.08 GB | |
+| `suburb-1-wide` | 640 m | - | - | 1.00 m | 7.8 cm | 820,790 | 116 | 1 | 19 MB | 0.33 GB | |
+| `suburb-1-wide-max` | 640 m | - | - | 0.50 m | 7.8 cm | 3,278,390 | 116 | 1 | 44 MB | 0.33 GB | |
+| `suburb-1-lidar` | 800 m | - | - | 0.40 m | 4.9 cm | 8,002,142 | 120 | 1 | 118 MB | 1.34 GB | |
 
 Flown 2026-09-12 on a desktop with an [RTX 5090](https://www.nvidia.com/en-eu/geforce/graphics-cards/50-series/rtx-5090/) at 3840 x 1600, one reading per map
 from the frame counter of the game. The laptop column is still open.
@@ -109,17 +134,17 @@ For scale, from `docs/the-zone-format.md`: the three official maps hold 0.98, 1.
 
 All four questions are answered, on one machine.
 
-**A 16384 px embedded texture loads and works.** `vahi-molla-max` carries one and ran
+**A 16384 px embedded texture loads and works.** `suburb-1-max` carries one and ran
 at 450 FPS. It was also the best looking map of the set. The estimate in
 `docs/analysis.md` that the Godot limit is usable holds.
 
 **Texture memory is not the binding constraint, and the pair that was built to test it
-says so clearly.** `vahi-molla-fine` and `vahi-molla-fine-flat` hold the same 2.28
+says so clearly.** `suburb-1-fine` and `suburb-1-fine-flat` hold the same 2.28
 million triangles and differ only in texture, 2.32 GB against 0.46 GB. The map with
 five times the texture ran *faster*, 663 against 577. A texture cut cannot make a map
 slower, so the 86 FPS between them is where the camera was pointing, not the texture.
 Any real cost of texture memory is under that noise on a 32 GB card. The same holds
-for `vahi-molla-max` against `vahi-molla-max-8k`: 450 against 427, with the larger
+for `suburb-1-max` against `suburb-1-max-8k`: 450 against 427, with the larger
 texture again ahead.
 
 **Triangles cost something, and the budget is far larger than this project assumed.**
@@ -137,7 +162,7 @@ actually looks like.
 
 **Load time is negligible, even at 251 MB.** The pilot reported no wait worth
 measuring on any map of the set, so file size does not gate a custom map the way the
-size of `vahi-molla-max` invites people to assume. This is a qualitative report and
+size of `suburb-1-max` invites people to assume. This is a qualitative report and
 not a stopwatch: it is strong enough to close the question and not strong enough to
 quote a figure. A reader who needs a figure should time the menu to the spawn on the
 smallest and the largest map and put both numbers here.

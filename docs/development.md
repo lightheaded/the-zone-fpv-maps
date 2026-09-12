@@ -283,6 +283,36 @@ still stands on true ground and only the filler outside the mesh drops.
 Use a bare earth model for `elevation`. A surface model holds the buildings, so the
 terrain would carry them a second time under the mesh.
 
+## Build a map with photo facades
+
+Add a `[facades]` section to a map and the walls take their picture from the
+Maa- ja Ruumiamet oblique photos instead of an in-game material. The roofs take the
+orthophoto. `maps/tartu-old-town-facades.toml` is the worked example, and
+`docs/facades.md` explains every step of the method.
+
+```toml
+[facades]
+enabled = true
+level = 12          # Deep Zoom level of the photo service. 13 is the full frame.
+texel_m = 0.09      # how fine the atlas samples a wall
+atlas_px = 16384    # atlas width. It grows in height until every panel fits.
+max_candidates = 90 # photos to fit a camera to
+max_sources = 22    # photos to bake from, spread over the compass
+min_correlation = 0.30
+jpeg_quality = 85
+```
+
+The first build is slow and the rest are not. The photo choice is cached as
+`data/fotoladu/sources-<map>.json` and every Deep Zoom tile is cached under
+`data/fotoladu/`, so a rebuild at another texel size costs no request. Delete the
+sources file to choose the photos again.
+
+Two things to know before you turn it on:
+
+- **The map may not be published.** See `docs/licensing.md` D6. Set `private = true`
+  in the `[map]` section, which is what keeps it out of the release and preview checks.
+- **It needs `scipy`.** `uv sync --extra facades`.
+
 ## Add a gate course
 
 A map that declares a `[course]` section gets a ring of gates, which makes a line

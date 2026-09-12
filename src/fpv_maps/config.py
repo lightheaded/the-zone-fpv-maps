@@ -14,11 +14,37 @@ ORTHO_SOURCES = ("city", "estonia")
 
 
 @dataclass(frozen=True)
+class FacadeSettings:
+    """The ``[facades]`` section: wall textures from oblique photos.
+
+    ``level`` is the Deep Zoom level of the photo service. Level 12 is half of the
+    full frame, which is about 18 cm on a wall at the usual flight height. ``texel_m``
+    is how fine the atlas samples a wall; below the photo resolution it only makes the
+    file bigger. ``atlas_px`` is the width of the atlas, which grows in height until
+    every panel fits.
+    """
+
+    enabled: bool = False
+    level: int = 12
+    texel_m: float = 0.20
+    atlas_px: int = 8192
+    max_candidates: int = 34
+    max_sources: int = 14
+    min_correlation: float = 0.30
+    jpeg_quality: int = 85
+
+
+@dataclass(frozen=True)
 class MapConfig:
     """All settings that the pipeline needs to build one map."""
 
     name: str
     description: str
+    #: ``[map] private``. This map is built but never published: no release asset, no
+    #: wiki page, no screenshot. Two reasons lead here and both end the same way. The
+    #: map is over a private site, or an input may not be redistributed. The build
+    #: report of a private map is redacted, and the release and preview checks skip it.
+    private: bool
     bbox: BBox
     origin: tuple[float, float]
     terrain_step_m: float
@@ -33,6 +59,7 @@ class MapConfig:
     roof_material: str
     probes_enabled: bool
     path: Path
+    facades: FacadeSettings = field(default_factory=FacadeSettings)
     drone: DroneSources = field(default_factory=DroneSources)
     gates: tuple[Gate, ...] = ()
 
@@ -75,6 +102,7 @@ def load_config(path: str | Path) -> MapConfig:
     ground = raw.get("ground_texture", {})
     buildings = raw.get("buildings", {})
     probes = raw.get("probes", {})
+    facades = _load_facades(raw.get("facades", {}))
     chunks = raw.get("chunks", {})
 
     source = str(ground.get("source", "city"))
@@ -98,6 +126,7 @@ def load_config(path: str | Path) -> MapConfig:
     return MapConfig(
         name=name,
         description=raw["map"].get("description", ""),
+        private=bool(raw["map"].get("private", False)),
         bbox=bbox,
         origin=origin,
         terrain_step_m=float(terrain.get("step_m", 2.0)),
@@ -112,9 +141,33 @@ def load_config(path: str | Path) -> MapConfig:
         roof_material=str(buildings.get("roof_material", "z_pebbled_asphalt")),
         probes_enabled=bool(probes.get("enabled", False)),
         path=path,
+        facades=facades,
         drone=drone,
         gates=gates,
     )
+
+
+def _load_facades(raw: dict) -> FacadeSettings:
+    """The ``[facades]`` section. Absent or ``enabled = false`` keeps template walls."""
+    if not raw:
+        return FacadeSettings()
+    settings = FacadeSettings(
+        enabled=bool(raw.get("enabled", True)),
+        level=int(raw.get("level", 12)),
+        texel_m=float(raw.get("texel_m", 0.20)),
+        atlas_px=int(raw.get("atlas_px", 8192)),
+        max_candidates=int(raw.get("max_candidates", 34)),
+        max_sources=int(raw.get("max_sources", 14)),
+        min_correlation=float(raw.get("min_correlation", 0.30)),
+        jpeg_quality=int(raw.get("jpeg_quality", 85)),
+    )
+    if not 8 <= settings.level <= 14:
+        raise ValueError(f"facades.level is a Deep Zoom level, 8 to 14: {settings.level}")
+    if settings.texel_m <= 0:
+        raise ValueError(f"facades.texel_m must be positive: {settings.texel_m}")
+    if settings.atlas_px > 16384:
+        raise ValueError(f"facades.atlas_px must not exceed 16384: {settings.atlas_px}")
+    return settings
 
 
 def _paths(value, base: Path) -> tuple[Path, ...]:
