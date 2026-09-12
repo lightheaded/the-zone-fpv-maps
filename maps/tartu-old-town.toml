@@ -1,0 +1,105 @@
+# A 1 km2 tile of the Tartu old town, with Raekoja plats in the middle. The box is
+# not on the Maa-amet 1:2000 grid, because no sheet aligned box holds the old town
+# core: the square, Toomemagi with the toomkirik ruin, Jaani kirik, the tahetorn and
+# two bridges over the Emajogi. The tile is the proof of concept for photo facades
+# from the Maa-amet oblique photos. See docs/analysis.md section 4.
+
+[map]
+name = "tartu-old-town"
+description = "1 km2 of the Tartu old town: Raekoja plats, Toomemagi with the toomkirik ruin, Jaani kirik, the tahetorn, Kaarsild and Voidu sild."
+
+[area]
+# L-EST97 (EPSG:3301), order east, north: xmin, ymin, xmax, ymax.
+bbox = [658750, 6473850, 659750, 6474850]
+# The spawn point is on Raekoja plats, in the open between the raekoda and the
+# Emajogi end of the square. The square is 60 m wide, so the drone starts enclosed
+# on two sides, which is what an old town flight feels like.
+origin = [659221, 6474313]
+
+[terrain]
+# Toomemagi rises about 25 m over the square, so the tile needs the fine step.
+step_m = 2.0
+
+[ground_texture]
+# 8192 px over 1000 m is 12 cm per pixel. The city orthophoto is 10 cm.
+size_px = 8192
+jpeg_quality = 88
+
+[buildings]
+enabled = true
+municipalities = ["Tartu_linn"]
+wall_material = "z_concrete2"
+roof_material = "z_pebbled_asphalt"
+
+[probes]
+enabled = false
+
+# The camera tour that "fpv-maps tour" renders. Every target is L-EST97 (east, north).
+[tour]
+fps = 60
+size = [1920, 1080]
+
+[[tour.shot]]
+name = "overview"
+kind = "orbit"
+seconds = 12
+target = [659250, 6474350]
+radius_m = 700
+height_m = 420
+turns = 0.30
+look_height_m = 20
+fov_deg = 42
+
+[[tour.shot]]
+name = "raekoja-plats"
+kind = "orbit"
+seconds = 11
+target = [659221, 6474313]
+radius_m = 110
+height_m = 70
+turns = 0.45
+start_deg = 210
+look_height_m = 14
+
+[[tour.shot]]
+name = "toomemagi"
+kind = "orbit"
+seconds = 10
+target = [658812, 6474302]
+radius_m = 130
+height_m = 90
+turns = 0.40
+start_deg = 30
+look_height_m = 20
+
+[[tour.shot]]
+name = "jaani-kirik"
+kind = "orbit"
+seconds = 9
+target = [659072, 6474580]
+radius_m = 90
+height_m = 75
+turns = 0.35
+start_deg = 120
+look_height_m = 22
+
+[[tour.shot]]
+name = "kaarsild"
+kind = "orbit"
+seconds = 9
+target = [659420, 6474384]
+radius_m = 120
+height_m = 60
+turns = 0.35
+start_deg = 300
+look_height_m = 10
+
+[[tour.shot]]
+name = "spawn"
+kind = "reveal"
+seconds = 9
+target = [659221, 6474313]
+radius_m = 200
+height_m = 85
+turns = 0.22
+look_height_m = 8
