@@ -365,13 +365,13 @@ class SceneRenderer:
         )
         texture = None
         if geometry.texture is not None:
-            # No flip. The first row uploaded is the row that V = 0 samples, and glTF
-            # puts V = 0 on the first row of the image, so file order is already right.
-            # This used to flip, which cancelled a terrain that numbered V the wrong way
-            # round. The two faults hid each other: every tour picture came out right
-            # while the exported map, read by a renderer that follows glTF, had its
-            # ground mirrored north to south.
-            image = geometry.texture.convert("RGB")
+            # The rows go up before the upload, because this renderer reads the map
+            # through trimesh and trimesh flips V on import. The file holds glTF V,
+            # so what arrives here is OpenGL V, and OpenGL samples the first uploaded
+            # row at V = 0. Without the flip the ground comes out mirrored north to
+            # south. See "flip_uv_for_export" for the other half of the same
+            # convention, and do not remove one without the other.
+            image = geometry.texture.convert("RGB").transpose(Image.FLIP_TOP_BOTTOM)
             texture = self.ctx.texture(image.size, 3, image.tobytes())
             texture.build_mipmaps()
             texture.anisotropy = 16.0

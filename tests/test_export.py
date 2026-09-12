@@ -86,18 +86,45 @@ def test_checker_is_png():
     assert checker_image().format == "PNG"
 
 
+def read_gltf_attribute(glb: Path, mesh_name: str, attribute: str):
+    """One accessor of one mesh, read from the bytes of the file.
+
+    No trimesh. trimesh flips V on import as well as on export, so loading the file
+    with it cancels the very fault these tests exist to catch.
+    """
+    import json
+    import struct
+
+    import numpy as np
+
+    raw = glb.read_bytes()
+    json_len = struct.unpack_from("<I", raw, 12)[0]
+    js = json.loads(raw[20 : 20 + json_len])
+    body = 20 + json_len + 8
+    mesh = next(m for m in js["meshes"] if m.get("name") == mesh_name)
+    index = mesh["primitives"][0]["attributes"][attribute]
+    acc = js["accessors"][index]
+    view = js["bufferViews"][acc["bufferView"]]
+    dtype = {5121: "u1", 5123: "<u2", 5125: "<u4", 5126: "<f4"}[acc["componentType"]]
+    width = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}[acc["type"]]
+    start = body + view.get("byteOffset", 0) + acc.get("byteOffset", 0)
+    flat = np.frombuffer(raw, dtype=dtype, count=acc["count"] * width, offset=start)
+    return flat.reshape(acc["count"], width)
+
+
 def test_the_exported_ground_uv_follows_gltf(tmp_path: Path, bbox, flat_field):
     """North in the ground texture must land on the north edge of the exported map.
 
     glTF reads V = 0 from row 0 of the image, and row 0 of the orthophoto is north, so
-    the north edge of the terrain must carry V = 0. This reads the exported file rather
-    than the renderer on purpose. The renderer once flipped the texture on upload, which
-    cancelled a terrain that numbered V the other way round: every tour picture came out
-    right while the map that shipped to the game had its ground mirrored north to south.
-    A test that draws cannot see that, because it sees both faults at once.
+    the north edge of the terrain must carry V = 0 in the file.
+
+    This reads the bytes of the file. An earlier version of this test loaded the file
+    with trimesh and passed for two releases while every shipped map was mirrored
+    north to south, because trimesh flips V on import exactly as it flips it on
+    export. A test that goes through trimesh cannot see a trimesh convention fault,
+    the same way the older test that drew the map could not see it either.
     """
     import numpy as np
-    import trimesh
 
     origin = (662500.0, 6473500.0, 40.0)
     terrain = build_terrain(flat_field, bbox, origin, step=250.0)
@@ -106,12 +133,31 @@ def test_the_exported_ground_uv_follows_gltf(tmp_path: Path, bbox, flat_field):
     glb = tmp_path / "ground.glb"
     write_glb({"terrain": terrain}, glb)
 
-    scene = trimesh.load(glb, process=False)
-    mesh = scene.geometry["terrain"]
-    vertices = np.asarray(mesh.vertices)
-    uv = np.asarray(mesh.visual.uv)
+    vertices = read_gltf_attribute(glb, "terrain", "POSITION")
+    uv = read_gltf_attribute(glb, "terrain", "TEXCOORD_0")
     # Game axes put north at -z, so the smallest z is the north edge of the map.
     north = vertices[:, 2] == vertices[:, 2].min()
     south = vertices[:, 2] == vertices[:, 2].max()
-    assert uv[north, 1].max() < 0.01, "the north edge reads row 0 of the ground texture"
-    assert uv[south, 1].min() > 0.99, "the south edge reads the last row"
+    assert uv[north, 1].max() < 0.01, "the north edge must read row 0 of the ground texture"
+    assert uv[south, 1].min() > 0.99, "the south edge must read the last row"
+
+
+def test_the_exporter_hands_gltf_v_to_the_file(tmp_path: Path):
+    """Any textured mesh, not only the terrain, keeps glTF V in the file.
+
+    The survey mesh takes its texture coordinates straight from 3D Tiles, which are
+    already glTF V. They must arrive in the file unchanged.
+    """
+    import numpy as np
+    import trimesh
+
+    v = np.array([[0, 0, 0], [1, 0, 0], [0, 0, 1], [1, 0, 1]], dtype=float)
+    uv = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+    mesh = trimesh.Trimesh(vertices=v, faces=np.array([[0, 2, 1], [1, 2, 3]]), process=False)
+    mesh.visual = trimesh.visual.TextureVisuals(
+        uv=uv.copy(),
+        material=texture_material("t", jpeg_image(np.zeros((8, 8, 3), dtype=np.uint8), 80)),
+    )
+    glb = tmp_path / "q.glb"
+    write_glb({"quad": mesh}, glb)
+    assert np.allclose(read_gltf_attribute(glb, "quad", "TEXCOORD_0"), uv)
