@@ -107,7 +107,7 @@ For scale, from `docs/the-zone-format.md`: the three official maps hold 0.98, 1.
 
 ## What the first flights answered
 
-Three of the four questions are answered, on one machine.
+All four questions are answered, on one machine.
 
 **A 16384 px embedded texture loads and works.** `vahi-molla-max` carries one and ran
 at 450 FPS. It was also the best looking map of the set. The estimate in
@@ -135,8 +135,12 @@ pipeline, not in the engine: every map before 2026-09-12 shipped with its textur
 mirrored top to bottom, and the flights above are the first that show what the data
 actually looks like.
 
-**Load time is still open.** Nobody timed it, and it is the one number a 251 MB map
-makes people ask about.
+**Load time is negligible, even at 251 MB.** The pilot reported no wait worth
+measuring on any map of the set, so file size does not gate a custom map the way the
+size of `vahi-molla-max` invites people to assume. This is a qualitative report and
+not a stopwatch: it is strong enough to close the question and not strong enough to
+quote a figure. A reader who needs a figure should time the menu to the spawn on the
+smallest and the largest map and put both numbers here.
 
 ### How to read these numbers
 
