@@ -83,3 +83,74 @@ def test_every_map_has_a_preview(path):
     preview = path.parent.parent / "docs" / "screenshots" / f"{path.stem}-preview.jpg"
     assert preview.is_file()
     assert preview.stat().st_size > 0
+
+
+NO_BUILDINGS = MINIMAL + "\n[buildings]\nenabled = false\n"
+
+
+def test_no_drone_and_no_course_by_default(tmp_path):
+    path = tmp_path / "test.toml"
+    path.write_text(NO_BUILDINGS)
+    cfg = load_config(path)
+    assert not cfg.drone
+    assert cfg.gates == ()
+    assert cfg.terrain_sink_m == 0.0
+
+
+def test_drone_paths_resolve_against_the_map_file(tmp_path):
+    survey = tmp_path / "survey"
+    survey.mkdir()
+    (survey / "dem.tif").write_bytes(b"")
+    (survey / "ortho.tif").write_bytes(b"")
+    (survey / "tiles").mkdir()
+    path = tmp_path / "test.toml"
+    path.write_text(
+        NO_BUILDINGS
+        + '\n[drone]\nelevation = ["survey/dem.tif"]\northo = ["survey/ortho.tif"]\n'
+        + 'mesh_tileset = "survey/tiles"\nmesh_error_m = 0.06\nmesh_texture_px = 256\n'
+    )
+    cfg = load_config(path)
+    assert cfg.drone.elevation == (survey / "dem.tif",)
+    assert cfg.drone.ortho == (survey / "ortho.tif",)
+    assert cfg.drone.tileset == survey / "tiles"
+    assert cfg.drone.mesh_error_m == 0.06
+    assert cfg.drone.mesh_texture_px == 256
+
+
+def test_a_missing_drone_file_fails_the_load(tmp_path):
+    # A survey is never downloaded, so a wrong path must stop the build rather than
+    # let it fall back to the open data and claim a quality it does not have.
+    path = tmp_path / "test.toml"
+    path.write_text(NO_BUILDINGS + '\n[drone]\nelevation = ["survey/missing.tif"]\n')
+    with pytest.raises(FileNotFoundError, match="drone source is missing"):
+        load_config(path)
+
+
+def test_a_missing_tileset_folder_fails_the_load(tmp_path):
+    path = tmp_path / "test.toml"
+    path.write_text(NO_BUILDINGS + '\n[drone]\nmesh_tileset = "survey/tiles"\n')
+    with pytest.raises(FileNotFoundError, match="mesh tileset is missing"):
+        load_config(path)
+
+
+def test_course_gates_take_the_section_defaults(tmp_path):
+    path = tmp_path / "test.toml"
+    path.write_text(
+        NO_BUILDINGS
+        + "\n[course]\nheight_m = 7.0\nsize_m = 6.0\n"
+        + "\n[[course.gate]]\nat = [662100.0, 6473100.0]\n"
+        + "\n[[course.gate]]\nat = [662200.0, 6473200.0]\nheight_m = 12.0\nyaw_deg = 45.0\n"
+    )
+    gates = load_config(path).gates
+    assert len(gates) == 2
+    assert gates[0].east == 662100.0 and gates[0].height_m == 7.0 and gates[0].size_m == 6.0
+    assert gates[1].height_m == 12.0 and gates[1].yaw_deg == 45.0
+    assert gates[1].size_m == 6.0
+
+
+def test_terrain_sink_is_read(tmp_path):
+    path = tmp_path / "test.toml"
+    path.write_text(NO_BUILDINGS + "\n[terrain]\nstep_m = 0.5\nsink_m = 0.5\n")
+    cfg = load_config(path)
+    assert cfg.terrain_step_m == 0.5
+    assert cfg.terrain_sink_m == 0.5

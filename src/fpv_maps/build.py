@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -14,6 +14,14 @@ from rich.console import Console
 from fpv_maps import __version__
 from fpv_maps.buildings import BuildingSet, build_building_chunks, read_obj, read_offset
 from fpv_maps.config import MapConfig
+from fpv_maps.course import build_course, check_clearance, course_length_m
+from fpv_maps.drone import (
+    load_mesh_tiles,
+    measure_vertical_shift,
+    read_drone_heights,
+    read_drone_rgb,
+    select_tiles,
+)
 from fpv_maps.export import write_glb
 from fpv_maps.fetch import LICENSE_URL, Fetcher
 from fpv_maps.geotiff import dtm_resolution, read_heights, read_rgb
@@ -66,17 +74,58 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
     finally:
         fetcher.close()
 
-    dtm_res = dtm_resolution(cfg.terrain_step_m, native_m=1.0)
-    log(f"terrain, step {cfg.terrain_step_m} m, elevation read at {dtm_res} m")
-    field = read_heights(dtm_paths, cfg.bbox, res_m=dtm_res)
+    height_shift = 0.0
+    if cfg.drone.elevation:
+        # The survey writes ellipsoidal heights and the open data writes EH2000.
+        # Measure the offset against the open model, so that every height of the map
+        # is EH2000 and an open data building sits on drone ground at the right level.
+        height_shift = measure_vertical_shift(cfg.drone.elevation, dtm_paths, cfg.bbox)
+        dtm_res = dtm_resolution(cfg.terrain_step_m, native_m=0.098)
+        log(
+            f"terrain from the survey, step {cfg.terrain_step_m} m, "
+            f"read at {dtm_res:.3f} m, height shift {height_shift:+.2f} m to EH2000"
+        )
+        field = read_drone_heights(cfg.drone.elevation, cfg.bbox, res_m=dtm_res)
+        field = replace(field, heights=field.heights + height_shift)
+        report["sources"].append(
+            {
+                "dataset": "Own drone survey, elevation",
+                "files": [p.name for p in cfg.drone.elevation],
+            }
+        )
+        report["drone_height_shift_m"] = round(height_shift, 3)
+    else:
+        dtm_res = dtm_resolution(cfg.terrain_step_m, native_m=1.0)
+        log(f"terrain, step {cfg.terrain_step_m} m, elevation read at {dtm_res} m")
+        field = read_heights(dtm_paths, cfg.bbox, res_m=dtm_res)
     origin_h = field.sample_one(*cfg.origin)
     origin = (cfg.origin[0], cfg.origin[1], origin_h)
     report["origin_height_eh2000"] = round(origin_h, 2)
-    terrain = build_terrain_chunks(field, cfg.bbox, origin, cfg.terrain_step_m, cfg.chunk_m)
+    # The filler terrain and the survey mesh describe the same ground twice, and the
+    # two disagree by a few centimeters, so the terrain pokes through the mesh at a
+    # grazing angle. Sinking the terrain a little puts it below the mesh everywhere.
+    # The origin is read before the sink, so the spawn still stands on true ground and
+    # only the filler outside the mesh drops.
+    terrain_field = field
+    if cfg.terrain_sink_m:
+        terrain_field = replace(field, heights=field.heights - cfg.terrain_sink_m)
+        report["terrain_sink_m"] = cfg.terrain_sink_m
+    terrain = build_terrain_chunks(terrain_field, cfg.bbox, origin, cfg.terrain_step_m, cfg.chunk_m)
     report["terrain_chunks"] = len(terrain)
 
     log(f"ground texture {cfg.ground_texture_px} px")
     rgb = read_rgb(ortho_paths, cfg.bbox, cfg.ground_texture_px)
+    if cfg.drone.ortho:
+        # The survey covers less ground than the box, so the open orthophoto stays
+        # under it and the drone pixels replace it where they exist.
+        rgb = read_drone_rgb(cfg.drone.ortho, cfg.bbox, cfg.ground_texture_px, base=rgb)
+        report["sources"].append(
+            {
+                "dataset": "Own drone survey, orthophoto",
+                "files": [p.name for p in cfg.drone.ortho],
+            }
+        )
+    report["ground_texture_m_per_px"] = round(cfg.bbox.width / cfg.ground_texture_px, 4)
     ground = texture_material("fpv_ground", jpeg_image(rgb, cfg.jpeg_quality))
     for mesh in terrain.values():
         mesh.visual.material = ground
@@ -100,12 +149,60 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
             )
         )
 
+    def ground_height(x: float, z: float) -> float:
+        return field.sample_one(origin[0] + x, origin[1] - z) - origin[2]
+
+    if cfg.drone.tileset is not None:
+        # The mesh may come from another flight than the terrain, and two flights do
+        # not share a height until each is measured against the open model. Register
+        # the mesh with its own elevation raster when the map names one.
+        mesh_shift = height_shift
+        if cfg.drone.mesh_elevation:
+            mesh_shift = measure_vertical_shift(cfg.drone.mesh_elevation, dtm_paths, cfg.bbox)
+            report["survey_mesh_height_shift_m"] = round(mesh_shift, 3)
+        tiles = select_tiles(cfg.drone.tileset, cfg.drone.mesh_error_m)
+        log(
+            f"survey mesh, error {cfg.drone.mesh_error_m} m, {len(tiles)} tiles, "
+            f"textures capped at {cfg.drone.mesh_texture_px} px, "
+            f"height shift {mesh_shift:+.2f} m"
+        )
+        mesh_tiles = load_mesh_tiles(
+            cfg.drone.tileset,
+            cfg.drone.mesh_error_m,
+            origin,
+            height_shift=mesh_shift,
+            max_px=cfg.drone.mesh_texture_px,
+            quality=cfg.drone.mesh_jpeg_quality,
+            bbox=cfg.bbox,
+        )
+        meshes.update(mesh_tiles)
+        report["survey_mesh"] = {
+            "max_error_m": cfg.drone.mesh_error_m,
+            "tiles_selected": len(tiles),
+            "meshes_in_box": len(mesh_tiles),
+            "texture_px_cap": cfg.drone.mesh_texture_px,
+            "jpeg_quality": cfg.drone.mesh_jpeg_quality,
+        }
+        report["sources"].append(
+            {"dataset": "Own drone survey, 3D Tiles mesh", "files": [cfg.drone.tileset.name]}
+        )
+
+    if cfg.gates:
+        log(f"course, {len(cfg.gates)} gates")
+        clearance = check_clearance(cfg.gates, origin, ground_height, meshes)
+        blocked = [c["gate"] for c in clearance if not c["clear"]]
+        if blocked:
+            log(f"[bold yellow]warning[/] gates not clear of the geometry: {blocked}")
+        meshes.update(build_course(cfg.gates, origin, ground_height))
+        report["course"] = {
+            "gates": len(cfg.gates),
+            "lap_length_m": round(course_length_m(cfg.gates), 1),
+            "blocked_gates": blocked,
+            "clearance": clearance,
+        }
+
     if cfg.probes_enabled:
         log("probes")
-
-        def ground_height(x: float, z: float) -> float:
-            return field.sample_one(origin[0] + x, origin[1] - z) - origin[2]
-
         meshes.update(build_probes(ground_height))
 
     out = cfg.dist_dir / f"{cfg.name}.glb"

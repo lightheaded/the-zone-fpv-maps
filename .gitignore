@@ -20,3 +20,6 @@ tmp/
 # Local overrides for Docker Compose
 compose.override.yaml
 .env
+
+# Private map variants that read an own drone survey, which is not published.
+maps-private/

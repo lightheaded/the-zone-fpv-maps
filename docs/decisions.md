@@ -272,3 +272,85 @@ Cost: every file name changed. `docs/screenshots/` and the map files in the rele
 version 0.4.0 carry the new names. The releases v0.1.0 to v0.3.0 keep the old names,
 because a published asset must never change under a reader. A person who installed
 `vaksali` must install `tartu-vaksali` and delete the old folder.
+
+## 2026-09-12: A survey mesh is chosen by geometric error, not by tile level
+
+Decision: a map asks for a quality in meters of surface error, `drone.mesh_error_m`,
+and the build walks the 3D Tiles tree and stops at the first node good enough. It does
+not take one level of the pyramid.
+
+Why: a level is not a quality. The pyramid of the test site runs from level 14 to level
+25, and the deep levels are sparse: level 25 holds nine tiles, because the tree only
+goes deeper where the reconstruction found more detail. Taking one level therefore
+leaves holes. Geometric error is also a physical quantity, so the same number means the
+same thing on another survey with another tree, and it is the number a reader of a
+benchmark can compare against a screen resolution and a flying speed.
+
+Cost: the walk has to follow a JSON file per node, because Terra links children through
+sub tileset files rather than inline.
+
+## 2026-09-12: Every survey is registered against the open elevation model
+
+Decision: the build measures the height offset of each survey raster against the
+Maa-amet 1 m model over the map box and shifts the survey into EH2000. A map names
+`drone.mesh_elevation` when the mesh comes from a different flight than the terrain, so
+that the mesh is registered on its own.
+
+Why: [DJI Terra](https://enterprise.dji.com/dji-terra) writes ellipsoidal heights, about 19 m above EH2000 over Estonia.
+That alone would be a fixed geoid correction. But the two flights over the test site
+also stand 4.1 m apart from each other, because each set its own RTK base three months
+apart, and no geoid model knows that. Measuring each flight against one common model
+fixes both faults at once and needs no extra file. Without it the photogrammetry mesh
+floated 4 m over its own terrain, which is how the fault was found.
+
+The estimator is the peak of the height difference, not its mean or its median. A
+surface model holds roofs and trees, which are real and only ever positive, so they
+pull a mean and a median up. They do not move the peak, because open ground is the most
+common surface of a suburban scene.
+
+## 2026-09-12: The filler terrain sinks under a survey mesh
+
+Decision: a map with a survey mesh sets `terrain.sink_m`, and the build lowers the
+terrain by it. The origin is read before the sink.
+
+Why: the terrain and the mesh describe the same ground twice and disagree by a few
+centimeters, so about seven percent of the mesh ground fell below the terrain and the
+terrain showed through the photogrammetry at a grazing angle. Half a meter is enough to
+separate them, and it is invisible outside the mesh, where the terrain is the only
+ground. Reading the origin first keeps the spawn on true ground.
+
+## 2026-09-12: Draco decoding is an optional extra, like the tour renderer
+
+Decision: `uv sync --extra survey` installs [DracoPy](https://github.com/seung-lab/DracoPy). The base install does not.
+
+Why: Terra compresses part of a pyramid with `KHR_draco_mesh_compression` and leaves
+the rest plain, so a reader of a survey has to do both. No map in `maps/` reads a
+survey, so the dependency has no place in the base install. DracoPy ships wheels for
+macOS, Windows and Linux, so the extra still needs no compiler, unlike `tour`.
+
+## 2026-09-12: Private map configs live in maps-private, which git ignores
+
+Decision: a map that reads data nobody published lives in `maps-private/`, not in
+`maps/`. The folder is in `.gitignore`. The pipeline, the documentation and the
+measured numbers stay public.
+
+Why: the release workflow builds every map in `maps/` from the open data and publishes
+it. A map that reads a private survey would fail that build, and if it did not fail it
+would publish the survey. Keeping the two folders apart makes the rule structural
+rather than a thing to remember. `maps-private/generate.py` writes a family of variants
+from one specification, so that everything the variants must share really is shared.
+
+## 2026-09-12: A benchmark map carries its own gate course
+
+Decision: a map may declare a `[course]` section, and the build puts a ring of gates in
+it and checks that every gate is flyable.
+
+Why: the game has no free camera, no replay, no telemetry export and no command line
+option that loads a map, so a frame rate comes from a person flying a line. Two such
+numbers are only comparable when the line is the same, and the only way to hold a line
+fixed across map files is to draw it into them. A gate is four thin boxes, 48 triangles
+and one flat color, which is far below the noise of the thing being measured.
+
+The build checks the gates because a survey mesh changes shape with its quality
+setting: a gate that is clear at 25 cm of error can be blocked at 3 cm. The first
+placement of gate 6 stood inside a treeline, which the check found.

@@ -236,6 +236,74 @@ settings from it:
 - `chunks.size_m`, so that the engine can skip a mesh that the camera cannot see.
 - A `terrain.step_m` of 8 to 12 m. A 2 m grid over 81 km² is 40 million triangles.
 
+## Build a map from an own drone survey
+
+The open data covers the whole country at one quality. A survey of one site gives far
+more, over far less ground, and the pipeline reads three products of a
+[DJI Terra](https://enterprise.dji.com/dji-terra) project: an elevation raster, an
+orthophoto and the textured mesh as [3D Tiles](https://www.ogc.org/standards/3dtiles).
+Install the extra once, because some tiles carry Draco compressed geometry:
+
+```
+uv sync --extra survey
+```
+
+A survey is not open data, so the pipeline never downloads it. A map names the files,
+relative to the map file, and the build fails when one is missing rather than falling
+back to the open data.
+
+```toml
+[drone]
+elevation     = ["../survey/lidar/dem.tif"]   # terrain, bare earth is best
+ortho         = ["../survey/ortho.tif"]       # replaces the open orthophoto where it reaches
+mesh_tileset  = "../survey/terra_b3dms"       # the folder that holds tileset.json
+mesh_elevation = ["../survey/photo/dsm.tif"]  # registers the mesh, see below
+mesh_error_m   = 0.12                         # quality: meters of surface error
+mesh_texture_px = 512                         # cap on the side of every tile texture
+```
+
+Three things decide whether the result lands where it should.
+
+**Projection.** Terra writes UTM zone 35N and the pipeline works in L-EST97. Every
+raster is warped on read, and the mesh comes through ECEF. Nothing to set.
+
+**Height.** Terra writes ellipsoidal heights and the open data writes EH2000, about
+19 m apart over Estonia. Worse, two flights over the same ground do not share a height
+unless they shared an RTK base: the two flights over the test site stand 4.1 m apart
+because each set its own base, three months apart. The build therefore measures every
+survey against the open elevation model and shifts it into EH2000, which puts all of
+them on each other. Name `mesh_elevation` whenever the mesh comes from a different
+flight than `elevation`, so that the mesh is registered on its own.
+
+**The double surface.** The terrain and the survey mesh describe the same ground twice,
+and they disagree by centimeters, so the terrain pokes through the mesh at a grazing
+angle. Set `terrain.sink_m = 0.5`. The origin is read before the sink, so the spawn
+still stands on true ground and only the filler outside the mesh drops.
+
+Use a bare earth model for `elevation`. A surface model holds the buildings, so the
+terrain would carry them a second time under the mesh.
+
+## Add a gate course
+
+A map that declares a `[course]` section gets a ring of gates, which makes a line
+repeatable between two variants of a map. See `docs/benchmark.md` for the method.
+
+```toml
+[course]
+height_m = 6.0        # defaults for every gate
+size_m   = 6.0
+
+[[course.gate]]
+at = [657850.0, 6477950.0]   # L-EST97, east then north
+height_m = 5.0               # over the terrain
+yaw_deg  = 0.0               # 0 means a pilot flies through it heading north
+```
+
+The build counts the geometry inside every gate and in the approach to it, writes the
+result into the build report, and warns when a gate is blocked. Check it after any
+change to the geometry: a survey mesh changes shape with its quality setting, so a gate
+that is clear in one variant can be blocked in another.
+
 ## Data budget
 
 | Data set | Sheet | Size |

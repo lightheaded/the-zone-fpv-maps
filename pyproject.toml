@@ -27,6 +27,13 @@ tour = [
     "moderngl>=5.10",
     "imageio-ffmpeg>=0.5",
 ]
+# Reading an own drone survey. DJI Terra writes some 3D Tiles with Draco compressed
+# geometry, and nothing in the base dependencies decodes it. DracoPy ships wheels for
+# macOS, Windows and Linux, so this extra still needs no compiler. It is optional
+# because only a survey map needs it, and no map in "maps/" does.
+survey = [
+    "DracoPy>=1.4",
+]
 
 [project.scripts]
 fpv-maps = "fpv_maps.cli:main"

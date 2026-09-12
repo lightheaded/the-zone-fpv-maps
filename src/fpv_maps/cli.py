@@ -235,6 +235,35 @@ def gallery(out: Path | None, repo: str | None, branch: str) -> None:
     console.print("Push them with scripts/publish-tours.sh.")
 
 
+@main.command()
+@click.argument("names", nargs=-1)
+@click.option("--dist", type=click.Path(file_okay=False, path_type=Path), default=Path("dist"))
+@click.option("--out", type=click.Path(dir_okay=False, path_type=Path), default=None)
+def benchmark(names: tuple[str, ...], dist: Path, out: Path | None) -> None:
+    """Collect the build reports of NAMES into one cost table.
+
+    With no names it takes every map that has a build report, newest first. The table
+    has an empty frame rate column per machine, to fill in after flying the course.
+    """
+    from fpv_maps.benchmark import collect, markdown_table
+
+    if not names:
+        names = tuple(sorted(p.name for p in dist.iterdir() if p.is_dir()))
+    costs = collect(dist, list(names))
+    if not costs:
+        raise click.ClickException(f"no build report under {dist}. Run 'fpv-maps build' first.")
+    table = markdown_table(costs)
+    blocked = [(c.name, c.blocked_gates) for c in costs if c.blocked_gates]
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(table + "\n", encoding="utf-8")
+        console.print(f"[green]wrote[/] {out}")
+    else:
+        click.echo(table)
+    for name, gates in blocked:
+        console.print(f"[bold yellow]warning[/] {name}: gates not clear: {gates}")
+
+
 @main.command(name="inspect")
 @click.argument("glb", type=click.Path(exists=True, dir_okay=False, path_type=Path))
 @click.option("--json", "as_json", is_flag=True, help="Print the full statistics as JSON.")

@@ -15,6 +15,13 @@ from trimesh.visual.material import PBRMaterial
 
 TEMPLATE_PREFIX = "z_"
 
+#: The largest texture that Godot accepts is 16384 px square, which is 268 megapixels.
+#: Pillow refuses an image over 179 megapixels by default, because an image that large
+#: from an unknown source is a denial of service. Every image this pipeline opens it
+#: wrote itself a moment earlier, or it comes from the survey of the person running the
+#: build, so the guard only has to stay above the engine limit.
+Image.MAX_IMAGE_PIXELS = 16384 * 16384
+
 
 def is_template_material(name: str) -> bool:
     return name.startswith(TEMPLATE_PREFIX)
