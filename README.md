@@ -126,7 +126,7 @@ uv run fpv-maps tour maps/tartu-vaksali.toml --publish
 
 - More detailed tiles of 1 km²: `annelinn-lohkva`, `tahtvere`, `kesklinn`, `raadi`. For freestyle and rehearsal.
 - Photo facades on the walls. The pipeline builds them today from the Maa- ja Ruumiamet oblique photos, and `docs/facades.md` describes every step. The maps it makes are not published: the photos are not licensed for redistribution until the access request in `docs/licensing.md` D6 is answered.
-- Trees, power lines, lattice towers, bridges and a water surface.
+- Trees, power lines, lattice towers, bridges and a water surface. A map built straight from the lidar has all of these already, because they were in the beam. See `docs/lidar.md`.
 - Hand made hero assets: the silos of Tartu Mill, the church spires, the laululava and the telemast.
 
 ## Documentation

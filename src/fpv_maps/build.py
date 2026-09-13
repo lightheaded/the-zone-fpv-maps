@@ -8,7 +8,9 @@ from dataclasses import asdict, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
+import numpy as np
 import trimesh
+from PIL import Image
 from rich.console import Console
 
 from fpv_maps import __version__
@@ -27,6 +29,7 @@ from fpv_maps.facades import build_facade_buildings
 from fpv_maps.fetch import LICENSE_URL, Fetcher
 from fpv_maps.geotiff import dtm_resolution, read_heights, read_rgb
 from fpv_maps.inspect import inspect_glb
+from fpv_maps.lidar import read_surface
 from fpv_maps.materials import jpeg_image, texture_material
 from fpv_maps.preview import render_preview
 from fpv_maps.probes import build_probes
@@ -75,8 +78,42 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
     finally:
         fetcher.close()
 
+    lidar_paths: list[Path] = []
+    lidar_rgb = None
+    if cfg.lidar.enabled:
+        fetcher = Fetcher(cfg.data_dir, quiet=quiet)
+        try:
+            lidar_paths = fetcher.fetch_lidar(cfg.bbox)
+        finally:
+            fetcher.close()
+        report["sources"].append(
+            {"dataset": "Lidar point cloud", "files": [p.name for p in lidar_paths]}
+        )
+
     height_shift = 0.0
-    if cfg.drone.elevation:
+    if cfg.lidar.enabled:
+        # The surface the scanner saw, not the bare earth under it. The trees, the
+        # roofs and the masts are the mesh here, so this map has no building model
+        # and no separate wall or roof material at all.
+        log(f"surface from the laser scan, {len(lidar_paths)} sheets at {cfg.lidar.res_m} m")
+        field, lidar_rgb = read_surface(
+            lidar_paths,
+            cfg.bbox,
+            cfg.lidar.res_m,
+            classes=cfg.lidar.classes or None,
+            colour=cfg.lidar.colour,
+            close_cells=cfg.lidar.close_cells,
+            smooth_cells=cfg.lidar.smooth_cells,
+        )
+        report["lidar"] = {
+            "res_m": cfg.lidar.res_m,
+            "sheets": len(lidar_paths),
+            "colour_from_points": cfg.lidar.colour,
+            "classes": list(cfg.lidar.classes),
+            "close_cells": cfg.lidar.close_cells,
+            "smooth_cells": cfg.lidar.smooth_cells,
+        }
+    elif cfg.drone.elevation:
         # The survey writes ellipsoidal heights and the open data writes EH2000.
         # Measure the offset against the open model, so that every height of the map
         # is EH2000 and an open data building sits on drone ground at the right level.
@@ -115,7 +152,17 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
     report["terrain_chunks"] = len(terrain)
 
     log(f"ground texture {cfg.ground_texture_px} px")
-    rgb = read_rgb(ortho_paths, cfg.bbox, cfg.ground_texture_px)
+    if lidar_rgb is not None:
+        # The colour of the highest return in each cell, which is the colour of the
+        # surface the mesh describes. It is the only texture that puts a wall colour
+        # on a wall: an orthophoto looks straight down and smears the roof over it.
+        rgb = np.asarray(
+            Image.fromarray(lidar_rgb).resize(
+                (cfg.ground_texture_px, cfg.ground_texture_px), Image.LANCZOS
+            )
+        )
+    else:
+        rgb = read_rgb(ortho_paths, cfg.bbox, cfg.ground_texture_px)
     if cfg.drone.ortho:
         # The survey covers less ground than the box, so the open orthophoto stays
         # under it and the drone pixels replace it where they exist.

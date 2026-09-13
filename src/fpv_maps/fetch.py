@@ -133,6 +133,12 @@ def newest_geotiff(files: list[str]) -> str | None:
     return max(tifs) if tifs else None
 
 
+def newest_laz(files: list[str]) -> str | None:
+    """The newest ``<sheet>_<year>_<density>.laz`` in a list. The year sorts as text."""
+    laz = [f for f in files if f.lower().endswith(".laz")]
+    return max(laz) if laz else None
+
+
 def check_is_file(content_type: str, url: str) -> None:
     """Raise when the portal answers with a web page instead of a file.
 
@@ -219,6 +225,21 @@ class Fetcher:
             zip_path = self.fetch_sheet_newest_geotiff(product, sheet)
             paths.extend(extract(zip_path, suffixes=(".tif", ".tfw")))
         return [p for p in paths if p.suffix.lower() == ".tif"]
+
+    def fetch_lidar(self, bbox: BBox) -> list[Path]:
+        """Lidar point cloud sheets for ``bbox``, newest flight per sheet.
+
+        The sheets are 1 x 1 km and about 250 MB each, so a box of more than a few
+        square kilometres is a large download. They are cached like everything else.
+        """
+        out: list[Path] = []
+        for sheet in sheets_for(bbox, LIDAR_MADAL.grid or 2000):
+            files = list_files(self.client, LIDAR_MADAL, sheet)
+            name = newest_laz(files)
+            if name is None:
+                raise FileNotFoundError(f"no lidar for sheet {sheet}: {files}")
+            out.append(self.fetch(LIDAR_MADAL, name, sheet))
+        return out
 
     def fetch_lod2(self, municipality: str) -> tuple[Path, Path]:
         """Return the OBJ path and the ``.fwt`` offset file for one municipality.

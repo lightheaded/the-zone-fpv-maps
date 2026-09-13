@@ -14,6 +14,33 @@ ORTHO_SOURCES = ("city", "estonia")
 
 
 @dataclass(frozen=True)
+class LidarSettings:
+    """The ``[lidar]`` section: build the surface from the laser scan itself.
+
+    With this on, the terrain mesh is the highest laser return in every cell rather
+    than the bare earth model, so the trees, the roofs and the masts are in the mesh
+    as measured. ``res_m`` is the cell size of that surface, and the terrain step
+    should match it: a step finer than the scan invents detail, and a step coarser
+    than the scan throws it away.
+
+    ``colour`` textures the map from the colour of the points instead of the
+    orthophoto. The scan has about one point per 20 cm against 10 cm orthophoto
+    pixels, so it is the softer of the two, and it is the only one that puts the right
+    colour on a wall rather than smearing the roof down it.
+    """
+
+    enabled: bool = False
+    res_m: float = 0.5
+    colour: bool = False
+    classes: tuple[int, ...] = ()
+    #: Radius in cells of the closing that turns woodland from spikes into canopy.
+    #: See ``lidar.close_gaps``. Zero is the raw highest return.
+    close_cells: int = 2
+    #: Radius in cells of a mean filter after the closing. One cell is usually enough.
+    smooth_cells: int = 1
+
+
+@dataclass(frozen=True)
 class FacadeSettings:
     """The ``[facades]`` section: wall textures from oblique photos.
 
@@ -60,6 +87,7 @@ class MapConfig:
     probes_enabled: bool
     path: Path
     facades: FacadeSettings = field(default_factory=FacadeSettings)
+    lidar: LidarSettings = field(default_factory=LidarSettings)
     drone: DroneSources = field(default_factory=DroneSources)
     gates: tuple[Gate, ...] = ()
 
@@ -103,6 +131,7 @@ def load_config(path: str | Path) -> MapConfig:
     buildings = raw.get("buildings", {})
     probes = raw.get("probes", {})
     facades = _load_facades(raw.get("facades", {}))
+    lidar = _load_lidar(raw.get("lidar", {}))
     chunks = raw.get("chunks", {})
 
     source = str(ground.get("source", "city"))
@@ -142,9 +171,27 @@ def load_config(path: str | Path) -> MapConfig:
         probes_enabled=bool(probes.get("enabled", False)),
         path=path,
         facades=facades,
+        lidar=lidar,
         drone=drone,
         gates=gates,
     )
+
+
+def _load_lidar(raw: dict) -> LidarSettings:
+    """The ``[lidar]`` section. Absent or ``enabled = false`` uses the terrain model."""
+    if not raw:
+        return LidarSettings()
+    settings = LidarSettings(
+        enabled=bool(raw.get("enabled", True)),
+        res_m=float(raw.get("res_m", 0.5)),
+        colour=bool(raw.get("colour", False)),
+        classes=tuple(int(c) for c in raw.get("classes", ())),
+        close_cells=int(raw.get("close_cells", 2)),
+        smooth_cells=int(raw.get("smooth_cells", 1)),
+    )
+    if settings.res_m <= 0:
+        raise ValueError(f"lidar.res_m must be positive: {settings.res_m}")
+    return settings
 
 
 def _load_facades(raw: dict) -> FacadeSettings:

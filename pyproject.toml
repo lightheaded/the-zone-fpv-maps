@@ -16,6 +16,9 @@ dependencies = [
     "trimesh>=4.4",
     "rich>=13.0",
     "pyogrio>=0.13.0",
+    # Read the Maa- ja Ruumiamet lidar. lazrs is the LAZ decoder and it is a Rust
+    # wheel, so this stays a wheels only install on every platform.
+    "laspy[lazrs]>=2.5",
 ]
 
 # The offscreen renderer of "fpv-maps tour". It is optional, because glcontext, which
