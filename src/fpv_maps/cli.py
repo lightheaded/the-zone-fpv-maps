@@ -219,7 +219,14 @@ def gallery(out: Path | None, repo: str | None, branch: str) -> None:
     configs = sorted(root.glob("maps/*.toml"))
     if not configs:
         raise click.ClickException("maps/ holds no configuration")
-    maps = [load_config(path) for path in configs]
+    # A private map gets no wiki page. The wiki is public, and a page for such a map
+    # would carry its preview and its tour pictures, which is the thing that must not
+    # be published. The release workflow, publish-tours.sh and release-notes.sh skip
+    # them too, and this is the fourth publisher that walks maps/ and has to.
+    maps = [cfg for cfg in (load_config(path) for path in configs) if not cfg.private]
+    skipped = len(configs) - len(maps)
+    if skipped:
+        console.print(f"[yellow]skipped[/] {skipped} private map(s): they are never published")
     out_dir = out or (root / "dist" / "wiki")
     pages = write_wiki(
         maps,

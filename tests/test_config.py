@@ -174,3 +174,25 @@ def test_the_build_module_never_imports_an_extra_at_module_level():
     header = source.split("def build_map", 1)[0]
     for extra in ("fpv_maps.facades", "moderngl", "scipy"):
         assert extra not in header, f"{extra} must be imported inside the function"
+
+
+def test_every_publisher_that_walks_the_maps_folder_skips_a_private_map():
+    """Four of them do, and each one was found separately.
+
+    A private map is built and flown and never published. The release workflow builds
+    and uploads, publish-tours.sh renders a tour and pushes it to the wiki,
+    release-notes.sh writes it a section with its pictures, and fpv-maps gallery
+    writes its wiki page. Every one of them enumerates maps/*.toml, so every one of
+    them has to filter. This test fails when a fifth is added without the filter.
+    """
+    root = Path(__file__).parent.parent
+    publishers = {
+        ".github/workflows/release.yml": "private = true",
+        "scripts/publish-tours.sh": "private = true",
+        "scripts/release-notes.sh": "private = true",
+        "src/fpv_maps/cli.py": "cfg.private",
+    }
+    for name, marker in publishers.items():
+        text = (root / name).read_text(encoding="utf-8")
+        assert "maps/*.toml" in text or 'glob("maps/*.toml")' in text, f"{name} changed shape"
+        assert marker in text, f"{name} walks maps/ and does not skip a private map"
