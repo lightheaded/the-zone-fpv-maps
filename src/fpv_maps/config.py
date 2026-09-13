@@ -209,9 +209,7 @@ def _load_lidar(raw: dict, base: Path) -> LidarSettings:
         classes=tuple(int(c) for c in raw.get("classes", ())),
         files=_paths(raw.get("files"), base),
         crs=str(raw.get("crs", "")),
-        height_shift_m=(
-            float(raw["height_shift_m"]) if "height_shift_m" in raw else None
-        ),
+        height_shift_m=(float(raw["height_shift_m"]) if "height_shift_m" in raw else None),
         close_cells=int(raw.get("close_cells", 2)),
         smooth_cells=int(raw.get("smooth_cells", 1)),
     )

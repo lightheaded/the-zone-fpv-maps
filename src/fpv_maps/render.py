@@ -352,7 +352,41 @@ class SceneRenderer:
             depth_attachment=self.ctx.depth_renderbuffer(size, samples=samples),
         )
         self.read_fbo = self.ctx.framebuffer(color_attachments=[self.ctx.texture(size, 3)])
+        # One GPU texture per image, not per mesh. A chunked map gives every chunk its
+        # own mesh and they all point at the same ground image, so uploading per mesh
+        # uploaded it once per chunk. The base map has 36 terrain chunks and an 8192 px
+        # ground texture, which is 268 MB with its mip chain, so that was 9.6 GB of the
+        # same picture. It survived only because nothing else on that map was textured.
+        # Giving the roofs the same image doubled it and the driver stopped drawing
+        # anything at all: every frame of the tour came out an identical smear.
+        self._textures: dict[int, object] = {}
         self.vaos = [self._upload(geometry) for geometry in self.geometries]
+
+    def _texture(self, image: Image.Image) -> object:
+        """The GPU texture for one image, uploaded once however many meshes use it.
+
+        The glTF loader hands the same ``PIL.Image`` object to every material that
+        refers to one image of the file, so identity is the right key.
+        """
+        key = id(image)
+        cached = self._textures.get(key)
+        if cached is not None:
+            return cached
+        # The rows go up before the upload, because this renderer reads the map
+        # through trimesh and trimesh flips V on import. The file holds glTF V,
+        # so what arrives here is OpenGL V, and OpenGL samples the first uploaded
+        # row at V = 0. Without the flip the ground comes out mirrored north to
+        # south. See "flip_uv_for_export" for the other half of the same
+        # convention, and do not remove one without the other.
+        import moderngl
+
+        rgb = image.convert("RGB").transpose(Image.FLIP_TOP_BOTTOM)
+        texture = self.ctx.texture(rgb.size, 3, rgb.tobytes())
+        texture.build_mipmaps()
+        texture.anisotropy = 16.0
+        texture.filter = (moderngl.LINEAR_MIPMAP_LINEAR, moderngl.LINEAR)
+        self._textures[key] = texture
+        return texture
 
     def _upload(self, geometry: Geometry) -> tuple[object, object]:
         data = np.hstack([geometry.positions, geometry.normals, geometry.uv]).astype(np.float32)
@@ -365,19 +399,7 @@ class SceneRenderer:
         )
         texture = None
         if geometry.texture is not None:
-            # The rows go up before the upload, because this renderer reads the map
-            # through trimesh and trimesh flips V on import. The file holds glTF V,
-            # so what arrives here is OpenGL V, and OpenGL samples the first uploaded
-            # row at V = 0. Without the flip the ground comes out mirrored north to
-            # south. See "flip_uv_for_export" for the other half of the same
-            # convention, and do not remove one without the other.
-            image = geometry.texture.convert("RGB").transpose(Image.FLIP_TOP_BOTTOM)
-            texture = self.ctx.texture(image.size, 3, image.tobytes())
-            texture.build_mipmaps()
-            texture.anisotropy = 16.0
-            import moderngl
-
-            texture.filter = (moderngl.LINEAR_MIPMAP_LINEAR, moderngl.LINEAR)
+            texture = self._texture(geometry.texture)
         return vao, texture
 
     def fog_for(self, pose: Pose) -> tuple[float, float]:
@@ -439,6 +461,11 @@ class SceneRenderer:
         raw = self.read_fbo.read(components=3, alignment=1)
         pixels = np.frombuffer(raw, dtype=np.uint8).reshape(height, width, 3)
         return np.flipud(pixels)
+
+    @property
+    def textures_uploaded(self) -> int:
+        """How many distinct images are on the GPU. One per image, not one per mesh."""
+        return len(self._textures)
 
     def close(self) -> None:
         self.ctx.release()

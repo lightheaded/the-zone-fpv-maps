@@ -207,3 +207,45 @@ def test_the_ground_texture_is_not_mirrored(opengl, tmp_path: Path, bbox, flat_f
     south = pixels[-40:].reshape(-1, 3).mean(axis=0)
     assert north[0] > north[2], "the north half is red"
     assert south[2] > south[0], "the south half is blue"
+
+
+def test_one_image_becomes_one_gpu_texture_however_many_meshes_use_it(tmp_path):
+    """A chunked map points every chunk at the same ground image.
+
+    Uploading per mesh uploaded that image once per chunk. On the 9 x 9 km base map
+    that is 36 terrain chunks and an 8192 px texture, which is 268 MB with its mip
+    chain and so 9.6 GB of the same picture. It survived only while nothing else on
+    the map was textured; giving the roofs the same image doubled it and the driver
+    stopped drawing anything, so every frame of the tour came out an identical smear.
+    """
+    import trimesh
+
+    from fpv_maps.render import SceneRenderer
+    from fpv_maps.tour import Tour
+
+    pytest.importorskip("moderngl")
+    rng = np.random.default_rng(0)
+    pixels = rng.integers(0, 255, (64, 64, 3), dtype=np.uint8)
+    shared = texture_material("fpv_ground", jpeg_image(pixels, 80))
+    meshes = {}
+    for i in range(4):
+        mesh = trimesh.creation.box(extents=(10, 10, 10))
+        mesh.apply_translation((20 * i, 0, 0))
+        mesh.visual = trimesh.visual.TextureVisuals(
+            uv=np.zeros((len(mesh.vertices), 2)), material=shared
+        )
+        meshes[f"terrain_r00c0{i}"] = mesh
+
+    glb = tmp_path / "shared.glb"
+    write_glb(meshes, glb)
+
+    tour = Tour(name="t", shots=(), fps=1, width=64, height=64)
+    try:
+        with SceneRenderer(glb, tour) as renderer:
+            assert renderer.textures_uploaded == 1, (
+                f"{renderer.textures_uploaded} textures for one image over 4 meshes"
+            )
+    except Exception as exc:  # pragma: no cover - no GL on this runner
+        if "context" in str(exc).lower() or "display" in str(exc).lower():
+            pytest.skip(f"no OpenGL context: {exc}")
+        raise
