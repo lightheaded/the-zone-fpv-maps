@@ -85,6 +85,28 @@ fi
 # The wiki is a second repository, and a fresh clone of it reads the global git
 # identity. That can be another identity than the one of this repository, and a wiki
 # commit is public. Copy the identity and the signing settings of this repository.
+#
+# Refuse first if that identity is a personal one. This repository had no local
+# identity of its own, so the copy would have taken the global one, and the global
+# one on a maintainer's own machine is their real name and their personal address.
+# A wiki commit is public and a git author is forever. Pillar 1 of AGENTS.md.
+author_name=$(git config --get user.name || true)
+author_email=$(git config --get user.email || true)
+if [ -z "$author_name" ] || [ -z "$author_email" ]; then
+  echo "this repository has no git identity, so the wiki commit would take the global one." >&2
+  echo "Run: git config --local user.name <handle>" >&2
+  exit 1
+fi
+case "$author_email" in
+  *@users.noreply.github.com) ;;
+  *)
+    echo "the git identity of this repository is <$author_email>, which is not a" >&2
+    echo "GitHub noreply address. A wiki commit is public and its author is forever." >&2
+    echo "Run: git config --local user.email <id>+<handle>@users.noreply.github.com" >&2
+    exit 1
+    ;;
+esac
+
 for key in user.name user.email user.signingkey gpg.format commit.gpgsign; do
   value=$(git config --get "$key" || true)
   if [ -n "$value" ]; then
