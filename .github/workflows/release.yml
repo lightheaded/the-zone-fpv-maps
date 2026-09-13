@@ -1,6 +1,8 @@
 name: release
 
 # A tag `vX.Y.Z` builds every map in maps/ from the open data and publishes a GitHub
+# release. A map with `private = true` is skipped everywhere below: it is built and
+# flown locally and it is never published. See docs/licensing.md.
 # release with the map files, the previews and the build reports. The tag must match
 # the version in pyproject.toml. The release notes come from git history, see
 # scripts/release-notes.sh and AGENTS.md, Releases.
@@ -33,6 +35,7 @@ jobs:
       - name: Check that every map has a preview image
         run: |
           for cfg in maps/*.toml; do
+            if grep -q '^private = true' "$cfg"; then continue; fi
             name=$(grep -m1 '^name = ' "$cfg" | sed -E 's/name = "(.*)"/\1/')
             test -s "docs/screenshots/$name-preview.jpg" || { echo "docs/screenshots/$name-preview.jpg is missing. Build the map and copy the preview."; exit 1; }
           done
@@ -42,6 +45,7 @@ jobs:
       - name: Check that every map has a tour picture
         run: |
           for cfg in maps/*.toml; do
+            if grep -q '^private = true' "$cfg"; then continue; fi
             name=$(grep -m1 '^name = ' "$cfg" | sed -E 's/name = "(.*)"/\1/')
             count=$(ls docs/screenshots/"$name"-tour-*.jpg 2>/dev/null | wc -l)
             test "$count" -gt 0 || { echo "docs/screenshots/$name-tour-*.jpg is missing. Run 'fpv-maps tour maps/$name.toml --publish'."; exit 1; }
@@ -85,6 +89,7 @@ jobs:
         run: |
           mkdir -p release-assets
           for cfg in maps/*.toml; do
+            if grep -q '^private = true' "$cfg"; then continue; fi
             name=$(grep -m1 '^name = ' "$cfg" | sed -E 's/name = "(.*)"/\1/')
             uv run fpv-maps build "$cfg"
             uv run fpv-maps inspect "dist/$name/$name.glb"

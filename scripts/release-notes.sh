@@ -126,6 +126,9 @@ echo
 for cfg in $new_maps; do
   # A map that the release adds and a later commit deletes is not in the tree.
   [ -f "$cfg" ] || continue
+  # A private map is built and flown locally and never published, so it is not on
+  # the release page either. See docs/licensing.md.
+  if grep -q '^private = true' "$cfg"; then continue; fi
   name=$(grep -m1 '^name = ' "$cfg" | sed -E 's/name = "(.*)"/\1/')
   description=$(grep -m1 '^description = ' "$cfg" | sed -E 's/description = "(.*)"/\1/')
   echo "### $name"

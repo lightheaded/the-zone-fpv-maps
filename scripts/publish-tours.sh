@@ -41,6 +41,13 @@ fi
 
 echo "==> render a tour for every map that has none"
 for cfg in maps/*.toml; do
+  # A private map is never published, so it gets no tour on the wiki and no video
+  # in the release. A tour of it is a picture of an input that may not be
+  # redistributed, or of a place that is not ours to show. See docs/licensing.md.
+  if grep -q '^private = true' "$cfg"; then
+    echo "==> $cfg is private, skipped"
+    continue
+  fi
   name=$(grep -m1 '^name = ' "$cfg" | sed -E 's/name = "(.*)"/\1/')
   if [ ! -s "dist/$name/tour/$name-tour.mp4" ]; then
     uv run fpv-maps tour "$cfg" --publish
