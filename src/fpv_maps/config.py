@@ -34,6 +34,15 @@ class LidarSettings:
     res_m: float = 0.5
     colour: bool = False
     classes: tuple[int, ...] = ()
+    #: Point cloud files to read. Empty downloads the Maa-amet sheets for the box.
+    #: Name files here to use a survey of your own, in any format laspy reads.
+    files: tuple[Path, ...] = ()
+    #: The projection the named files are in, if it is not L-EST97. Reprojected on read.
+    crs: str = ""
+    #: Metres to add to every height. Empty measures it against the open elevation
+    #: model, which puts an ellipsoidal survey into EH2000 and absorbs a base station
+    #: offset at the same time. Set a number to skip the measurement.
+    height_shift_m: float | None = None
     #: Radius in cells of the closing that turns woodland from spikes into canopy.
     #: See ``lidar.close_gaps``. Zero is the raw highest return.
     close_cells: int = 2
@@ -136,7 +145,7 @@ def load_config(path: str | Path) -> MapConfig:
     buildings = raw.get("buildings", {})
     probes = raw.get("probes", {})
     facades = _load_facades(raw.get("facades", {}))
-    lidar = _load_lidar(raw.get("lidar", {}))
+    lidar = _load_lidar(raw.get("lidar", {}), path.parent)
     chunks = raw.get("chunks", {})
 
     source = str(ground.get("source", "city"))
@@ -189,7 +198,7 @@ def load_config(path: str | Path) -> MapConfig:
     )
 
 
-def _load_lidar(raw: dict) -> LidarSettings:
+def _load_lidar(raw: dict, base: Path) -> LidarSettings:
     """The ``[lidar]`` section. Absent or ``enabled = false`` uses the terrain model."""
     if not raw:
         return LidarSettings()
@@ -198,11 +207,19 @@ def _load_lidar(raw: dict) -> LidarSettings:
         res_m=float(raw.get("res_m", 0.5)),
         colour=bool(raw.get("colour", False)),
         classes=tuple(int(c) for c in raw.get("classes", ())),
+        files=_paths(raw.get("files"), base),
+        crs=str(raw.get("crs", "")),
+        height_shift_m=(
+            float(raw["height_shift_m"]) if "height_shift_m" in raw else None
+        ),
         close_cells=int(raw.get("close_cells", 2)),
         smooth_cells=int(raw.get("smooth_cells", 1)),
     )
     if settings.res_m <= 0:
         raise ValueError(f"lidar.res_m must be positive: {settings.res_m}")
+    for path in settings.files:
+        if not path.exists():
+            raise FileNotFoundError(f"lidar point cloud is missing: {path}")
     return settings
 
 

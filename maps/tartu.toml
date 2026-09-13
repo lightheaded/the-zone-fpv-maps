@@ -47,6 +47,11 @@ municipalities = [
   "Kastre_vald",
 ]
 wall_material = "z_concrete2"
+# Roofs from the orthophoto, the same as the 1 km tiles. Here it is 1.1 m per pixel,
+# so a small house gets four pixels and a large roof gets its shape. That is a weak
+# picture and it still beats one asphalt over 23745 buildings: the colour of a roof is
+# right everywhere, and a city read from 100 m up is mostly colour.
+roof_source = "orthophoto"
 roof_material = "z_pebbled_asphalt"
 
 [probes]

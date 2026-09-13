@@ -133,7 +133,7 @@ uv run fpv-maps tour maps/tartu-vaksali.toml --publish
 
 - `docs/analysis.md`: feasibility study and plan for Tartu.
 - `docs/facades.md`: how a wall gets a photo of itself from an oblique aerial frame.
-- `docs/lidar.md`: a map whose whole world is the laser scan, trees and all.
+- `docs/lidar.md`: a map whose whole world is the laser scan, trees and all. Reads the open Maa-amet sheets or a survey of your own.
 - `docs/the-zone-format.md`: what the game loads, verified facts, open questions.
 - `docs/decisions.md`: decision log.
 - `docs/development.md`: setup and commands.

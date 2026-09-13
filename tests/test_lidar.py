@@ -10,6 +10,7 @@ import pytest
 
 from fpv_maps.crs import BBox
 from fpv_maps.lidar import close_gaps, read_surface, smooth
+from fpv_maps.terrain import HeightField
 
 BOX = BBox(657000, 6477000, 657020, 6477020)
 
@@ -131,3 +132,52 @@ def test_the_smoothing_keeps_the_mean():
     rng = np.random.default_rng(1)
     a = rng.normal(10.0, 2.0, (32, 32))
     assert smooth(a, 1).mean() == pytest.approx(a.mean(), abs=1e-9)
+
+
+# ------------------------------------------------------ a cloud from somewhere else
+
+
+def test_a_cloud_in_another_projection_lands_in_the_right_place(tmp_path):
+    """A survey in UTM 35N must arrive in L-EST97, or the map is 400 km away."""
+    from pyproj import Transformer
+
+    to_utm = Transformer.from_crs("EPSG:3301", "EPSG:32635", always_xy=True)
+    east, north = 657010.5, 6477010.5
+    ux, uy = to_utm.transform(east, north)
+    path = write_las(tmp_path / "utm.las", [ux], [uy], [7.0])
+    field, _ = read_surface([path], BOX, res_m=1.0, crs="EPSG:32635")
+    assert field.sample_one(east, north) == pytest.approx(7.0, abs=1e-3)
+
+
+def test_a_height_shift_moves_every_point(tmp_path):
+    path = write_las(tmp_path / "a.las", [657010.5], [6477010.5], [3.0])
+    field, _ = read_surface([path], BOX, res_m=1.0, height_shift_m=-19.0)
+    assert field.sample_one(657010.5, 6477010.5) == pytest.approx(-16.0, abs=1e-3)
+
+
+def test_the_height_shift_is_measured_from_the_ground_points(tmp_path):
+    """An ellipsoidal survey sits about 19 m above EH2000. Measure, do not guess.
+
+    Only the ground class may enter the measurement. The trees and the roofs in this
+    cloud stand well above the ground and would drag a mean upward.
+    """
+    from fpv_maps.lidar import measure_height_shift
+
+    ee, nn, _ = grid_points(1.0, lambda e, n: np.zeros(len(e)))
+    truth = 12.0
+    ground = write_las(tmp_path / "g.las", ee, nn, np.full(len(ee), truth + 19.0))
+    canopy = write_las(
+        tmp_path / "c.las", ee, nn, np.full(len(ee), truth + 19.0 + 15.0), classification=5
+    )
+    dtm = HeightField(heights=np.full((20, 20), truth), west=BOX.xmin, north=BOX.ymax, res=1.0)
+    shift = measure_height_shift([ground, canopy], dtm)
+    assert shift == pytest.approx(-19.0, abs=0.05)
+
+
+def test_a_cloud_with_no_ground_class_measures_no_shift(tmp_path):
+    """Nothing to measure against. Zero is honest and a guess would not be."""
+    from fpv_maps.lidar import measure_height_shift
+
+    canopy = write_las(tmp_path / "c.las", [657010.5], [6477010.5], [30.0], classification=5)
+    dtm = HeightField(heights=np.zeros((20, 20)), west=BOX.xmin, north=BOX.ymax, res=1.0)
+    assert measure_height_shift([canopy], dtm) == 0.0

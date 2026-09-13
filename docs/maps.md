@@ -40,10 +40,12 @@ them.
 
 - Terrain from the Maa-amet 1 m elevation model, as one mesh or as a grid of chunks.
 - One ground texture, cut from the orthophoto and baked into the file as a JPEG.
-- LOD2 buildings with the in-game concrete on the walls. The three 1 km tiles give
-  each roof its own picture from the orthophoto, straight down, so a tin roof is red
-  and a tile roof is brown. The 9 x 9 km base map keeps the in-game asphalt, because
-  its ground texture is 1.1 m per pixel and that is not a roof.
+- LOD2 buildings with the in-game concrete on the walls, and each roof with its own
+  picture from the orthophoto, straight down, so a tin roof is red and a tile roof is
+  brown. On the 1 km tiles that is 12 cm per pixel and a roof has its ridge, its
+  dormers and its vents. On the 9 x 9 km base map it is 1.1 m per pixel and a small
+  house gets four pixels, which is a weak picture and still better than one asphalt
+  for the whole city.
 - The walls carry no photo texture. `docs/facades.md` describes a pipeline that can
   put one there, and `docs/licensing.md` D6 says why no such map is published yet.
 

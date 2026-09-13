@@ -302,16 +302,40 @@ min_correlation = 0.30
 jpeg_quality = 85
 ```
 
-The first build is slow and the rest are not. The photo choice is cached as
-`data/fotoladu/sources-<map>.json` and every Deep Zoom tile is cached under
-`data/fotoladu/`, so a rebuild at another texel size costs no request. Delete the
-sources file to choose the photos again.
+`docs/facades.md` has the full run-book: what to put in the map, how to read the four
+numbers in the log that say whether it worked, what the cache holds, and what changes
+the day Maa- ja Ruumiamet answer the access request.
 
 Two things to know before you turn it on:
 
 - **The map may not be published.** See `docs/licensing.md` D6. Set `private = true`
   in the `[map]` section, which is what keeps it out of the release and preview checks.
 - **It needs `scipy`.** `uv sync --extra facades`.
+
+## Build a map from a point cloud
+
+`[lidar] enabled = true` builds the whole world from a laser scan: the trees, the
+roofs and the masts are the mesh, and there is no building model in the map at all.
+With no `files` it downloads the Maa- ja Ruumiamet sheets for the box. With `files` it
+reads a survey of your own, reprojects it, and measures its height against the open
+elevation model.
+
+```toml
+[lidar]
+enabled = true
+files = ["../data/private/my-survey/cloud.laz"]   # omit for the open Maa-amet sheets
+crs = "EPSG:32635"    # omit when the cloud is already L-EST97
+res_m = 0.3           # match the point spacing
+colour = true         # only if the points carry RGB
+close_cells = 6       # closes the gaps a beam finds through a canopy
+smooth_cells = 1
+
+[buildings]
+enabled = false
+```
+
+`docs/lidar.md` has the run-book, including what your cloud needs to have in it and
+the three numbers to check on a first build.
 
 ## Add a gate course
 

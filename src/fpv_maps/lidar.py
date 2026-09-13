@@ -27,8 +27,9 @@ from pathlib import Path
 
 import laspy
 import numpy as np
+from pyproj import Transformer
 
-from fpv_maps.crs import BBox
+from fpv_maps.crs import LEST97, BBox
 from fpv_maps.terrain import HeightField
 
 #: Points the scanner never should have kept. 7 is noise and 18 is a high point, which
@@ -39,6 +40,59 @@ NOISE_CLASSES = (7, 18)
 #: Read the file in blocks. A 1 km sheet at 29 points per square metre is 29 million
 #: points, and every dimension of one is another 29 million values in memory.
 CHUNK = 4_000_000
+
+
+def _reproject(x: np.ndarray, y: np.ndarray, transformer) -> tuple[np.ndarray, np.ndarray]:
+    """Points of one block into L-EST97. A no-op when the cloud is already in it."""
+    if transformer is None:
+        return x, y
+    return transformer.transform(x, y)
+
+
+def measure_height_shift(
+    paths: list[Path] | tuple[Path, ...],
+    dtm: HeightField,
+    crs: str | None = None,
+    ground_classes: tuple[int, ...] = (2,),
+    sample: int = 200_000,
+) -> float:
+    """How far to move a cloud in height so that its ground sits on the open model.
+
+    A survey writes ellipsoidal heights and Maa-amet writes EH2000. Over Estonia those
+    are about 19 m apart, which is enough to bury a house or to hang it in the air. The
+    offset of a survey base station lands in the same number, and a fixed geoid model
+    would not catch that, so it is measured rather than looked up.
+
+    The measurement is the median difference over the ground classified points, which
+    is robust to the vegetation and the buildings that surround them. A cloud with no
+    ground class returns 0.0: it has nothing to measure against and a guess would be
+    worse than nothing.
+    """
+    transformer = (
+        Transformer.from_crs(crs, LEST97, always_xy=True) if crs and crs.upper() != LEST97 else None
+    )
+    diffs: list[np.ndarray] = []
+    taken = 0
+    for path in paths:
+        with laspy.open(str(path)) as reader:
+            for points in reader.chunk_iterator(CHUNK):
+                cls = np.asarray(points.classification)
+                keep = np.isin(cls, ground_classes)
+                if not keep.any():
+                    continue
+                x, y = _reproject(
+                    np.asarray(points.x)[keep], np.asarray(points.y)[keep], transformer
+                )
+                z = np.asarray(points.z)[keep]
+                diffs.append(dtm.sample(x, y) - z)
+                taken += len(z)
+                if taken >= sample:
+                    break
+        if taken >= sample:
+            break
+    if not diffs:
+        return 0.0
+    return float(np.median(np.concatenate(diffs)))
 
 
 def _grid_index(x: np.ndarray, y: np.ndarray, bbox: BBox, res: float, shape) -> np.ndarray:
@@ -59,6 +113,8 @@ def read_surface(
     colour: bool = False,
     close_cells: int = 0,
     smooth_cells: int = 0,
+    crs: str | None = None,
+    height_shift_m: float = 0.0,
 ) -> tuple[HeightField, np.ndarray | None]:
     """The highest return in every cell of ``bbox``, and optionally its colour.
 
@@ -68,6 +124,10 @@ def read_surface(
     ``close_cells`` is the radius of a morphological closing over the finished grid.
     Over woodland it is the difference between a canopy and a field of spikes. See
     ``close_gaps``.
+
+    ``crs`` reprojects the cloud on read, for a survey that is not in L-EST97.
+    ``height_shift_m`` is added to every height, which puts an ellipsoidal survey into
+    EH2000. ``measure_height_shift`` works the number out against the open model.
 
     Returns the height field and, when ``colour`` is set, an (rows, cols, 3) uint8
     image of the colour of the highest return, in the same grid. A cell with no point
@@ -81,13 +141,15 @@ def read_surface(
     shape = (rows, cols)
     top = np.full(rows * cols, -np.inf, dtype=np.float32)
     rgb = np.zeros((rows * cols, 3), dtype=np.uint16) if colour else None
+    transformer = (
+        Transformer.from_crs(crs, LEST97, always_xy=True) if crs and crs.upper() != LEST97 else None
+    )
 
     for path in paths:
         with laspy.open(str(path)) as reader:
             has_colour = colour and "red" in reader.header.point_format.dimension_names
             for points in reader.chunk_iterator(CHUNK):
-                x = np.asarray(points.x)
-                y = np.asarray(points.y)
+                x, y = _reproject(np.asarray(points.x), np.asarray(points.y), transformer)
                 idx = _grid_index(x, y, bbox, res_m, shape)
                 keep = idx >= 0
                 if not keep.any():
@@ -99,7 +161,7 @@ def read_surface(
                 if not wanted.any():
                     continue
                 cell = idx[keep][wanted]
-                z = np.asarray(points.z)[keep][wanted].astype(np.float32)
+                z = np.asarray(points.z)[keep][wanted].astype(np.float32) + height_shift_m
                 # np.maximum.at is the only way to reduce by key without sorting the
                 # whole block, and a 1 km sheet is 29 million points.
                 np.maximum.at(top, cell, z)

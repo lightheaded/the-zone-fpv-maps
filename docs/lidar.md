@@ -77,6 +77,75 @@ photogrammetry survey gives real two sided geometry over a small area. The LOD2
 model gives clean walls a drone can fly between. The scan gives everything that
 stands on the ground, over as much ground as you care to download, and no interiors.
 
+## Use a point cloud of your own
+
+Nothing above is specific to the Maa-amet flight. Name your own files and the same
+pipeline reads them. This is the whole configuration for a survey:
+
+```toml
+[lidar]
+enabled = true
+files = ["../data/private/my-survey/cloud.laz"]   # or several, or .las
+crs = "EPSG:32635"        # omit when the cloud is already L-EST97
+res_m = 0.3               # match the point spacing, see "Cost"
+colour = true             # only if the points carry RGB
+close_cells = 6           # see "The forest", raise it over dense woodland
+smooth_cells = 1
+
+[buildings]
+enabled = false           # the scan already holds every building
+```
+
+Paths are relative to the map file. The pipeline never downloads these and it fails
+rather than falling back to the open data, so a map never quietly claims a quality it
+did not get.
+
+Three things it does for you.
+
+**The projection.** `crs` reprojects every point on read. Without it a UTM survey
+lands about 400 km from where it belongs, and the map is empty.
+
+**The height datum.** A survey writes ellipsoidal heights and Maa-amet writes EH2000,
+which over Estonia are about 19 m apart. That is enough to bury a house or to hang it
+in the air over the open terrain around it. The build measures the offset itself: it
+takes the ground classified points, compares them with the open 1 m elevation model,
+and uses the median difference. The median rather than the mean, because vegetation
+and buildings surround the ground points and would drag a mean upward. The measurement
+also absorbs an offset in your RTK base station, which a fixed geoid model would not.
+
+Set `height_shift_m` to skip the measurement and use your own number. A cloud with no
+ground classified points measures no shift at all and says so, rather than guessing.
+
+**The classes.** `classes = [2, 6]` keeps only ground and building, which gives a map
+with no vegetation. The default keeps everything except the noise classes.
+
+### What your cloud needs
+
+- **Classification**, at least a ground class, if you want the height measured for
+  you. Without it, set `height_shift_m` by hand.
+- **Colour**, if you want `colour = true`. Without it, leave the map's
+  `[ground_texture]` on the orthophoto: the pipeline uses that whenever the scan has
+  no colour of its own.
+- **Density.** Set `res_m` near the point spacing. One point per square metre wants
+  `res_m = 1.0`, and asking for 0.2 there gives four empty cells out of five for the
+  hole filling to invent.
+
+### A first run
+
+```bash
+uv run fpv-maps build maps/<name>.toml
+```
+
+Read three numbers out of the log and the build report before you fly it.
+
+1. The measured height shift. If it is not near 0 or near the geoid separation of
+   your area, the ground classification is probably wrong.
+2. `terrain_chunks` and the triangle count. `res_m` halved is four times the
+   triangles.
+3. The gate clearance, if the map has a course. A tree that is now real geometry
+   blocks a gate that was clear when the trees were not in the map. That happened to
+   `suburb-1-scan` at gate 2, and it is the check working rather than failing.
+
 ## Cost
 
 A 600 m box at a 30 cm grid is 8.0 million triangles and 83 MB, which is inside what

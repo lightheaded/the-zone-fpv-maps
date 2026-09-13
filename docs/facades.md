@@ -1,7 +1,15 @@
 # Photo textured facades from oblique aerial photos
 
-Date: 2026-09-12. Status: the pipeline builds them. The maps stay on the machine that
-builds them. See "What may leave the machine" at the end.
+Date: 2026-09-13. Status: the pipeline builds them. The maps stay on the machine that
+builds them.
+
+> **Read this before you run it.** The oblique photos are open data with attribution,
+> and the viewer that serves them offers no bulk download. `docs/licensing.md` D6 asks
+> anyone using this at scale to write to Maa- ja Ruumiamet first, and
+> `docs/letters/2026-09-fotoladu-access.md` is the letter. The code here is published
+> so that the method is public and so that the work is ready the day permission
+> arrives. It is not published as an invitation to scrape the viewer. That restraint
+> is yours to keep: nothing in the code enforces it beyond a rate limit.
 
 The LOD2 building model of [Maa- ja Ruumiamet](https://geoportaal.maaruum.ee/) gives the shape of every house in
 Estonia and nothing of its surface. A map built from it alone gives all 23745
@@ -127,15 +135,137 @@ D6 asks for.
 
 ## What it reaches
 
-Tartu old town, 1 km box, 19 photos of 39 candidates from a single centre query:
+Tartu old town, a 1 km box, built 2026-09-13 from level 12 tiles at a 9 cm atlas texel:
 
 | | |
 |---|---|
+| Usable photos found, from five queries | 116 |
+| Photos whose fitted pose the orthophoto agrees with | 40 |
+| Photos baked from, spread over all eight octants | 22 |
 | Wall panels | 9,698 |
-| Atlas | 8192 x 2759 px |
-| Wall area with a photo | 56.9 % |
-| Panels that borrowed their own building | 2,004 |
-| File | 30.1 MB, 538,700 triangles |
+| Atlas | 16384 x 6404 px |
+| Panels with a photograph of themselves | 5,839 |
+| Wall area with a photograph of itself | 60.3 % |
+| Remaining panels, borrowing their own building or its neighbour | 3,859 |
+| File | 39.7 MB, 538,700 triangles |
+
+Flown, it is convincing from 50 m up and soft in a narrow street. That is the source
+and not the code: level 12 tiles are about 18 cm on a wall and they carry the viewer
+watermark. "The day permission arrives" below says what changes with the full frames.
+
+## Run it
+
+Everything needed is in this repository. `maps/tartu-old-town-facades.toml` is a
+complete worked example over a square kilometre of dense old town.
+
+### 1. Install the extra
+
+The camera resection is a non linear least squares fit, which needs scipy. It is an
+optional extra so that a normal map build stays a small install.
+
+```bash
+uv sync --extra facades
+```
+
+A map with a `[facades]` section built without it stops with a message naming the
+extra. No other map is affected.
+
+### 2. Write the map
+
+```toml
+[map]
+name = "<city>-<place>-facades"
+private = true          # required: this map is never published, see below
+
+[buildings]
+enabled = true
+municipalities = ["Tartu_linn"]
+wall_material = "z_concrete2"      # unused while facades are on, kept for the switch back
+roof_material = "z_pebbled_asphalt"
+
+[facades]
+enabled = true
+level = 12              # Deep Zoom level. 13 is the full frame and four times the tiles.
+texel_m = 0.09          # atlas resolution on the wall
+atlas_px = 16384        # atlas width. It grows in height until every panel fits.
+max_candidates = 90     # photos to fit a camera to
+max_sources = 22        # photos to bake from, spread over the compass
+min_correlation = 0.30  # the orthophoto gate. Below this the pose is wrong.
+jpeg_quality = 85
+```
+
+Everything else is a normal map: the box, the origin, the terrain and the ground
+texture behave exactly as they do without the section.
+
+### 3. Build
+
+```bash
+uv run fpv-maps build maps/<name>.toml
+```
+
+The first build is slow. It makes five metadata queries, fetches a small frame of
+every candidate photo to score it, fits a camera to each, then fetches the chosen
+photos at the texture level. Over the Tartu old town that is about two minutes of
+requests and four minutes in total.
+
+Every later build is fast, because two things are cached under `data/fotoladu/`:
+
+```
+data/fotoladu/
+  sources-<map>.json          the chosen photos and their fitted cameras
+  <image id>/<level>/<c>_<r>.jpg   every Deep Zoom tile ever fetched
+```
+
+Change `texel_m`, `atlas_px` or `jpeg_quality` and the rebuild costs no request at
+all. Delete `sources-<map>.json` to choose the photos again, which is what you want
+after changing `max_sources`, `max_candidates` or `min_correlation`.
+
+### 4. Read the log
+
+Four numbers say whether it worked.
+
+| Line | Good | Bad, and what it means |
+|---|---|---|
+| `usable photos` | tens | under 10: the box is outside the flown area |
+| `photos with a pose the orthophoto agrees with` | half the candidates | near 0: the orthophoto and the photos disagree, check the ground texture is the same box |
+| `photos per direction` | every octant present | one direction only: walls facing away get nothing |
+| `wall coverage` | 50 to 65 percent | under 30: the occlusion or the poses are wrong |
+
+Over the Tartu old town on 2026-09-13: 116 usable photos, 40 with an agreed pose, 22
+chosen with every octant covered, 60.3 percent of the wall area.
+
+### 5. Install and fly
+
+```bash
+uv run fpv-maps build maps/<name>.toml --install
+```
+
+The map is a normal custom map. Nothing about it is special to the game.
+
+## The day permission arrives
+
+The pipeline was written to make that day short. Two things change.
+
+**Full resolution frames.** Set `level = 13`, which is the whole 7952 px frame instead
+of half of it, and lower `texel_m` to about 0.05. That is the single change that turns
+a facade from recognisable into sharp, and the tile cache means only the new level is
+fetched. Expect the atlas to reach 16384 px wide by about 12000 tall.
+
+**Exterior orientation.** If the agency supplies the projection centre, the three
+rotation angles and the focal length per frame, then steps 2, 3 and 4 of the method
+below disappear: no corner ordering to resolve, no resection to fit, no orthophoto to
+score against, and no photo thrown away for failing the gate. Build a `Camera`
+directly and pass it to the baker.
+
+`fpv_maps.facades.fotoladu.Camera` is the type to fill. It takes the focal length in
+pixels, the projection centre as L-EST97 east, north and up, and a 3 x 3 world to
+camera rotation whose rows are the camera axes. `Camera.project` is the only thing the
+baker calls on it, so anything that fills those fields correctly works. The rest of
+the pipeline is unchanged: `sources.frames` fetches the images, `walls.wall_panels`
+makes the panels and `bake.bake` fills the atlas.
+
+Every photo would then be usable, not the 34 percent that survive the gate today, and
+coverage should rise well above 60 percent.
 
 ## What may leave the machine
 

@@ -28,7 +28,7 @@ from fpv_maps.export import write_glb
 from fpv_maps.fetch import LICENSE_URL, Fetcher
 from fpv_maps.geotiff import dtm_resolution, read_heights, read_rgb
 from fpv_maps.inspect import inspect_glb
-from fpv_maps.lidar import read_surface
+from fpv_maps.lidar import measure_height_shift, read_surface
 from fpv_maps.materials import jpeg_image, texture_material
 from fpv_maps.preview import render_preview
 from fpv_maps.probes import build_probes
@@ -79,15 +79,34 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
 
     lidar_paths: list[Path] = []
     lidar_rgb = None
+    lidar_shift = 0.0
     if cfg.lidar.enabled:
-        fetcher = Fetcher(cfg.data_dir, quiet=quiet)
-        try:
-            lidar_paths = fetcher.fetch_lidar(cfg.bbox)
-        finally:
-            fetcher.close()
-        report["sources"].append(
-            {"dataset": "Lidar point cloud", "files": [p.name for p in lidar_paths]}
-        )
+        if cfg.lidar.files:
+            # A cloud of your own. The pipeline never downloads these and it fails
+            # rather than falling back to the open data, so a quality claim is never
+            # silent about which scan it came from.
+            lidar_paths = list(cfg.lidar.files)
+            dataset = "Own lidar survey, point cloud"
+        else:
+            fetcher = Fetcher(cfg.data_dir, quiet=quiet)
+            try:
+                lidar_paths = fetcher.fetch_lidar(cfg.bbox)
+            finally:
+                fetcher.close()
+            dataset = "Lidar point cloud, Maa- ja Ruumiamet"
+        report["sources"].append({"dataset": dataset, "files": [p.name for p in lidar_paths]})
+        if cfg.lidar.height_shift_m is not None:
+            lidar_shift = cfg.lidar.height_shift_m
+        elif cfg.lidar.files:
+            # An own survey writes ellipsoidal heights and the open data writes
+            # EH2000, about 19 m apart over Estonia. Measure it against the open
+            # model instead of trusting a geoid, which also absorbs a base station
+            # offset. The Maa-amet cloud is already EH2000 and needs no measurement.
+            open_dtm = read_heights(dtm_paths, cfg.bbox, res_m=2.0)
+            lidar_shift = measure_height_shift(lidar_paths, open_dtm, crs=cfg.lidar.crs or None)
+            log(f"lidar height shift {lidar_shift:+.2f} m to EH2000, from the ground points")
+        if lidar_shift:
+            report["lidar_height_shift_m"] = round(lidar_shift, 3)
 
     height_shift = 0.0
     if cfg.lidar.enabled:
@@ -103,6 +122,8 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
             colour=cfg.lidar.colour,
             close_cells=cfg.lidar.close_cells,
             smooth_cells=cfg.lidar.smooth_cells,
+            crs=cfg.lidar.crs or None,
+            height_shift_m=lidar_shift,
         )
         report["lidar"] = {
             "res_m": cfg.lidar.res_m,
@@ -111,6 +132,7 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
             "classes": list(cfg.lidar.classes),
             "close_cells": cfg.lidar.close_cells,
             "smooth_cells": cfg.lidar.smooth_cells,
+            "own_survey": bool(cfg.lidar.files),
         }
     elif cfg.drone.elevation:
         # The survey writes ellipsoidal heights and the open data writes EH2000.
