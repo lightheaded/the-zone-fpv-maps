@@ -19,10 +19,11 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.optimize import least_squares
 
+from fpv_maps import __version__
 from fpv_maps.crs import wgs84_to_lest97
 
 API = "https://fotoladu.maaamet.ee/api.php"
-UA = "the-zone-fpv-maps/0.4 (map pipeline; contact via GitHub lightheaded)"
+UA = f"the-zone-fpv-maps/{__version__} (map pipeline; contact via GitHub lightheaded)"
 
 # Sensor width in mm by the camera folder name that the tile path carries.
 SENSOR_MM = {"a7r": 35.9, "a7r2": 35.9, "a7r3": 35.9, "a7r4": 35.7, "nex7": 23.5}

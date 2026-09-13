@@ -19,10 +19,11 @@ from pathlib import Path
 
 from PIL import Image
 
+from fpv_maps import __version__
 from fpv_maps.facades.fotoladu import Photo
 
 TILE = 256
-UA = "the-zone-fpv-maps/0.4 (map pipeline, proof of concept; GitHub lightheaded)"
+UA = f"the-zone-fpv-maps/{__version__} (map pipeline, proof of concept; GitHub lightheaded)"
 _RATE = threading.Semaphore(4)
 _last = [0.0]
 _lock = threading.Lock()

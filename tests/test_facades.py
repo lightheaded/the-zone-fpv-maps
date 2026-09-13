@@ -12,6 +12,10 @@ import math
 import numpy as np
 import pytest
 
+# The camera resection needs scipy, which is the "facades" extra. A base install must
+# skip these rather than fail to collect them. CI installs the extra, so they run.
+pytest.importorskip("scipy", reason="the facade pipeline needs the facades extra")
+
 from fpv_maps.buildings import Building, BuildingSet
 from fpv_maps.crs import BBox
 from fpv_maps.facades import bake, orthocheck, tiles

@@ -25,7 +25,6 @@ from fpv_maps.drone import (
     select_tiles,
 )
 from fpv_maps.export import write_glb
-from fpv_maps.facades import build_facade_buildings
 from fpv_maps.fetch import LICENSE_URL, Fetcher
 from fpv_maps.geotiff import dtm_resolution, read_heights, read_rgb
 from fpv_maps.inspect import inspect_glb
@@ -191,6 +190,18 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
             # A whole photo frame is about a kilometre across, so the camera fit needs
             # terrain well outside the map box. It is read coarse: it only carries the
             # four corners of a frame, never a triangle of the map.
+            # Imported here and not at the top of the module. The facade pipeline
+            # needs scipy, which is the "facades" extra, and a base install must still
+            # build every other map. A top level import made the whole build module
+            # unimportable without the extra, which is every map rather than the one.
+            try:
+                from fpv_maps.facades import build_facade_buildings
+            except ImportError as exc:  # pragma: no cover - one line of guidance
+                raise SystemExit(
+                    f"{cfg.name} has a [facades] section, which needs the facades "
+                    f'extra: "uv sync --extra facades". The import said: {exc}'
+                ) from exc
+
             log("facades from oblique photos")
             wide = cfg.bbox.buffer(2000.0)
             fetcher = Fetcher(cfg.data_dir, quiet=quiet)

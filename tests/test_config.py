@@ -159,3 +159,18 @@ def test_terrain_sink_is_read(tmp_path):
     cfg = load_config(path)
     assert cfg.terrain_step_m == 0.5
     assert cfg.terrain_sink_m == 0.5
+
+
+def test_the_build_module_never_imports_an_extra_at_module_level():
+    """A base install must build every map that does not use an extra.
+
+    The facade pipeline needs scipy and the renderer needs moderngl, and both are
+    optional. A top level import of either makes ``fpv_maps.build`` unimportable
+    without it, which breaks every map rather than the one that asked for the extra.
+    That shipped once and the release workflow, which installs no extra, would have
+    failed on all five maps.
+    """
+    source = (Path(__file__).parent.parent / "src" / "fpv_maps" / "build.py").read_text()
+    header = source.split("def build_map", 1)[0]
+    for extra in ("fpv_maps.facades", "moderngl", "scipy"):
+        assert extra not in header, f"{extra} must be imported inside the function"

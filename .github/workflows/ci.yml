@@ -22,7 +22,9 @@ jobs:
         with:
           enable-cache: true
       - name: Install
-        run: uv sync --frozen
+        # The facades extra as well, or tests/test_facades.py skips itself and the
+        # camera resection is tested nowhere.
+        run: uv sync --frozen --extra facades
       - name: Lint
         run: |
           uv run ruff check src tests
@@ -31,6 +33,11 @@ jobs:
         run: uv run pytest
       - name: Smoke test the CLI
         run: uv run fpv-maps area maps/tartu-annelinn-test.toml
+
+      - name: A base install has no skipped test but the optional ones
+        run: |
+          uv sync --frozen
+          uv run pytest -q -rs
 
   # The renderer is an optional extra, because glcontext needs a C++ compiler outside
   # macOS. Mesa draws in software here, so the tests render small pictures only.
