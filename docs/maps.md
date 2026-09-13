@@ -9,13 +9,14 @@ hold the same maps under the names `vaksali`, `ulejoe`, `tartu-base` and
 `annelinn-test`. The folder in the game must carry the new name, so an installed map
 from an older release needs a new folder. See `docs/decisions.md`.
 
-The numbers come from the build reports of version 0.4.0, built on 2026-09-11 on macOS
-arm64. A build on another processor architecture writes a file of a slightly different
+The numbers come from the build reports of version 0.5.0, built on 2026-09-13 on Linux
+x86_64. A build on another processor architecture writes a file of a slightly different
 size, because the JPEG encoder differs. The geometry is the same everywhere. See
 `docs/development.md`, "How reproducible a build is".
 
 | Map | Area | Ground pixel | Buildings | Triangles | File | First release |
 |-----|------|--------------|-----------|-----------|------|---------------|
+| [`tartu-old-town`](#tartu-old-town) | 1 x 1 km | 12.2 cm | 549 | 0.55 M | 26.5 MB | v0.5.0 |
 | [`tartu-vaksali`](#tartu-vaksali) | 1 x 1 km | 12.2 cm | 776 | 0.55 M | 26.5 MB | v0.3.0 |
 | [`tartu-ulejoe`](#tartu-ulejoe) | 1 x 1 km | 12.2 cm | 883 | 0.54 M | 25.8 MB | v0.3.0 |
 | [`tartu`](#tartu) | 9 x 9 km | 1.10 m | 23,745 | 2.87 M | 126 MB | v0.2.0 |
@@ -39,11 +40,39 @@ them.
 
 - Terrain from the Maa-amet 1 m elevation model, as one mesh or as a grid of chunks.
 - One ground texture, cut from the orthophoto and baked into the file as a JPEG.
-- LOD2 buildings with the in-game concrete and asphalt materials. The walls carry no
-  photo texture yet. See `docs/analysis.md` section 4 for the plan.
+- LOD2 buildings with the in-game concrete on the walls. The three 1 km tiles give
+  each roof its own picture from the orthophoto, straight down, so a tin roof is red
+  and a tile roof is brown. The 9 x 9 km base map keeps the in-game asphalt, because
+  its ground texture is 1.1 m per pixel and that is not a roof.
+- The walls carry no photo texture. `docs/facades.md` describes a pipeline that can
+  put one there, and `docs/licensing.md` D6 says why no such map is published yet.
 
 What no map holds yet: trees, power lines, lattice towers, bridges, a water surface,
-hand made hero assets and photo facades. `README.md` lists them under planned products.
+hand made hero assets and photo facades on the walls. `README.md` lists them under
+planned products. A map built straight from the lidar holds the first four already,
+because they were in the beam: see `docs/lidar.md`.
+
+## tartu-old-town
+
+1 km² of the Tartu old town, with Raekoja plats in the middle. The box is not on the
+Maa-amet 1:2000 grid, because no sheet aligned box holds the old town core: the square,
+Toomemägi with the toomkirik ruin, Jaani kirik, the tähetorn, Kaarsild and Võidu sild.
+
+The spawn point is on Raekoja plats, in the open between the raekoda and the Emajõgi
+end of the square. The square is 60 m wide, so the drone starts enclosed on two sides,
+which is what an old town flight feels like. Toomemägi rises about 25 m over it, so the
+tile uses the 2 m terrain step.
+
+The 549 buildings of this box are fewer than the 776 of `tartu-vaksali`, and they are
+the reason the tile exists: most of them are attached to their neighbours in blocks,
+around courtyards, along streets a drone can fly down. That is a wall problem rather
+than a roof problem, which is what `docs/facades.md` is the work on.
+
+### The tour of `tartu-old-town`
+
+![Raekoja plats](screenshots/tartu-old-town-tour-2-raekoja-plats.jpg)
+
+![Toomemägi](screenshots/tartu-old-town-tour-3-toomemagi.jpg)
 
 ## tartu-vaksali
 
