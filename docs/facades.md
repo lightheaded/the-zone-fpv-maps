@@ -5,8 +5,7 @@ builds them.
 
 > **Read this before you run it.** The oblique photos are open data with attribution,
 > and the viewer that serves them offers no bulk download. `docs/licensing.md` D6 asks
-> anyone using this at scale to write to Maa- ja Ruumiamet first, and
-> `docs/letters/2026-09-fotoladu-access.md` is the letter. The code here is published
+> anyone using this at scale to write to Maa- ja Ruumiamet first. The code here is published
 > so that the method is public and so that the work is ready the day permission
 > arrives. It is not published as an invitation to scrape the viewer. That restraint
 > is yours to keep: nothing in the code enforces it beyond a rate limit.

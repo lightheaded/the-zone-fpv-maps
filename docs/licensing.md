@@ -69,9 +69,9 @@ the written yes arrives:
 
 **Decided 2026-09-13: send the access request.** The proof of concept reached 60
 percent of the wall area with recognisable buildings, which is enough to say the
-capability is worth the letter. The draft is `docs/letters/2026-09-fotoladu-access.md`.
-It asks for two things: the frames themselves, and the exterior orientation of each
-frame, which is the number that removes the ambiguous resection entirely.
+capability is worth the letter. Ask for two things: the frames themselves, and the
+exterior orientation of each frame, which is the number that removes the ambiguous
+resection entirely. Record the answer here when it arrives.
 
 ## 2. Licenses that come with the inputs
 
