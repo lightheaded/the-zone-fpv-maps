@@ -67,6 +67,12 @@ the written yes arrives:
 
 `maps/tartu-old-town-facades.toml` carries the same warning at the top of the file.
 
+**Decided 2026-09-13: send the access request.** The proof of concept reached 60
+percent of the wall area with recognisable buildings, which is enough to say the
+capability is worth the letter. The draft is `docs/letters/2026-09-fotoladu-access.md`.
+It asks for two things: the frames themselves, and the exterior orientation of each
+frame, which is the number that removes the ambiguous resection entirely.
+
 ## 2. Licenses that come with the inputs
 
 No choice here. Each entry says what we can do, what we cannot do, and what it means for the project.
