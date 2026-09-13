@@ -186,6 +186,7 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
         for obj_path, fwt_path in lod2_files:
             buildings.extend(read_obj(obj_path, read_offset(fwt_path)).inside(cfg.bbox))
         report["buildings_in_bbox"] = len(buildings)
+        report["roof_source"] = cfg.roof_source
         if cfg.facades.enabled:
             # A whole photo frame is about a kilometre across, so the camera fit needs
             # terrain well outside the map box. It is read coarse: it only carries the
@@ -218,6 +219,7 @@ def build_map(cfg: MapConfig, quiet: bool = False) -> Path:
                     cfg.wall_material,
                     cfg.roof_material,
                     cfg.chunk_m,
+                    roof_texture=ground if cfg.roof_source == "orthophoto" else None,
                 )
             )
 

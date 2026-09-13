@@ -144,18 +144,35 @@ def _planar_uv(vertices: np.ndarray, normals_per_vertex: np.ndarray, scale: floa
     return np.column_stack([u, v])
 
 
+def ortho_uv(verts: np.ndarray, origin: tuple[float, float, float], bbox: BBox) -> np.ndarray:
+    """Map game space vertices onto the ground texture, straight down.
+
+    The ground texture covers the map box exactly, so a roof takes the pixels of
+    itself. Game axes are x east and z south, so the north edge of the box is V = 0,
+    the same way the terrain reads it.
+    """
+    u = (verts[:, 0] + origin[0] - bbox.xmin) / bbox.width
+    v = (bbox.ymax - (origin[1] - verts[:, 2])) / bbox.height
+    return np.column_stack([u, v])
+
+
 def build_building_meshes(
     buildings: BuildingSet,
     origin: tuple[float, float, float],
     wall_material: str | PBRMaterial,
     roof_material: str | PBRMaterial,
     uv_scale_m: float = 4.0,
+    roof_bbox: BBox | None = None,
 ) -> dict[str, trimesh.Trimesh]:
     """Merge all buildings into two meshes, walls and roofs, in game axes.
 
     A face is a roof when its normal points up more than 30 degrees. Faces are
     unwelded so that each face gets its own material and UVs. Pass a ``PBRMaterial``
     instead of a name to share one material between many chunks.
+
+    With ``roof_bbox`` the roofs take the orthophoto from straight above instead of a
+    repeating in-game texture. Every house then has the colour and the shape of its
+    own roof, in place of one asphalt for all 23745 buildings of Tartu.
     """
     wall_tris: list[np.ndarray] = []
     roof_tris: list[np.ndarray] = []
@@ -182,9 +199,11 @@ def build_building_meshes(
         faces = np.arange(len(verts)).reshape(-1, 3)
         normals = np.repeat(_face_normals(verts, faces), 3, axis=0)
         mesh = trimesh.Trimesh(vertices=verts, faces=faces, process=False)
-        mesh.visual = trimesh.visual.TextureVisuals(
-            uv=_planar_uv(verts, normals, uv_scale_m), material=mat
-        )
+        if key == "roofs" and roof_bbox is not None:
+            uv = ortho_uv(verts, origin, roof_bbox)
+        else:
+            uv = _planar_uv(verts, normals, uv_scale_m)
+        mesh.visual = trimesh.visual.TextureVisuals(uv=uv, material=mat)
         out[key] = mesh
     return out
 
@@ -217,17 +236,23 @@ def build_building_chunks(
     roof_material: str,
     chunk_m: float = 0.0,
     uv_scale_m: float = 4.0,
+    roof_texture: PBRMaterial | None = None,
 ) -> dict[str, trimesh.Trimesh]:
     """Wall and roof meshes for every non empty chunk, with one shared material each.
 
     Names are ``buildings_walls`` and ``buildings_roofs`` without chunks, and
     ``buildings_r<row>c<column>_walls`` with chunks.
+
+    ``roof_texture`` replaces the in-game roof material with a texture that covers the
+    map box, normally the ground orthophoto. ``roof_material`` is then unused.
     """
     walls = template_material(wall_material)
-    roofs = template_material(roof_material)
+    roofs = roof_texture if roof_texture is not None else template_material(roof_material)
+    roof_bbox = bbox if roof_texture is not None else None
     out: dict[str, trimesh.Trimesh] = {}
     for key, subset in chunk_buildings(buildings, bbox, chunk_m).items():
         prefix = f"buildings_{key}_" if key else "buildings_"
-        for part, mesh in build_building_meshes(subset, origin, walls, roofs, uv_scale_m).items():
+        meshes = build_building_meshes(subset, origin, walls, roofs, uv_scale_m, roof_bbox)
+        for part, mesh in meshes.items():
             out[f"{prefix}{part}"] = mesh
     return out

@@ -1,8 +1,11 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from fpv_maps.buildings import (
+    Building,
+    BuildingSet,
     build_building_chunks,
     build_building_meshes,
     chunk_buildings,
@@ -117,3 +120,79 @@ def test_triangle_count(tmp_path: Path):
     obj = tmp_path / "x.obj"
     obj.write_text(OBJ)
     assert read_obj(obj).triangles() == 18
+
+
+def test_an_ortho_roof_uv_maps_the_box_corners_to_the_texture_corners():
+    """The north west corner of the box is (0, 0) of the ground texture.
+
+    Game axes are x east and z south, and the terrain reads the same box the same
+    way, so a roof and the ground under it take pixels from the same place.
+    """
+    from fpv_maps.buildings import ortho_uv
+
+    bbox = BBox(658750, 6473850, 659750, 6474850)
+    origin = (659221.0, 6474313.0, 40.0)
+    corners = np.array(
+        [
+            [bbox.xmin - origin[0], 0.0, -(bbox.ymax - origin[1])],  # north west
+            [bbox.xmax - origin[0], 0.0, -(bbox.ymin - origin[1])],  # south east
+        ]
+    )
+    uv = ortho_uv(corners, origin, bbox)
+    assert uv[0] == pytest.approx([0.0, 0.0], abs=1e-9)
+    assert uv[1] == pytest.approx([1.0, 1.0], abs=1e-9)
+
+
+def test_orthophoto_roofs_replace_the_roof_material_and_keep_the_walls():
+    from fpv_maps.materials import color_material
+
+    bbox = BBox(658750, 6473850, 659750, 6474850)
+    origin = (659221.0, 6474313.0, 40.0)
+    texture = color_material("fpv_ground", (10, 20, 30))
+    buildings = BuildingSet(buildings=[_house()])
+    plain = build_building_chunks(buildings, bbox, origin, "z_concrete2", "z_pebbled_asphalt")
+    orthophoto = build_building_chunks(
+        buildings, bbox, origin, "z_concrete2", "z_pebbled_asphalt", roof_texture=texture
+    )
+    assert plain["buildings_roofs"].visual.material.name == "z_pebbled_asphalt"
+    assert orthophoto["buildings_roofs"].visual.material.name == "fpv_ground"
+    assert orthophoto["buildings_walls"].visual.material.name == "z_concrete2"
+    # The roof UVs must land inside the texture, not repeat across it many times.
+    uv = orthophoto["buildings_roofs"].visual.uv
+    assert uv.min() >= 0.0 and uv.max() <= 1.0
+    assert plain["buildings_roofs"].visual.uv.max() > 1.0
+
+
+def _house() -> Building:
+    """A box with a flat roof, standing inside the old town box."""
+    x0, x1 = 659200.0, 659220.0
+    y0, y1 = 6474300.0, 6474320.0
+    z0, z1 = 40.0, 52.0
+    v = np.array(
+        [
+            [x0, y0, z0],
+            [x1, y0, z0],
+            [x1, y1, z0],
+            [x0, y1, z0],
+            [x0, y0, z1],
+            [x1, y0, z1],
+            [x1, y1, z1],
+            [x0, y1, z1],
+        ],
+        float,
+    )
+    f = np.array(
+        [
+            [4, 5, 6],
+            [4, 6, 7],
+            [0, 1, 5],
+            [0, 5, 4],
+            [1, 2, 6],
+            [1, 6, 5],
+            [2, 3, 7],
+            [2, 7, 6],
+            [3, 0, 4],
+            [3, 4, 7],
+        ]
+    )
+    return Building(name="h1", vertices=v, faces=f)

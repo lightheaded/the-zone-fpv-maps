@@ -30,6 +30,11 @@ jpeg_quality = 88
 enabled = true
 municipalities = ["Tartu_linn"]
 wall_material = "z_concrete2"
+# Every roof takes its own picture from the 10 cm orthophoto, straight down, instead
+# of one in-game asphalt for every house in the city. A tin roof is then red, a tile
+# roof is brown and a flat roof has its vents on it. roof_material is unused while
+# this is set, and it stays so that turning the option off needs no other edit.
+roof_source = "orthophoto"
 roof_material = "z_pebbled_asphalt"
 
 [probes]

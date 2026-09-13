@@ -11,6 +11,7 @@ from fpv_maps.crs import BBox, wgs84_to_lest97
 from fpv_maps.drone import DroneSources
 
 ORTHO_SOURCES = ("city", "estonia")
+ROOF_SOURCES = ("material", "orthophoto")
 
 
 @dataclass(frozen=True)
@@ -84,6 +85,10 @@ class MapConfig:
     municipalities: tuple[str, ...]
     wall_material: str
     roof_material: str
+    #: ``[buildings] roof_source``. ``material`` gives every roof the same in-game
+    #: asphalt. ``orthophoto`` gives each roof its own picture from straight above,
+    #: which is the single largest visual gain available to a map of open data.
+    roof_source: str
     probes_enabled: bool
     path: Path
     facades: FacadeSettings = field(default_factory=FacadeSettings)
@@ -140,6 +145,12 @@ def load_config(path: str | Path) -> MapConfig:
             f"ground_texture.source must be one of {sorted(ORTHO_SOURCES)}: {source!r}"
         )
 
+    roof_source = str(buildings.get("roof_source", "material"))
+    if roof_source not in ROOF_SOURCES:
+        raise ValueError(
+            f"buildings.roof_source must be one of {sorted(ROOF_SOURCES)}: {roof_source!r}"
+        )
+
     name = raw["map"]["name"]
     if not name.replace("-", "").replace("_", "").isalnum():
         raise ValueError(f"map name must be letters, digits, - or _: {name!r}")
@@ -168,6 +179,7 @@ def load_config(path: str | Path) -> MapConfig:
         municipalities=municipalities,
         wall_material=str(buildings.get("wall_material", "z_concrete2")),
         roof_material=str(buildings.get("roof_material", "z_pebbled_asphalt")),
+        roof_source=roof_source,
         probes_enabled=bool(probes.get("enabled", False)),
         path=path,
         facades=facades,
